@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EWA — Premium Light | Variant 7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <style>
+    /* ── RESET & TOKENS ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #ffffff;
+      --surface:      #ffffff;
+      --surface-2:    #f5f5f5;
+      --accent:       #4a9c3f;
+      --accent-light: rgba(74,156,63,0.12);
+      --accent-glow:  rgba(74,156,63,0.25);
+      --text:         #1a1a1a;
+      --text-muted:   #6b7280;
+      --border:       rgba(74,156,63,0.30);
+      --border-subtle: rgba(0,0,0,0.08);
+      --brand-green:  #4a9c3f;
+      --success:      #22c55e;
+      --danger:       rgba(239,68,68,0.45);
+      --font:         'Montserrat', system-ui, sans-serif;
+      --font-display: 'Montserrat', system-ui, sans-serif;
+      --radius:       10px;
+      --shadow:       0 4px 24px rgba(0,0,0,0.12);
+    }
+
+    html { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100%;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── SITE HEADER ─────────────────────────────────────────────────── */
+    .site-header {
+      width: 100%;
+      background: #ffffff;
+      border-bottom: 1px solid rgba(74,156,63,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .site-header img {
+      height: 32px;
+      width: auto;
+      filter: none;
+    }
+
+    /* ── PROGRESS BAR ────────────────────────────────────────────────── */
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(0,0,0,0.08);
+      flex-shrink: 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--brand-green);
+      transition: width 0.6s ease;
+    }
+
+    /* ── OUTER WRAPPER ───────────────────────────────────────────────── */
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      align-items: stretch;
+    }
+
+    .flow-wrap {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      align-self: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+
+    /* ── GOLD SHIMMER OVERLAY ────────────────────────────────────────── */
+    @keyframes goldExpand {
+      from { clip-path: circle(0% at 50% 72%); }
+      to   { clip-path: circle(170% at 50% 72%); }
+    }
+
+    @keyframes goldRetract {
+      from { clip-path: circle(170% at 50% 4%); }
+      to   { clip-path: circle(0% at 50% 4%); }
+    }
+
+    .page-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      pointer-events: none;
+      background: linear-gradient(135deg, #ffffff 0%, #4a9c3f 50%, #ffffff 100%);
+      clip-path: circle(0% at 50% 72%);
+    }
+
+    .page-overlay.expanding  { animation: goldExpand  0.42s cubic-bezier(0.4,0,0.2,1) forwards; }
+    .page-overlay.retracting { animation: goldRetract 0.48s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+    /* ── SCREEN 1 LAYOUT ─────────────────────────────────────────────── */
+    .screen-pad { padding: 32px 20px 48px; }
+
+    .screen-headline {
+      font-size: 28px;
+      font-weight: 300;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.25;
+      margin-bottom: 20px;
+    }
+
+    @media (min-width: 400px) {
+      .screen-headline { font-size: 32px; }
+    }
+
+    /* tip block */
+    .tip-block {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .tip-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .tip-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    /* account cards */
+    .acct-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 0;
+    }
+
+    .acct-card-full { grid-column: 1 / -1; }
+
+    .acct-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      min-height: 104px;
+      justify-content: center;
+      text-align: center;
+      user-select: none;
+    }
+
+    .acct-card:hover {
+      border-color: rgba(74,156,63,0.4);
+      background: rgba(74,156,63,0.05);
+    }
+
+    .acct-card:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .acct-card.selected {
+      border-color: var(--accent);
+      background: var(--accent-light);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .acct-card .material-icons-outlined {
+      font-size: 28px;
+      color: var(--accent);
+    }
+
+    .acct-card-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* button row */
+    .btn-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 75px;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 99px;
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: border-color 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-green {
+      flex: 1;
+      background: var(--brand-green);
+      color: #fff;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 16px;
+      min-height: 52px;
+      border-radius: 99px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn-green:hover  { opacity: 0.9; }
+    .btn-green:active { transform: scale(0.98); }
+    .btn-green:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ssl footer */
+    .ssl-footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .ssl-footer .material-icons-outlined { font-size: 14px; color: var(--success); }
+
+    /* ── SCREEN 2 — WIZARD ───────────────────────────────────────────── */
+    .wizard-steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 24px 24px 0;
+    }
+
+    .wizard-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+    }
+
+    .wizard-step.active .step-num {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    .wizard-step.active { color: var(--text); }
+
+    .wizard-step.done .step-num {
+      background: var(--success);
+      color: #fff;
+      border-color: var(--success);
+    }
+
+    .wizard-connector {
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 0 6px;
+      min-width: 12px;
+    }
+
+    /* form fields */
+    .wizard-body { padding: 28px 20px 40px; flex: 1; display: flex; flex-direction: column; }
+
+    .step-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .step-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .field-full { margin-bottom: 16px; }
+
+    .float-field { position: relative; }
+
+    .float-field input,
+    .float-field select {
+      width: 100%;
+      padding: 22px 16px 8px;
+      font-size: 16px;
+      font-family: var(--font);
+      background: var(--surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .float-field input::placeholder { color: transparent; }
+
+    .float-field input:focus,
+    .float-field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      outline: none;
+    }
+
+    .float-field label {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--text-muted);
+      pointer-events: none;
+      transition: all 0.16s;
+    }
+
+    .float-field input:focus + label,
+    .float-field input:not(:placeholder-shown) + label {
+      top: 11px;
+      transform: translateY(0);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* select always shows label floated since it has a value by default or blank */
+    .float-field select + label,
+    .float-field select:focus + label {
+      top: 11px;
+      transform: translateY(0);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .float-field select option { background: var(--surface-2); }
+
+    .select-arrow {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+
+    /* cta gold */
+    .btn-gold {
+      background: var(--accent);
+      color: #ffffff;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 16px;
+      min-height: 52px;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      letter-spacing: 0.02em;
+      transition: opacity 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-gold:hover  { opacity: 0.9; }
+    .btn-gold:active { transform: scale(0.98); }
+
+    .wizard-back {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 20px;
+      padding: 0;
+      transition: color 0.15s;
+    }
+
+    .wizard-back:hover { color: var(--text); }
+
+    .legal-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    /* step transitions */
+    [x-cloak] { display: none !important; }
+
+    /* ── SCREEN 3 — BAR CHART ────────────────────────────────────────── */
+    .s3-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 20px 40px;
+      flex: 1;
+      gap: 0;
+    }
+
+    .s3-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .s3-headline {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 36px;
+      line-height: 1.2;
+    }
+
+    .bar-chart-wrap {
+      width: 100%;
+      max-width: 320px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 20px 16px 16px;
+      margin-bottom: 24px;
+    }
+
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 7px;
+      height: 160px;
+    }
+
+    .bar {
+      flex: 1;
+      border-radius: 4px 4px 0 0;
+      background: var(--border-subtle);
+      transition: height 0.5s ease, background 0.3s ease, box-shadow 0.3s ease;
+      min-height: 8px;
+    }
+
+    .bar.checking {
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .bar.matched { background: var(--success); box-shadow: none; }
+
+    .bar.no-match { background: var(--danger); box-shadow: none; }
+
+    .bar-labels {
+      display: flex;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .bar-label {
+      flex: 1;
+      text-align: center;
+      font-size: 8px;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .s3-status {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: center;
+      min-height: 24px;
+      transition: color 0.3s;
+    }
+
+    .s3-status.matched-state {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .s3-cta-pill {
+      margin-top: 32px;
+      background: linear-gradient(135deg, rgba(74,156,63,0.10), rgba(74,156,63,0.05));
+      border: 1px solid var(--accent);
+      border-radius: 99px;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      animation: pillPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    .s3-cta-pill:hover {
+      background: var(--accent-light);
+      box-shadow: 0 0 24px var(--accent-glow);
+    }
+
+    @keyframes pillPop {
+      from { opacity: 0; transform: scale(0.85) translateY(12px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* ── SCREEN 4 — COMPARISON TABLE ─────────────────────────────────── */
+    .s4-wrap { padding: 28px 16px 48px; flex: 1; }
+
+    .s4-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .s4-headline {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .s4-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* comparison table */
+    .compare-table {
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 20px;
+    }
+
+    .compare-header-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr 0.5fr;
+      padding: 10px 14px;
+      background: var(--surface-2);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .compare-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr 0.5fr;
+      padding: 14px;
+      align-items: center;
+      border-top: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background 0.15s;
+      position: relative;
+    }
+
+    .compare-row.best-match {
+      border-left: 3px solid var(--accent);
+    }
+
+    .compare-row:hover { background: rgba(74,156,63,0.04); }
+
+    .compare-row.expanded { background: rgba(74,156,63,0.07); }
+
+    .compare-cell-provider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .provider-logo {
+      height: 20px;
+      width: auto;
+      max-width: 56px;
+      object-fit: contain;
+    }
+
+    .provider-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .best-badge {
+      font-size: 8px;
+      font-weight: 800;
+      background: var(--accent);
+      color: #000000;
+      border-radius: 4px;
+      padding: 2px 5px;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .compare-cell {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .compare-cell-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .compare-cell-arrow .material-icons-outlined {
+      font-size: 20px;
+      color: var(--text-muted);
+      transition: transform 0.3s ease;
+    }
+
+    .compare-cell-arrow .rotate { transform: rotate(180deg); }
+
+    /* expanded detail */
+    .compare-expand {
+      grid-column: 1 / -1;
+      border-top: 1px solid var(--border-subtle);
+      padding: 16px;
+      margin-top: 4px;
+      background: rgba(0,0,0,0.03);
+      border-radius: 0 0 var(--radius) var(--radius);
+    }
+
+    .expand-inner { display: flex; flex-direction: column; gap: 14px; }
+
+    .expand-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .amount-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .amount-pill {
+      padding: 8px 16px;
+      border-radius: 99px;
+      border: 1.5px solid var(--border-subtle);
+      background: var(--surface-2);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+
+    .amount-pill:hover { border-color: var(--accent); color: var(--accent); }
+    .amount-pill.selected-amt { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+
+    .trust-line {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* mobile table simplification */
+    @media (max-width: 479px) {
+      .compare-header-row {
+        grid-template-columns: 2fr 1fr 0.5fr;
+      }
+      .compare-header-row .col-speed,
+      .compare-header-row .col-bestfor { display: none; }
+
+      .compare-row {
+        grid-template-columns: 2fr 1fr 0.5fr;
+      }
+      .compare-cell.speed,
+      .compare-cell.bestfor { display: none; }
+    }
+
+    /* trust footer */
+    .trust-footer {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.6;
+      padding: 0 4px;
+    }
+
+    /* ── FADE TRANSITIONS ────────────────────────────────────────────── */
+    .fade-in { animation: fadeIn 0.35s ease both; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-up-enter { animation: slideUp 0.28s ease both; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── UTILITIES ───────────────────────────────────────────────────── */
+    .mt-auto { margin-top: auto; }
+    .mt-16   { margin-top: 16px; }
+    .mt-20   { margin-top: 20px; }
+
+    .separator {
+      width: 100%;
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 16px 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── JS DATA ─────────────────────────────────────────────────────────── -->
+<script>
+const ewaOffers = [
+  {
+    id: 'dave',
+    name: 'Dave',
+    logo: '../media/dave.png',
+    logoFilter: 'none',
+    maxAmt: 500,
+    amounts: [100, 200, 300, 400, 500],
+    delivery: 'Instant',
+    bestFor: 'Larger amounts',
+    trust: 'No credit check · 4.8★',
+    ctaBase: 'Get My Advance',
+    url: '#',
+    isBest: true
+  },
+  {
+    id: 'albert',
+    name: 'Albert',
+    logo: '../media/albert.png',
+    logoFilter: 'none',
+    maxAmt: 250,
+    amounts: [50, 100, 150, 200, 250],
+    delivery: 'No interest',
+    bestFor: 'No fees',
+    trust: 'Free to try · 4.7★',
+    ctaBase: 'Try Albert Free',
+    url: '#',
+    isBest: false
+  },
+  {
+    id: 'earnin',
+    name: 'Earnin',
+    logo: '../media/EarnIn_Logo.png',
+    logoFilter: 'none',
+    maxAmt: 100,
+    amounts: [25, 50, 75, 100],
+    delivery: 'Lightning',
+    bestFor: 'Daily access',
+    trust: 'You choose what to pay · 4.6★',
+    ctaBase: 'Get Started',
+    url: '#',
+    isBest: false
+  }
+];
+
+const US_STATES = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+
+const BAR_LABELS = ['EWA1','EWA2','EWA3','EWA4','EWA5','EWA6','EWA7','EWA8','EWA9'];
+const MATCHED_COUNT = 3;
+</script>
+
+<!-- ─── ALPINE APP ────────────────────────────────────────────────────── -->
+<script>
+document.addEventListener('alpine:init', () => {
+  Alpine.data('ewaApp', () => ({
+
+    // ── State
+    currentScreen: 1,
+    selectedAcct: null,
+    overlayAnim: '',
+    currentStep: 0,
+
+    formData: {
+      firstName: 'Jason',
+      lastName: 'Williams',
+      email: 'jason@example.com',
+      age: '',
+      state: ''
+    },
+
+    // Screen 3
+    bars: BAR_LABELS.map(() => ({ height: 20, state: 'idle' })),
+    s3StatusText: 'Searching network...',
+    s3StatusMatched: false,
+    s3PillVisible: false,
+    s3AnimDone: false,
+
+    // Screen 4
+    expandedOffer: null,
+    selectedAmounts: { dave: 500, albert: 250, earnin: 100 },
+    offers: ewaOffers,
+
+    // ── Computed
+    get progressPct() {
+      return [75, 85, 95, 100][this.currentScreen - 1] ?? 75;
+    },
+
+    get overlayClass() {
+      return {
+        'expanding':  this.overlayAnim === 'expand',
+        'retracting': this.overlayAnim === 'retract'
+      };
+    },
+
+    // ── Methods
+    selectAcct(type) {
+      this.selectedAcct = type;
+      if (type === 'none') {
+        setTimeout(() => this.pushToScreen(2), 160);
+      }
+    },
+
+    handleKeyAcct(e, type) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.selectAcct(type);
+      }
+    },
+
+    pushToScreen(n) {
+      this.overlayAnim = 'expand';
+      setTimeout(() => {
+        this.currentScreen = n;
+        if (n === 3) {
+          setTimeout(() => this.initProcessing(), 200);
+        }
+        if (n === 4) {
+          setTimeout(() => { this.expandedOffer = 'dave'; }, 600);
+        }
+      }, 420);
+      setTimeout(() => { this.overlayAnim = 'retract'; }, 440);
+      setTimeout(() => { this.overlayAnim = ''; }, 940);
+    },
+
+    continueFromS1() {
+      if (!this.selectedAcct) return;
+      this.pushToScreen(2);
+    },
+
+    prevStep() {
+      if (this.currentStep > 0) {
+        this.currentStep--;
+      } else {
+        this.currentScreen = 1;
+      }
+    },
+
+    nextStep() {
+      if (this.currentStep < 2) {
+        this.currentStep++;
+      } else {
+        this.submitForm();
+      }
+    },
+
+    submitForm() {
+      this.pushToScreen(3);
+    },
+
+    // ── Bar chart animation
+    initProcessing() {
+      const statusMessages = [
+        { text: 'Connecting to network...', delay: 0 },
+        { text: 'Checking eligibility...', delay: 900 },
+        { text: 'Verifying income data...', delay: 1700 },
+        { text: '3 providers matched!', delay: 2900, matched: true }
+      ];
+
+      statusMessages.forEach(m => {
+        setTimeout(() => {
+          this.s3StatusText = m.text;
+          if (m.matched) this.s3StatusMatched = true;
+        }, m.delay);
+      });
+
+      // Random starting heights
+      const startHeights = [40, 55, 30, 70, 45, 60, 35, 50, 65];
+      this.bars = BAR_LABELS.map((_, i) => ({ height: startHeights[i] || 40, state: 'idle' }));
+
+      // Animate bars sequentially
+      BAR_LABELS.forEach((_, i) => {
+        const checkDelay  = 300 + i * 280;
+        const resolveDelay = checkDelay + 480;
+
+        setTimeout(() => {
+          this.bars[i].state = 'checking';
+          this.bars[i].height = 40 + Math.floor(Math.random() * 100);
+        }, checkDelay);
+
+        setTimeout(() => {
+          if (i < MATCHED_COUNT) {
+            this.bars[i].state = 'matched';
+            this.bars[i].height = 80 + Math.floor(Math.random() * 60);
+          } else {
+            this.bars[i].state = 'no-match';
+            this.bars[i].height = 20 + Math.floor(Math.random() * 30);
+          }
+        }, resolveDelay);
+      });
+
+      // Show CTA pill
+      setTimeout(() => {
+        this.s3PillVisible = true;
+      }, 3400);
+
+      // Auto-advance to screen 4
+      setTimeout(() => {
+        this.pushToScreen(4);
+      }, 4200);
+    },
+
+    toggleOffer(id) {
+      this.expandedOffer = this.expandedOffer === id ? null : id;
+    },
+
+    selectAmount(offerId, amt) {
+      this.selectedAmounts[offerId] = amt;
+    },
+
+    offerCta(offer) {
+      const amt = this.selectedAmounts[offer.id];
+      return `${offer.ctaBase} — $${amt}`;
+    }
+
+  }));
+});
+</script>
+
+<!-- ─── MARKUP ──────────────────────────────────────────────────────────── -->
+<div x-data="ewaApp" x-cloak style="display:flex;flex-direction:column;min-height:100vh;align-items:stretch;">
+
+  <!-- HEADER -->
+  <header class="site-header" role="banner">
+    <img src="../media/logo.svg" alt="EWA Logo" width="120" height="32">
+  </header>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" role="progressbar" :aria-valuenow="progressPct" aria-valuemin="0" aria-valuemax="100" aria-label="Application progress">
+    <div class="progress-fill" :style="`width:${progressPct}%`"></div>
+  </div>
+
+  <!-- ── CONTENT COLUMN ─────────────────────────────────────────────── -->
+  <div class="flow-wrap">
+
+    <!-- ════════════════════════════════════════════════════
+         SCREEN 1 — BANK ACCOUNT TYPE
+    ════════════════════════════════════════════════════ -->
+    <main x-show="currentScreen === 1" class="screen-pad fade-in" role="main">
+
+      <h1 class="screen-headline">What type of bank account do you have?</h1>
+
+      <!-- Tip block -->
+      <div class="tip-block" role="note" aria-label="Helpful tip">
+        <p class="tip-text">Most Earned Wage Access providers require an active checking account to deposit your advance. This helps us match you to the right option for your situation.</p>
+        <span class="tip-label" aria-hidden="true">A HELPFUL TIP! ∧</span>
+      </div>
+
+      <!-- Account cards -->
+      <div class="acct-grid" role="group" aria-label="Select your bank account type">
+
+        <!-- Checking -->
+        <div
+          class="acct-card"
+          :class="{ selected: selectedAcct === 'checking' }"
+          role="button"
+          tabindex="0"
+          aria-pressed="selectedAcct === 'checking'"
+          aria-label="Checking account"
+          @click="selectAcct('checking')"
+          @keydown="handleKeyAcct($event, 'checking')"
+        >
+          <span class="material-icons-outlined" aria-hidden="true">account_balance</span>
+          <span class="acct-card-label">Checking</span>
+        </div>
+
+        <!-- Savings -->
+        <div
+          class="acct-card"
+          :class="{ selected: selectedAcct === 'savings' }"
+          role="button"
+          tabindex="0"
+          aria-pressed="selectedAcct === 'savings'"
+          aria-label="Savings account"
+          @click="selectAcct('savings')"
+          @keydown="handleKeyAcct($event, 'savings')"
+        >
+          <span class="material-icons-outlined" aria-hidden="true">savings</span>
+          <span class="acct-card-label">Savings</span>
+        </div>
+
+        <!-- No Bank Account -->
+        <div
+          class="acct-card acct-card-full"
+          :class="{ selected: selectedAcct === 'none' }"
+          role="button"
+          tabindex="0"
+          aria-pressed="selectedAcct === 'none'"
+          aria-label="No bank account"
+          @click="selectAcct('none')"
+          @keydown="handleKeyAcct($event, 'none')"
+        >
+          <span class="material-icons-outlined" aria-hidden="true">money_off</span>
+          <span class="acct-card-label">No Bank Account</span>
+        </div>
+
+      </div><!-- /acct-grid -->
+
+      <!-- Button row -->
+      <div class="btn-row">
+        <button class="btn-back" aria-label="Go back" @click="window.history.back()">
+          <span class="material-icons-outlined" style="font-size:20px;" aria-hidden="true">arrow_back</span>
+        </button>
+        <button
+          class="btn-green"
+          :disabled="!selectedAcct"
+          @click="continueFromS1"
+          aria-label="Continue to next step"
+        >
+          Continue
+        </button>
+      </div>
+
+      <!-- SSL footer -->
+      <footer class="ssl-footer" role="contentinfo">
+        <span class="material-icons-outlined" aria-hidden="true">lock</span>
+        256-bit SSL Encrypted · Your data is safe
+      </footer>
+
+    </main>
+
+    <!-- ════════════════════════════════════════════════════
+         SCREEN 2 — WIZARD FORM
+    ════════════════════════════════════════════════════ -->
+    <section x-show="currentScreen === 2" aria-label="Application form" class="fade-in" style="flex:1;display:flex;flex-direction:column;">
+
+      <!-- Wizard step nav -->
+      <nav class="wizard-steps" aria-label="Form progress">
+        <div class="wizard-step" :class="{ active: currentStep >= 0, done: currentStep > 0 }" aria-current="currentStep === 0 ? 'step' : false">
+          <span class="step-num" aria-hidden="true" x-text="currentStep > 0 ? '✓' : '1'"></span>
+          <span class="step-label">Name</span>
+        </div>
+        <div class="wizard-connector" aria-hidden="true"></div>
+        <div class="wizard-step" :class="{ active: currentStep >= 1, done: currentStep > 1 }" aria-current="currentStep === 1 ? 'step' : false">
+          <span class="step-num" aria-hidden="true" x-text="currentStep > 1 ? '✓' : '2'"></span>
+          <span class="step-label">Contact</span>
+        </div>
+        <div class="wizard-connector" aria-hidden="true"></div>
+        <div class="wizard-step" :class="{ active: currentStep >= 2, done: currentStep > 2 }" aria-current="currentStep === 2 ? 'step' : false">
+          <span class="step-num" aria-hidden="true">3</span>
+          <span class="step-label">Profile</span>
+        </div>
+      </nav>
+
+      <div class="wizard-body">
+
+        <!-- Back button -->
+        <button class="wizard-back" @click="prevStep" aria-label="Go to previous step">
+          <span class="material-icons-outlined" style="font-size:16px;" aria-hidden="true">arrow_back_ios</span>
+          Back
+        </button>
+
+        <!-- ── STEP 1 — NAME ── -->
+        <div x-show="currentStep === 0" class="slide-up-enter">
+          <h2 class="step-title">What's your name?</h2>
+          <p class="step-subtitle">We'll use this to personalize your experience.</p>
+
+          <div class="field-row">
+            <div class="float-field">
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                x-model="formData.firstName"
+                placeholder="First Name"
+                autocomplete="given-name"
+                aria-label="First name"
+                aria-required="true"
+              >
+              <label for="firstName">First Name</label>
+            </div>
+            <div class="float-field">
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                x-model="formData.lastName"
+                placeholder="Last Name"
+                autocomplete="family-name"
+                aria-label="Last name"
+                aria-required="true"
+              >
+              <label for="lastName">Last Name</label>
+            </div>
+          </div>
+
+          <div class="mt-20">
+            <button class="btn-gold" @click="nextStep" aria-label="Continue to contact step">
+              Continue
+              <span class="material-icons-outlined" style="font-size:18px;" aria-hidden="true">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── STEP 2 — CONTACT ── -->
+        <div x-show="currentStep === 1" class="slide-up-enter">
+          <h2 class="step-title">Your contact info</h2>
+          <p class="step-subtitle">Providers need this to verify and reach you.</p>
+
+          <div class="field-full float-field">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              x-model="formData.email"
+              placeholder="Email Address"
+              autocomplete="email"
+              aria-label="Email address"
+              aria-required="true"
+            >
+            <label for="email">Email Address</label>
+          </div>
+
+          <div class="mt-20">
+            <button class="btn-gold" @click="nextStep" aria-label="Continue to profile step">
+              Continue
+              <span class="material-icons-outlined" style="font-size:18px;" aria-hidden="true">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── STEP 3 — PROFILE ── -->
+        <div x-show="currentStep === 2" class="slide-up-enter">
+          <h2 class="step-title">A little about you</h2>
+          <p class="step-subtitle">This helps us find options available in your area.</p>
+
+          <div class="field-row">
+            <div class="float-field">
+              <input
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                id="age"
+                name="age"
+                x-model="formData.age"
+                placeholder="Age"
+                autocomplete="off"
+                aria-label="Age"
+                aria-required="true"
+              >
+              <label for="age">Age</label>
+            </div>
+
+            <div class="float-field" style="position:relative;">
+              <select
+                id="state"
+                name="state"
+                x-model="formData.state"
+                aria-label="State"
+                aria-required="true"
+              >
+                <option value="" disabled selected></option>
+                <template x-for="s in ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming']" :key="s">
+                  <option :value="s" x-text="s"></option>
+                </template>
+              </select>
+              <label for="state">State</label>
+              <span class="material-icons-outlined select-arrow" aria-hidden="true">expand_more</span>
+            </div>
+          </div>
+
+          <div class="mt-20">
+            <button class="btn-gold" @click="nextStep" aria-label="Find my EWA options">
+              Find My Options
+              <span class="material-icons-outlined" style="font-size:18px;" aria-hidden="true">search</span>
+            </button>
+          </div>
+
+          <p class="legal-text">
+            By continuing you agree to our <a href="#" style="color:var(--accent);text-decoration:none;">Terms of Service</a> and <a href="#" style="color:var(--accent);text-decoration:none;">Privacy Policy</a>. This is not a loan application. Results are earned wage access offers only.
+          </p>
+        </div>
+
+      </div><!-- /wizard-body -->
+    </section>
+
+    <!-- ════════════════════════════════════════════════════
+         SCREEN 3 — BAR CHART LENDER SEARCH
+    ════════════════════════════════════════════════════ -->
+    <section x-show="currentScreen === 3" class="s3-wrap fade-in" aria-label="Searching for lenders" aria-live="polite">
+
+      <p class="s3-eyebrow">Live Matching</p>
+      <h2 class="s3-headline">Searching lenders<br>for you…</h2>
+
+      <!-- Bar chart -->
+      <div class="bar-chart-wrap" role="img" aria-label="Lender matching progress chart">
+        <div class="bar-chart" aria-hidden="true">
+          <template x-for="(bar, i) in bars" :key="i">
+            <div
+              class="bar"
+              :class="bar.state"
+              :style="`height:${bar.height}px`"
+            ></div>
+          </template>
+        </div>
+        <div class="bar-labels" aria-hidden="true">
+          <template x-for="(label, i) in ['EWA1','EWA2','EWA3','EWA4','EWA5','EWA6','EWA7','EWA8','EWA9']" :key="i">
+            <span class="bar-label" x-text="label"></span>
+          </template>
+        </div>
+      </div>
+
+      <!-- Status text -->
+      <p class="s3-status" :class="{ 'matched-state': s3StatusMatched }" x-text="s3StatusText" aria-live="polite"></p>
+
+      <!-- CTA pill — appears after animation -->
+      <div
+        x-show="s3PillVisible"
+        x-transition
+        class="s3-cta-pill"
+        role="status"
+        aria-live="assertive"
+      >
+        <span aria-hidden="true">⚡</span>
+        3 EWA offers ready
+      </div>
+
+    </section>
+
+    <!-- ════════════════════════════════════════════════════
+         SCREEN 4 — COMPARISON TABLE
+    ════════════════════════════════════════════════════ -->
+    <section x-show="currentScreen === 4" class="s4-wrap fade-in" aria-label="Your EWA offers">
+
+      <p class="s4-eyebrow">Your EWA Options</p>
+      <h2 class="s4-headline">3 matched providers</h2>
+      <p class="s4-sub">Expand any row to select your advance amount.</p>
+
+      <!-- Comparison table -->
+      <div class="compare-table" role="table" aria-label="EWA provider comparison">
+
+        <!-- Header row -->
+        <div class="compare-header-row" role="row">
+          <div role="columnheader">Provider</div>
+          <div role="columnheader">Max Amount</div>
+          <div class="col-speed" role="columnheader">Speed</div>
+          <div class="col-bestfor" role="columnheader">Best For</div>
+          <div role="columnheader" aria-hidden="true"></div>
+        </div>
+
+        <!-- Offer rows -->
+        <template x-for="offer in offers" :key="offer.id">
+          <div>
+            <!-- Row header -->
+            <div
+              class="compare-row"
+              :class="{ 'best-match': offer.isBest, 'expanded': expandedOffer === offer.id }"
+              role="row"
+              tabindex="0"
+              :aria-expanded="expandedOffer === offer.id"
+              :aria-label="`${offer.name} — $${offer.maxAmt} max. Press Enter to expand.`"
+              @click="toggleOffer(offer.id)"
+              @keydown.enter.prevent="toggleOffer(offer.id)"
+              @keydown.space.prevent="toggleOffer(offer.id)"
+            >
+              <!-- Provider -->
+              <div class="compare-cell-provider" role="cell">
+                <img
+                  :src="offer.logo"
+                  :alt="offer.name + ' logo'"
+                  class="provider-logo"
+                  :style="`filter:${offer.logoFilter}`"
+                >
+                <span class="provider-name" x-text="offer.name"></span>
+                <span class="best-badge" x-show="offer.isBest">BEST</span>
+              </div>
+              <!-- Max amount -->
+              <div class="compare-cell" role="cell" :aria-label="`Maximum $${offer.maxAmt}`">
+                $<span x-text="offer.maxAmt"></span>
+              </div>
+              <!-- Speed -->
+              <div class="compare-cell speed" role="cell" x-text="offer.delivery"></div>
+              <!-- Best for -->
+              <div class="compare-cell bestfor" role="cell" x-text="offer.bestFor"></div>
+              <!-- Arrow -->
+              <div class="compare-cell-arrow" role="cell" aria-hidden="true">
+                <span class="material-icons-outlined" :class="{ rotate: expandedOffer === offer.id }">expand_more</span>
+              </div>
+            </div>
+
+            <!-- Expanded detail panel -->
+            <div
+              class="compare-expand"
+              x-show="expandedOffer === offer.id"
+              x-transition:enter="slide-up-enter"
+              role="region"
+              :aria-label="`${offer.name} detail and amount selection`"
+            >
+              <div class="expand-inner">
+                <div>
+                  <p class="expand-label">Select your advance amount</p>
+                  <div class="amount-pills" role="group" :aria-label="`Amount options for ${offer.name}`">
+                    <template x-for="amt in offer.amounts" :key="amt">
+                      <button
+                        class="amount-pill"
+                        :class="{ 'selected-amt': selectedAmounts[offer.id] === amt }"
+                        @click.stop="selectAmount(offer.id, amt)"
+                        :aria-pressed="selectedAmounts[offer.id] === amt"
+                        :aria-label="`$${amt}`"
+                      >
+                        $<span x-text="amt"></span>
+                      </button>
+                    </template>
+                  </div>
+                </div>
+
+                <div class="separator"></div>
+
+                <div>
+                  <p class="trust-line" x-text="offer.trust"></p>
+                </div>
+
+                <a
+                  :href="offer.url"
+                  class="btn-gold"
+                  style="text-decoration:none;"
+                  :aria-label="`${offer.ctaBase} — $${selectedAmounts[offer.id]} from ${offer.name}`"
+                >
+                  <span x-text="offerCta(offer)"></span>
+                  <span class="material-icons-outlined" style="font-size:18px;" aria-hidden="true">arrow_forward</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </template>
+
+      </div><!-- /compare-table -->
+
+      <!-- Trust footer -->
+      <footer class="trust-footer">
+        All rates and terms displayed by each provider · Not a loan · Your earned wages · No interest
+      </footer>
+
+    </section>
+
+  </div><!-- /flow-wrap -->
+
+  <!-- ── GOLD SHIMMER OVERLAY ───────────────────────────────────────── -->
+  <div
+    class="page-overlay"
+    :class="overlayClass"
+    aria-hidden="true"
+  ></div>
+
+</div><!-- /x-data -->
+
+</body>
+</html>

@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EWA — Early Wage Access | Get Your Earned Pay Today</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:    #0c1220;
+      --slate:   #111827;
+      --emerald: #10b981;
+      --emerald-dk: #059669;
+      --field:   #1a2535;
+      --border:  #374151;
+      --border-green: rgba(16,185,129,0.25);
+      --muted:   #9ca3af;
+      --white:   #f9fafb;
+      --font: 'Montserrat', sans-serif;
+    }
+
+    html, body, #root {
+      height: 100%;
+      font-family: var(--font);
+      background: var(--navy);
+      color: var(--white);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── APP SHELL ─────────────────────────────────────────────── */
+    .app {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── BACKGROUND DESIGN ──────────────────────────────────────── */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    /* Dot grid — very faint emerald circuit-board feel */
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(16,185,129,0.11) 1px, transparent 1px);
+      background-size: 38px 38px;
+    }
+    /* Glowing orbs */
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+    }
+    .bg-orb-1 {
+      width: 800px;
+      height: 800px;
+      top: -300px;
+      right: -250px;
+      background: radial-gradient(circle, rgba(16,185,129,0.13) 0%, transparent 65%);
+    }
+    .bg-orb-2 {
+      width: 560px;
+      height: 560px;
+      bottom: -220px;
+      left: -120px;
+      background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 65%);
+    }
+    .bg-orb-3 {
+      width: 340px;
+      height: 340px;
+      top: 55%;
+      left: 38%;
+      background: radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 65%);
+    }
+    /* Faint diagonal lines across right panel only */
+    .bg-lines {
+      position: absolute;
+      top: 0; right: 0;
+      width: 58%;
+      height: 100%;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        rgba(16,185,129,0.025) 0px,
+        rgba(16,185,129,0.025) 1px,
+        transparent 1px,
+        transparent 48px
+      );
+    }
+
+    /* ─── LEFT PANEL ────────────────────────────────────────────── */
+    .left-panel {
+      background: var(--navy);
+      flex: 0 0 42%;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 48px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .left-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 28px;
+    }
+
+    .logo-wrap {
+      align-self: flex-start;
+    }
+
+    .logo-wrap img {
+      height: 32px;
+      width: auto;
+      filter: brightness(0) invert(1);
+      display: block;
+    }
+
+    .eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--emerald);
+    }
+
+    .headline {
+      font-size: clamp(28px, 3.2vw, 42px);
+      font-weight: 800;
+      line-height: 1.22;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      text-wrap: balance;
+    }
+
+    .headline .em {
+      color: var(--emerald);
+    }
+
+    /* Stat pills row */
+    .stat-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--field);
+      border: 1px solid var(--border-green);
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--white);
+      white-space: nowrap;
+    }
+
+    .stat-pill .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--emerald);
+      flex-shrink: 0;
+    }
+
+    /* Bullets */
+    .bullets {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .bullet {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #d1d5db;
+      line-height: 1.4;
+    }
+
+    .bullet-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(16,185,129,0.15);
+      border: 1px solid rgba(16,185,129,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .bullet-icon svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* SSL badge */
+    .ssl-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      padding-top: 4px;
+    }
+
+    .ssl-badge svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.6;
+    }
+
+    /* ─── RIGHT PANEL ───────────────────────────────────────────── */
+    .right-panel {
+      flex: 1;
+      background: var(--slate);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .right-inner {
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 60px 40px;
+    }
+
+    /* ─── STEP FADE ANIMATION ───────────────────────────────────── */
+    @keyframes stepFadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-pane {
+      animation: stepFadeIn 0.3s ease both;
+    }
+
+    /* ─── AMOUNT DISPLAY ─────────────────────────────────────────── */
+    .amount-display-wrap {
+      margin-bottom: 20px;
+    }
+
+    .amount-display-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .amount-display {
+      background: var(--navy);
+      border: 1.5px solid var(--border-green);
+      border-radius: 12px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .amount-display::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(16,185,129,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .amount-currency {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--emerald);
+      opacity: 0.7;
+      font-variant-numeric: tabular-nums;
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+
+    .amount-value {
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--emerald);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -1px;
+    }
+
+    .amount-placeholder {
+      font-size: 42px;
+      font-weight: 800;
+      color: rgba(16,185,129,0.25);
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .amount-subtext {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: right;
+      align-self: center;
+    }
+
+    /* ─── AMOUNT GRID ────────────────────────────────────────────── */
+    .amount-grid-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .amount-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .amount-btn {
+      background: var(--field);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 8px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+    }
+
+    .amount-btn:hover {
+      border-color: var(--emerald);
+      background: rgba(16,185,129,0.08);
+      color: var(--emerald);
+    }
+
+    .amount-btn.selected {
+      border-color: var(--emerald);
+      background: rgba(16,185,129,0.12);
+      color: var(--emerald);
+    }
+
+    .amount-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* Custom amount input */
+    .custom-input-wrap {
+      margin-bottom: 22px;
+    }
+
+    .custom-input {
+      width: 100%;
+      background: var(--field);
+      border: 1.5px solid var(--emerald);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: var(--font);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--white);
+      outline: none;
+    }
+
+    .custom-input::placeholder {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ─── FORM STEP 2 ─────────────────────────────────────────────── */
+    .step2-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--emerald);
+      margin-bottom: 6px;
+    }
+
+    .step2-headline {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+
+    .step2-sub {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .step2-sub .amount-em {
+      color: var(--emerald);
+      font-weight: 700;
+    }
+
+    /* ─── FLOATING LABEL FIELDS ──────────────────────────────────── */
+    .fields-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .fields-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .field {
+      position: relative;
+      margin-bottom: 0;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      background: var(--field);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 22px 14px 8px;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .field select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 38px;
+    }
+
+    .field select option {
+      background: var(--field);
+      color: var(--white);
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--emerald);
+    }
+
+    .field label {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      pointer-events: none;
+      transition: top 0.15s, font-size 0.15s, color 0.15s, transform 0.15s, font-weight 0.15s;
+    }
+
+    .field input:not(:placeholder-shown) + label,
+    .field input:focus + label,
+    .field select:not([value=""]) + label,
+    .field select.has-value + label {
+      top: 10px;
+      transform: none;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--emerald);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .field select + label {
+      top: 10px;
+      transform: none;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--emerald);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .field-error {
+      font-size: 11px;
+      font-weight: 600;
+      color: #f87171;
+      margin-top: 4px;
+      padding-left: 2px;
+    }
+
+    .field input.has-error,
+    .field select.has-error {
+      border-color: #f87171;
+    }
+
+    /* ─── BUTTON ──────────────────────────────────────────────────── */
+    .btn-primary {
+      width: 100%;
+      background: var(--emerald);
+      border: none;
+      border-radius: 10px;
+      padding: 16px;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.1s;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-primary:hover {
+      background: var(--emerald-dk);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.99);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ─── STEP DOTS ──────────────────────────────────────────────── */
+    .step-dots {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 20px;
+    }
+    .step-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: rgba(16,185,129,0.18);
+      border: 1.5px solid rgba(16,185,129,0.3);
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    .step-dot.done {
+      background: rgba(16,185,129,0.55);
+      border-color: rgba(16,185,129,0.7);
+    }
+    .step-dot.active {
+      background: var(--emerald);
+      border-color: var(--emerald);
+      width: 26px;
+      height: 9px;
+      border-radius: 5px;
+      box-shadow: 0 0 8px rgba(16,185,129,0.5);
+    }
+
+    /* ─── BACK BTN ───────────────────────────────────────────────── */
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--emerald);
+      font-family: Montserrat, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 14px;
+      opacity: 0.75;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .back-btn:hover { opacity: 1; }
+
+    /* ─── EWA BLURB ──────────────────────────────────────────────── */
+    .ewa-blurb {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .ewa-blurb-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--emerald);
+      margin-bottom: 6px;
+    }
+
+    .ewa-blurb-text {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ─── LEGAL TEXT ─────────────────────────────────────────────── */
+    .legal-text {
+      font-size: 11px;
+      font-weight: 400;
+      color: #6b7280;
+      line-height: 1.55;
+      margin-top: 12px;
+    }
+
+    .no-loan-note {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+
+    .no-loan-note svg {
+      width: 14px;
+      height: 14px;
+      color: var(--emerald);
+      flex-shrink: 0;
+    }
+
+    /* ─── PROCESSING SCREEN ──────────────────────────────────────── */
+    .processing-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--slate);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      animation: stepFadeIn 0.3s ease both;
+    }
+
+    .sonar-wrap {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sonar-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 14px rgba(16,185,129,0.9);
+      position: relative;
+      z-index: 1;
+    }
+    .sonar-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid var(--emerald);
+      opacity: 0;
+      animation: sonar-pulse 2.4s ease-out infinite;
+    }
+    .sonar-ring:nth-child(1) { animation-delay: 0s; }
+    .sonar-ring:nth-child(2) { animation-delay: 0.8s; }
+    .sonar-ring:nth-child(3) { animation-delay: 1.6s; }
+    @keyframes sonar-pulse {
+      0%   { width: 14px; height: 14px; opacity: 0.85; }
+      100% { width: 110px; height: 110px; opacity: 0; }
+    }
+
+    .processing-msg {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--white);
+      text-align: center;
+      height: 22px;
+      margin-bottom: 8px;
+    }
+
+    .processing-sub {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .checkmark-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      animation: stepFadeIn 0.4s ease both;
+    }
+
+    .checkmark-circle {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(16,185,129,0.15);
+      border: 2px solid var(--emerald);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .checkmark-circle svg {
+      width: 36px;
+      height: 36px;
+      color: var(--emerald);
+    }
+
+    .success-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--white);
+    }
+
+    .success-sub {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    /* ─── MOBILE ─────────────────────────────────────────────────── */
+    @media (max-width: 639px) {
+      .app {
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .left-panel {
+        flex: none;
+        height: auto;
+        position: static;
+        padding: 28px 24px 24px;
+      }
+
+      .left-main {
+        gap: 18px;
+      }
+
+      .bullets {
+        display: none;
+      }
+
+      .headline {
+        font-size: 32px;
+        letter-spacing: -1px;
+      }
+
+      .ssl-badge {
+        display: none;
+      }
+
+      .stat-pills {
+        gap: 6px;
+      }
+
+      .stat-pill {
+        font-size: 10px;
+        padding: 5px 10px;
+      }
+
+      .right-panel {
+        min-height: auto;
+        justify-content: flex-start;
+      }
+
+      .right-inner {
+        padding: 32px 20px 40px;
+      }
+
+      .amount-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+
+      .amount-btn {
+        font-size: 12px;
+        padding: 10px 4px;
+      }
+
+      .amount-value {
+        font-size: 34px;
+      }
+
+      .amount-placeholder {
+        font-size: 34px;
+      }
+
+      .fields-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .amount-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const US_STATES = [
+      'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut',
+      'Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa',
+      'Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan',
+      'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada',
+      'New Hampshire','New Jersey','New Mexico','New York','North Carolina',
+      'North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island',
+      'South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont',
+      'Virginia','Washington','West Virginia','Wisconsin','Wyoming'
+    ];
+
+    const AMOUNTS = ['$100','$250','$500','$750','$1,000','$1,500','$2,000','Custom'];
+
+    const PROCESSING_MSGS = [
+      'Verifying your eligibility…',
+      'Connecting to payroll network…',
+      'Calculating available wages…',
+      'Preparing your offer…',
+    ];
+
+    // ─── ICONS ───────────────────────────────────────────────────
+
+    const CheckIcon = () => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    );
+
+    const LockIcon = () => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    );
+
+    const InfoIcon = () => (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    );
+
+    const ArrowIcon = () => (
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    );
+
+    // ─── EWA BLURB ────────────────────────────────────────────────
+
+    const EwaBlurb = () => (
+      <div className="ewa-blurb">
+        <div className="ewa-blurb-label">What is Early Wage Access?</div>
+        <div className="ewa-blurb-text">
+          Early Wage Access lets you tap into wages you've already earned before your scheduled payday —
+          without interest, fees, or a credit check. It's not a loan. You're simply getting paid for
+          work you've already done.
+        </div>
+      </div>
+    );
+
+    // ─── LEFT PANEL ───────────────────────────────────────────────
+
+    const LeftPanel = () => (
+      <div className="left-panel">
+        <div className="left-main">
+          <div className="logo-wrap">
+            <img src="../media/logo.svg" alt="Logo" />
+          </div>
+
+          <div>
+            <div className="eyebrow">Early Wage Access</div>
+          </div>
+
+          <h1 className="headline">
+            Your earned wages,<br/>
+            available <span className="em">right now.</span>
+          </h1>
+
+          <div className="stat-pills">
+            <div className="stat-pill"><span className="dot"></span>No Interest</div>
+            <div className="stat-pill"><span className="dot"></span>Same Day Access</div>
+            <div className="stat-pill"><span className="dot"></span>Up to $2,000</div>
+          </div>
+
+          <div className="bullets">
+            {[
+              'Access wages already earned',
+              'No credit check required',
+              'Funds in your account today',
+              'Zero fees, zero interest',
+            ].map((text, i) => (
+              <div key={i} className="bullet">
+                <div className="bullet-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <span>{text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="ssl-badge">
+          <LockIcon />
+          <span>256-bit SSL encrypted · Never sold</span>
+        </div>
+      </div>
+    );
+
+    // ─── STEP DOTS ────────────────────────────────────────────────
+    const StepDots = ({ current, total }) => (
+      <div className="step-dots" role="progressbar" aria-valuenow={current} aria-valuemin={1} aria-valuemax={total} aria-label={`Step ${current} of ${total}`}>
+        {Array.from({ length: total }, (_, i) => (
+          <div key={i} className={`step-dot ${i < current - 1 ? 'done' : i === current - 1 ? 'active' : ''}`} />
+        ))}
+      </div>
+    );
+
+    // ─── STEP 1 — AMOUNT SELECTION ────────────────────────────────
+
+    const Step1 = ({ onContinue }) => {
+      const [selected, setSelected] = useState(null);
+      const [customMode, setCustomMode] = useState(false);
+      const [customVal, setCustomVal] = useState('');
+
+      const displayAmount = (() => {
+        if (customMode) {
+          const n = parseInt(customVal.replace(/\D/g,''), 10);
+          return isNaN(n) ? null : n;
+        }
+        if (!selected) return null;
+        const n = parseInt(selected.replace(/[$,]/g,''), 10);
+        return isNaN(n) ? null : n;
+      })();
+
+      const canContinue = displayAmount !== null && displayAmount > 0;
+
+      const handleAmountClick = (amt) => {
+        if (amt === 'Custom') {
+          setCustomMode(true);
+          setSelected('Custom');
+        } else {
+          setCustomMode(false);
+          setSelected(amt);
+          setCustomVal('');
+        }
+      };
+
+      const handleCustomChange = (e) => {
+        const raw = e.target.value.replace(/\D/g,'');
+        setCustomVal(raw);
+      };
+
+      const formatDisplayNum = (n) => n.toLocaleString();
+
+      return (
+        <div className="step-pane" key="step1">
+          <StepDots current={1} total={4} />
+          {/* Amount display */}
+          <div className="amount-display-wrap">
+            <div className="amount-display-label">Amount Requested</div>
+            <div className="amount-display">
+              {displayAmount !== null ? (
+                <>
+                  <span className="amount-currency">$</span>
+                  <span className="amount-value">{formatDisplayNum(displayAmount)}</span>
+                </>
+              ) : (
+                <span className="amount-placeholder">$0</span>
+              )}
+              {displayAmount !== null && (
+                <span className="amount-subtext">Available<br/>today</span>
+              )}
+            </div>
+          </div>
+
+          {/* Amount grid */}
+          <div className="amount-grid-label">Select an amount</div>
+          <div className="amount-grid">
+            {AMOUNTS.map((amt) => (
+              <button
+                key={amt}
+                className={`amount-btn${selected === amt ? ' selected' : ''}`}
+                onClick={() => handleAmountClick(amt)}
+              >
+                {amt}
+              </button>
+            ))}
+          </div>
+
+          {/* Custom input */}
+          {customMode && (
+            <div className="custom-input-wrap">
+              <input
+                className="custom-input"
+                type="text"
+                inputMode="numeric"
+                placeholder="Enter amount (e.g. 350)"
+                value={customVal}
+                onChange={handleCustomChange}
+                autoFocus
+              />
+            </div>
+          )}
+
+          {/* Continue */}
+          <button
+            className="btn-primary"
+            disabled={!canContinue}
+            onClick={() => canContinue && onContinue(displayAmount)}
+          >
+            Continue <ArrowIcon />
+          </button>
+
+          <div className="no-loan-note">
+            <InfoIcon />
+            Not a loan. You're accessing wages already earned.
+          </div>
+
+          <EwaBlurb />
+        </div>
+      );
+    };
+
+    // ─── STEP 2 — PERSONAL INFO ───────────────────────────────────
+
+    const FloatingField = ({ label, id, type='text', value, onChange, error, inputMode, autoComplete }) => {
+      return (
+        <div className="field">
+          <input
+            id={id}
+            type={type}
+            inputMode={inputMode}
+            autoComplete={autoComplete}
+            value={value}
+            onChange={onChange}
+            placeholder=" "
+            className={error ? 'has-error' : ''}
+          />
+          <label htmlFor={id}>{label}</label>
+          {error && <div className="field-error">{error}</div>}
+        </div>
+      );
+    };
+
+    const FloatingSelect = ({ label, id, value, onChange, error, children }) => {
+      return (
+        <div className="field">
+          <select
+            id={id}
+            value={value}
+            onChange={onChange}
+            className={`${value ? 'has-value' : ''} ${error ? 'has-error' : ''}`}
+          >
+            {children}
+          </select>
+          <label htmlFor={id}>{label}</label>
+          {error && <div className="field-error">{error}</div>}
+        </div>
+      );
+    };
+
+    // ─── FORM WIZARD — 3 personal info sub-steps ─────────────────────
+    const FormWizard = ({ amount, onSubmit }) => {
+      const [subStep, setSubStep] = useState(1);
+      const [form, setForm] = useState({
+        firstName: 'Jason',
+        lastName: 'Williams',
+        email: 'jason@epcvip.com',
+        age: '',
+        state: '',
+      });
+      const [errors, setErrors] = useState({});
+
+      const set = (field) => (e) => {
+        setForm(f => ({ ...f, [field]: e.target.value }));
+        setErrors(err => ({ ...err, [field]: '' }));
+      };
+
+      const fmt = (n) => `$${n.toLocaleString('en-US')}`;
+
+      if (subStep === 1) {
+        const next = () => {
+          const errs = {};
+          if (!form.firstName.trim()) errs.firstName = 'Required';
+          if (!form.lastName.trim()) errs.lastName = 'Required';
+          if (Object.keys(errs).length) { setErrors(errs); return; }
+          setErrors({});
+          setSubStep(2);
+        };
+        return (
+          <div className="step-pane" key="wiz1">
+            <StepDots current={2} total={4} />
+            <div className="step2-eyebrow">Your Name</div>
+            <div className="step2-headline">What's your name?</div>
+            <div className="step2-sub">
+              You requested <span className="amount-em">{fmt(amount)}</span>.
+            </div>
+            <div className="fields-stack">
+              <div className="fields-row">
+                <FloatingField label="First Name" id="firstName" value={form.firstName}
+                  onChange={set('firstName')} error={errors.firstName} autoComplete="given-name" />
+                <FloatingField label="Last Name" id="lastName" value={form.lastName}
+                  onChange={set('lastName')} error={errors.lastName} autoComplete="family-name" />
+              </div>
+            </div>
+            <div style={{ marginTop: '22px' }}>
+              <button className="btn-primary" onClick={next}>Continue <ArrowIcon /></button>
+            </div>
+            <EwaBlurb />
+          </div>
+        );
+      }
+
+      if (subStep === 2) {
+        const next = () => {
+          const errs = {};
+          if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+            errs.email = 'Enter a valid email address';
+          }
+          if (Object.keys(errs).length) { setErrors(errs); return; }
+          setErrors({});
+          setSubStep(3);
+        };
+        return (
+          <div className="step-pane" key="wiz2">
+            <button className="back-btn" onClick={() => { setErrors({}); setSubStep(1); }}>← Back</button>
+            <StepDots current={3} total={4} />
+            <div className="step2-eyebrow">Your Email</div>
+            <div className="step2-headline">Where do we send confirmation?</div>
+            <div className="step2-sub">Your wage access details will arrive here.</div>
+            <div className="fields-stack">
+              <FloatingField label="Email Address" id="email" type="email" value={form.email}
+                onChange={set('email')} error={errors.email} autoComplete="email" />
+            </div>
+            <div style={{ marginTop: '22px' }}>
+              <button className="btn-primary" onClick={next}>Continue <ArrowIcon /></button>
+            </div>
+            <EwaBlurb />
+          </div>
+        );
+      }
+
+      const handleSubmit = () => {
+        const errs = {};
+        const age = parseInt(form.age, 10);
+        if (!form.age || isNaN(age) || age < 18 || age > 99) errs.age = 'Must be 18–99';
+        if (!form.state) errs.state = 'Select a state';
+        if (Object.keys(errs).length) { setErrors(errs); return; }
+        onSubmit(form);
+      };
+
+      return (
+        <div className="step-pane" key="wiz3">
+          <button className="back-btn" onClick={() => { setErrors({}); setSubStep(2); }}>← Back</button>
+          <StepDots current={4} total={4} />
+          <div className="step2-eyebrow">Almost Done</div>
+          <div className="step2-headline">Age & location</div>
+          <div className="step2-sub">Last step — just two more details.</div>
+          <div className="fields-stack">
+            <div className="fields-row">
+              <FloatingField label="Age" id="age" type="text" inputMode="numeric"
+                value={form.age} onChange={set('age')} error={errors.age} />
+              <FloatingSelect label="State" id="state" value={form.state}
+                onChange={set('state')} error={errors.state}>
+                <option value="" disabled></option>
+                {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+              </FloatingSelect>
+            </div>
+          </div>
+          <div style={{ marginTop: '22px' }}>
+            <button className="btn-primary" onClick={handleSubmit}>
+              Get My Funds <ArrowIcon />
+            </button>
+          </div>
+          <div className="legal-text">
+            By clicking "Get My Funds" you agree to our Terms of Service and Privacy Policy,
+            and consent to being contacted about your Early Wage Access request. This is not
+            a loan application. No credit check will be performed.
+          </div>
+          <EwaBlurb />
+        </div>
+      );
+    };
+
+    // ─── PROCESSING SCREEN ────────────────────────────────────────
+
+    const Processing = ({ onDone }) => {
+      const [msgIdx, setMsgIdx] = useState(0);
+      const [done, setDone] = useState(false);
+
+      useEffect(() => {
+        let i = 0;
+        const interval = setInterval(() => {
+          i++;
+          if (i < PROCESSING_MSGS.length) {
+            setMsgIdx(i);
+          } else {
+            clearInterval(interval);
+            setTimeout(() => setDone(true), 400);
+          }
+        }, 900);
+        return () => clearInterval(interval);
+      }, []);
+
+      useEffect(() => {
+        if (done) {
+          const t = setTimeout(onDone, 1800);
+          return () => clearTimeout(t);
+        }
+      }, [done, onDone]);
+
+      return (
+        <div className="processing-overlay">
+          {!done ? (
+            <>
+              <div className="sonar-wrap" aria-hidden="true">
+                <div className="sonar-ring" />
+                <div className="sonar-ring" />
+                <div className="sonar-ring" />
+                <div className="sonar-dot" />
+              </div>
+              <div className="processing-msg">{PROCESSING_MSGS[msgIdx]}</div>
+              <div className="processing-sub">This only takes a moment</div>
+            </>
+          ) : (
+            <div className="checkmark-wrap">
+              <div className="checkmark-circle">
+                <CheckIcon />
+              </div>
+              <div className="success-title">User Redirected</div>
+              <div className="success-sub">Your application was submitted successfully.</div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ─── APP ──────────────────────────────────────────────────────
+
+    const App = () => {
+      const [step, setStep] = useState(1);
+      const [amount, setAmount] = useState(null);
+      const [processing, setProcessing] = useState(false);
+      const [done, setDone] = useState(false);
+
+      const handleAmountContinue = (amt) => {
+        setAmount(amt);
+        setStep(2);
+      };
+
+      const handleFormSubmit = () => {
+        setProcessing(true);
+      };
+
+      const handleProcessingDone = () => {
+        setDone(true);
+      };
+
+      return (
+        <>
+          <div className="bg-layer" aria-hidden="true">
+            <div className="bg-grid" />
+            <div className="bg-orb bg-orb-1" />
+            <div className="bg-orb bg-orb-2" />
+            <div className="bg-orb bg-orb-3" />
+            <div className="bg-lines" />
+          </div>
+          {processing && <Processing onDone={handleProcessingDone} />}
+          <div className="app">
+            <LeftPanel />
+            <div className="right-panel">
+              <div className="right-inner">
+                {step === 1 && (
+                  <Step1 onContinue={handleAmountContinue} />
+                )}
+                {step === 2 && (
+                  <FormWizard amount={amount} onSubmit={handleFormSubmit} />
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>EWA POC — Variant 9: Cosmos</title>
+<meta name="description" content="Early Wage Access — get your earned pay today with zero fees and no interest.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+/* ─── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'Montserrat', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #0a0a18;
+}
+
+#root { min-height: 100vh; }
+
+/* ─── Layout ─────────────────────────────────────────────────── */
+.cosmos-wrap {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── BACKGROUND DESIGN ──────────────────────────────────────── */
+.bg-cosmos {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+/* Two-layer star field — tiny dots at different scales */
+.bg-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.55) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255,255,255,0.3)  1px, transparent 1px),
+    radial-gradient(circle, rgba(34,211,238,0.45)  1px, transparent 1px);
+  background-size: 220px 220px, 150px 150px, 340px 340px;
+  background-position: 0 0, 70px 110px, 175px 55px;
+}
+/* Glowing orbs */
+.cosmos-orb {
+  position: absolute;
+  border-radius: 50%;
+}
+.cosmos-orb-1 {
+  width: 900px;
+  height: 900px;
+  top: -350px;
+  left: -300px;
+  background: radial-gradient(circle, rgba(99,55,175,0.22) 0%, transparent 65%);
+}
+.cosmos-orb-2 {
+  width: 650px;
+  height: 650px;
+  bottom: -250px;
+  right: -150px;
+  background: radial-gradient(circle, rgba(34,211,238,0.12) 0%, transparent 65%);
+}
+.cosmos-orb-3 {
+  width: 420px;
+  height: 420px;
+  top: 30%;
+  right: 15%;
+  background: radial-gradient(circle, rgba(139,92,246,0.09) 0%, transparent 65%);
+}
+/* Subtle concentric ring — sonar/cosmos feel, centered */
+.cosmos-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(34,211,238,0.07);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.cosmos-ring-1 { width: 400px;  height: 400px;  }
+.cosmos-ring-2 { width: 700px;  height: 700px;  }
+.cosmos-ring-3 { width: 1050px; height: 1050px; border-color: rgba(34,211,238,0.04); }
+.cosmos-ring-4 { width: 1400px; height: 1400px; border-color: rgba(34,211,238,0.025); }
+
+/* ─── Left Panel ─────────────────────────────────────────────── */
+.left-panel {
+  flex: 0 0 42%;
+  background: linear-gradient(160deg, #1e1b4b 0%, #0f0a20 100%);
+  display: flex;
+  flex-direction: column;
+  padding: 60px 48px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.left-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+}
+
+.left-logo {
+  align-self: flex-start;
+}
+
+.left-logo img {
+  height: 36px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+.left-eyebrow {
+  color: #22d3ee;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.left-headline {
+  font-size: clamp(32px, 4vw, 50px);
+  font-weight: 800;
+  color: #f1f5f9;
+  line-height: 1.1;
+}
+
+.left-headline .cyan-text {
+  color: #22d3ee;
+}
+
+.left-rule {
+  width: 48px;
+  height: 3px;
+  background: #22d3ee;
+  border-radius: 2px;
+  border: none;
+}
+
+.feature-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feature-card {
+  background: rgba(255,255,255,0.04);
+  border-left: 3px solid rgba(34,211,238,0.5);
+  padding: 11px 14px;
+  border-radius: 0 8px 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.feature-card-icon {
+  color: #22d3ee;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.feature-card-title {
+  color: #f1f5f9;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.feature-card-subtitle {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.ssl-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.ssl-badge .material-icons-outlined {
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* ─── Right Panel ────────────────────────────────────────────── */
+.right-panel {
+  flex: 1;
+  background: #0a0a18;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.right-inner {
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 60px 40px;
+}
+
+/* ─── Step Animations ────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.step-content {
+  animation: fadeUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* ─── Step Header ────────────────────────────────────────────── */
+.step-eyebrow {
+  color: #22d3ee;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 10px;
+}
+
+.step-headline {
+  color: #f1f5f9;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.step-subtext {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 28px;
+}
+
+/* ─── Tile Grid ──────────────────────────────────────────────── */
+.tile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tile {
+  background: #0f1729;
+  border: 1.5px solid rgba(34, 211, 238, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tile:hover {
+  border-color: rgba(34, 211, 238, 0.5);
+  background: rgba(34, 211, 238, 0.04);
+}
+
+.tile.selected {
+  border-color: #22d3ee;
+  background: rgba(34, 211, 238, 0.08);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+}
+
+.tile-icon {
+  font-size: 22px;
+  color: #22d3ee;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.tile-title {
+  color: #f1f5f9;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.tile-range {
+  color: #22d3ee;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.tile-desc {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* ─── Confirmation Strip ─────────────────────────────────────── */
+.confirm-strip {
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  border-radius: 10px;
+  padding: 11px 16px;
+  color: #22d3ee;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: fadeUp 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.confirm-strip .material-icons-outlined {
+  font-size: 17px;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────── */
+.btn-primary {
+  width: 100%;
+  height: 54px;
+  background: #22d3ee;
+  color: #0a0a18;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: 0.02em;
+}
+
+.btn-primary:hover {
+  background: #0891b2;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  background: #0891b2;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── STEP CHIPS ───────────────────────────────────────────── */
+.step-chips {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.step-chip {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(34,211,238,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.step-chip.done {
+  background: rgba(34,211,238,0.12);
+  border-color: #22d3ee;
+  color: #22d3ee;
+  font-size: 13px;
+}
+.step-chip.active {
+  background: #22d3ee;
+  border-color: #22d3ee;
+  color: #0a0a18;
+}
+.step-chip-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(34,211,238,0.12);
+  min-width: 14px;
+  transition: background 0.3s;
+}
+.step-chip-line.done {
+  background: rgba(34,211,238,0.4);
+}
+
+/* ─── WIZARD BACK BTN ──────────────────────────────────────── */
+.wizard-back {
+  background: none;
+  border: none;
+  color: #22d3ee;
+  font-family: Montserrat, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 14px;
+  opacity: 0.75;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.wizard-back:hover { opacity: 1; }
+
+.btn-note {
+  text-align: center;
+  color: #64748b;
+  font-size: 11px;
+  margin-top: 10px;
+}
+
+/* ─── Floating Label Fields ──────────────────────────────────── */
+.field-wrap {
+  position: relative;
+}
+
+.field-wrap input,
+.field-wrap select {
+  width: 100%;
+  padding: 22px 14px 8px;
+  background: #0f1729;
+  border: 1.5px solid #1e293b;
+  color: #f1f5f9;
+  border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.15s;
+}
+
+.field-wrap input:focus,
+.field-wrap select:focus {
+  border-color: #22d3ee;
+}
+
+.field-wrap label {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  pointer-events: none;
+  font-size: 14px;
+  transition: all 0.15s;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.field-wrap input:not(:placeholder-shown) + label,
+.field-wrap input:focus + label {
+  top: 10px;
+  transform: none;
+  font-size: 10px;
+  color: #22d3ee;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field-wrap input::placeholder {
+  color: transparent;
+}
+
+/* Select: always raised label */
+.field-wrap select ~ label {
+  top: 10px !important;
+  transform: none !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #22d3ee !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field-wrap select {
+  padding-top: 22px;
+}
+
+/* Select chevron */
+.select-wrap::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #94a3b8;
+}
+
+/* Field row */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Form stack */
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+/* Field error */
+.field-error {
+  color: #f87171;
+  font-size: 11px;
+  margin-top: 4px;
+  padding-left: 2px;
+  font-weight: 500;
+}
+
+/* ─── Legal / EWA Blurb ──────────────────────────────────────── */
+.legal-text {
+  color: #475569;
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+.ewa-blurb {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(34, 211, 238, 0.12);
+  color: #475569;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* ─── Processing Screen ──────────────────────────────────────── */
+.processing-screen {
+  position: fixed;
+  inset: 0;
+  background: #0a0a18;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  gap: 28px;
+}
+
+.orbit-system {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+.orbit-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #22d3ee;
+  box-shadow: 0 0 16px rgba(34,211,238,0.9);
+  z-index: 1;
+}
+.orbit-track {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(34,211,238,0.1);
+  top: 50%; left: 50%;
+}
+.orbit-track-1 {
+  width: 52px; height: 52px;
+  animation: orbit-spin-cw 1.2s linear infinite;
+}
+.orbit-track-2 {
+  width: 84px; height: 84px;
+  animation: orbit-spin-ccw 2s linear infinite;
+}
+.orbit-track::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  top: 0; left: 50%;
+}
+.orbit-track-1::after {
+  width: 9px; height: 9px;
+  background: #22d3ee;
+  box-shadow: 0 0 8px rgba(34,211,238,0.85);
+  transform: translate(-50%, -50%);
+}
+.orbit-track-2::after {
+  width: 7px; height: 7px;
+  background: #a78bfa;
+  box-shadow: 0 0 8px rgba(167,139,250,0.8);
+  transform: translate(-50%, -50%);
+}
+@keyframes orbit-spin-cw {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes orbit-spin-ccw {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+
+.processing-msg {
+  color: #22d3ee;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: center;
+  animation: fadeUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+  min-height: 24px;
+}
+
+.done-check {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: fadeUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.done-check .material-icons-outlined {
+  font-size: 52px;
+  color: #22d3ee;
+}
+
+.done-check-label {
+  color: #22d3ee;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* ─── Mobile ─────────────────────────────────────────────────── */
+@media (max-width: 639px) {
+  .cosmos-wrap {
+    flex-direction: column;
+  }
+
+  .left-panel {
+    flex: none;
+    height: auto;
+    position: static;
+    padding: 28px 24px;
+  }
+
+  .left-main {
+    gap: 18px;
+  }
+
+  .left-headline {
+    font-size: 28px;
+  }
+
+  .feature-cards {
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .feature-card {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border-left: none;
+    border-top: 2px solid rgba(34,211,238,0.3);
+    border-radius: 8px;
+    padding: 10px 6px;
+    gap: 5px;
+  }
+
+  .feature-card-icon {
+    font-size: 22px;
+  }
+
+  .feature-card-title {
+    font-size: 11px;
+  }
+
+  .feature-card-subtitle {
+    font-size: 10px;
+  }
+
+  .ssl-badge {
+    display: none;
+  }
+
+  .right-panel {
+    min-height: auto;
+    justify-content: flex-start;
+  }
+
+  .right-inner {
+    padding: 32px 20px 48px;
+  }
+
+  .tile-grid {
+    gap: 10px;
+  }
+
+  .tile {
+    padding: 16px;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .step-content,
+  .confirm-strip,
+  .ring-a, .ring-b, .ring-c { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* ─── Data ──────────────────────────────────────────────────── */
+const TILES = [
+  { id: 'quick',  icon: 'flash_on',      title: 'Quick Access',   range: '$100 – $500',    desc: 'Cover a quick expense' },
+  { id: 'mid',    icon: 'trending_up',   title: 'Mid-Range',      range: '$500 – $1,000',  desc: 'Bills, groceries, more' },
+  { id: 'large',  icon: 'rocket_launch', title: 'Large Advance',  range: '$1,000 – $1,500',desc: 'Bigger needs covered' },
+  { id: 'max',    icon: 'stars',         title: 'Max Access',     range: '$1,500 – $2,000',desc: 'Maximum wage advance' },
+];
+
+const US_STATES = [
+  'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut',
+  'Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa',
+  'Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan',
+  'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire',
+  'New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio',
+  'Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota',
+  'Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia',
+  'Wisconsin','Wyoming'
+];
+
+const PROCESSING_MSGS = [
+  'Verifying your information…',
+  'Checking eligibility…',
+  'Connecting to your employer…',
+  'Preparing your offer…',
+  'Almost there…',
+];
+
+/* ─── EWA Blurb ─────────────────────────────────────────────── */
+function EwaBlurb() {
+  return (
+    <div className="ewa-blurb">
+      Early Wage Access (EWA) lets you tap into pay you've already earned — before your regular
+      payday — with zero interest and zero fees. No credit check required. Repayment happens
+      automatically on your next payday. Subject to employer participation and eligibility verification.
+    </div>
+  );
+}
+
+/* ─── Left Panel ─────────────────────────────────────────────── */
+function LeftPanel() {
+  return (
+    <div className="left-panel">
+      <div className="left-main">
+        <div className="left-logo">
+          <img src="../media/logo.svg" alt="Logo" />
+        </div>
+
+        <div className="left-eyebrow">Early Wage Access</div>
+
+        <h1 className="left-headline">
+          Your paycheck,{' '}
+          <span className="cyan-text">on your schedule.</span>
+        </h1>
+
+        <hr className="left-rule" />
+
+        <div className="feature-cards">
+          <div className="feature-card">
+            <span className="material-icons-outlined feature-card-icon">bolt</span>
+            <div>
+              <div className="feature-card-title">Instant Access</div>
+              <div className="feature-card-subtitle">Get funds in your bank account today</div>
+            </div>
+          </div>
+          <div className="feature-card">
+            <span className="material-icons-outlined feature-card-icon">money_off</span>
+            <div>
+              <div className="feature-card-title">Zero Cost</div>
+              <div className="feature-card-subtitle">No interest, no fees, ever</div>
+            </div>
+          </div>
+          <div className="feature-card">
+            <span className="material-icons-outlined feature-card-icon">verified</span>
+            <div>
+              <div className="feature-card-title">Already Yours</div>
+              <div className="feature-card-subtitle">You earned it. Access it now.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="ssl-badge">
+        <span className="material-icons-outlined">lock</span>
+        256-bit SSL encrypted · Never sold
+      </div>
+    </div>
+  );
+}
+
+/* ─── Step 1 ─────────────────────────────────────────────────── */
+function Step1({ onContinue }) {
+  const [selected, setSelected] = useState(null);
+
+  const selectedTile = TILES.find(t => t.id === selected);
+
+  return (
+    <div className="step-content" key="step1">
+      <StepChips current={1} total={4} />
+      <div className="step-eyebrow">Select Amount</div>
+      <div className="step-headline">How much do you need?</div>
+      <div className="step-subtext">Select the range that fits your needs</div>
+
+      <div className="tile-grid">
+        {TILES.map(tile => (
+          <div
+            key={tile.id}
+            className={`tile${selected === tile.id ? ' selected' : ''}`}
+            onClick={() => setSelected(tile.id)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setSelected(tile.id); }}
+            aria-pressed={selected === tile.id}
+          >
+            <span className="material-icons-outlined tile-icon">{tile.icon}</span>
+            <div className="tile-title">{tile.title}</div>
+            <div className="tile-range">{tile.range}</div>
+            <div className="tile-desc">{tile.desc}</div>
+          </div>
+        ))}
+      </div>
+
+      {selectedTile && (
+        <div className="confirm-strip">
+          <span className="material-icons-outlined">check_circle</span>
+          {selectedTile.title} selected
+        </div>
+      )}
+
+      <button
+        className="btn-primary"
+        disabled={!selected}
+        onClick={() => selected && onContinue(selected)}
+      >
+        Continue
+        <span className="material-icons-outlined" style={{fontSize:'18px'}}>arrow_forward</span>
+      </button>
+      <div className="btn-note">No commitment required.</div>
+
+      <EwaBlurb />
+    </div>
+  );
+}
+
+/* ─── Step 2 ─────────────────────────────────────────────────── */
+/* ─── Step Chips ─────────────────────────────────────────────── */
+function StepChips({ current, total }) {
+  return (
+    <div className="step-chips" role="progressbar" aria-valuenow={current} aria-valuemin={1} aria-valuemax={total} aria-label={`Step ${current} of ${total}`}>
+      {Array.from({ length: total }, (_, i) => (
+        <React.Fragment key={i}>
+          <div className={`step-chip ${i < current - 1 ? 'done' : i === current - 1 ? 'active' : ''}`}>
+            {i < current - 1 ? '✓' : i + 1}
+          </div>
+          {i < total - 1 && (
+            <div className={`step-chip-line ${i < current - 1 ? 'done' : ''}`} />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Form Wizard — 3 personal info sub-steps ────────────────── */
+function FormWizard({ onContinue }) {
+  const [subStep, setSubStep] = useState(1);
+  const [form, setForm] = useState({
+    firstName: 'Jason',
+    lastName: 'Williams',
+    email: 'jason@epcvip.com',
+    age: '',
+    state: '',
+  });
+  const [errors, setErrors] = useState({});
+
+  const set = (k, v) => {
+    setForm(f => ({ ...f, [k]: v }));
+    setErrors(e => ({ ...e, [k]: '' }));
+  };
+
+  /* sub-step 1: name */
+  if (subStep === 1) {
+    const next = () => {
+      const errs = {};
+      if (!form.firstName.trim()) errs.firstName = 'First name is required';
+      if (!form.lastName.trim()) errs.lastName = 'Last name is required';
+      if (Object.keys(errs).length) { setErrors(errs); return; }
+      setErrors({});
+      setSubStep(2);
+    };
+    return (
+      <div className="step-content" key="chip1">
+        <StepChips current={2} total={4} />
+        <div className="step-eyebrow">Your Name</div>
+        <div className="step-headline">What should we call you?</div>
+        <div className="step-subtext">Enter your full legal name</div>
+        <div className="form-stack">
+          <div className="field-row">
+            <div>
+              <div className="field-wrap">
+                <input id="firstName" type="text" placeholder=" " value={form.firstName}
+                  onChange={e => set('firstName', e.target.value)} autoComplete="given-name" />
+                <label htmlFor="firstName">First Name</label>
+              </div>
+              {errors.firstName && <div className="field-error">{errors.firstName}</div>}
+            </div>
+            <div>
+              <div className="field-wrap">
+                <input id="lastName" type="text" placeholder=" " value={form.lastName}
+                  onChange={e => set('lastName', e.target.value)} autoComplete="family-name" />
+                <label htmlFor="lastName">Last Name</label>
+              </div>
+              {errors.lastName && <div className="field-error">{errors.lastName}</div>}
+            </div>
+          </div>
+        </div>
+        <button className="btn-primary" onClick={next}>
+          Continue
+          <span className="material-icons-outlined" style={{fontSize:'18px'}}>arrow_forward</span>
+        </button>
+        <EwaBlurb />
+      </div>
+    );
+  }
+
+  /* sub-step 2: email */
+  if (subStep === 2) {
+    const next = () => {
+      const errs = {};
+      if (!form.email.trim()) errs.email = 'Email is required';
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Enter a valid email';
+      if (Object.keys(errs).length) { setErrors(errs); return; }
+      setErrors({});
+      setSubStep(3);
+    };
+    return (
+      <div className="step-content" key="chip2">
+        <button className="wizard-back" onClick={() => { setErrors({}); setSubStep(1); }}>← Back</button>
+        <StepChips current={3} total={4} />
+        <div className="step-eyebrow">Your Email</div>
+        <div className="step-headline">What's your email?</div>
+        <div className="step-subtext">We'll send your confirmation here</div>
+        <div className="form-stack">
+          <div>
+            <div className="field-wrap">
+              <input id="email" type="email" placeholder=" " value={form.email}
+                onChange={e => set('email', e.target.value)} autoComplete="email" />
+              <label htmlFor="email">Email Address</label>
+            </div>
+            {errors.email && <div className="field-error">{errors.email}</div>}
+          </div>
+        </div>
+        <button className="btn-primary" onClick={next}>
+          Continue
+          <span className="material-icons-outlined" style={{fontSize:'18px'}}>arrow_forward</span>
+        </button>
+        <EwaBlurb />
+      </div>
+    );
+  }
+
+  /* sub-step 3: age + state */
+  const handleSubmit = () => {
+    const errs = {};
+    if (!form.age) errs.age = 'Age is required';
+    else { const a = parseInt(form.age, 10); if (isNaN(a) || a < 18 || a > 99) errs.age = 'Must be 18–99'; }
+    if (!form.state) errs.state = 'State is required';
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    onContinue(form);
+  };
+
+  return (
+    <div className="step-content" key="chip3">
+      <button className="wizard-back" onClick={() => { setErrors({}); setSubStep(2); }}>← Back</button>
+      <StepChips current={4} total={4} />
+      <div className="step-eyebrow">Almost There</div>
+      <div className="step-headline">Age & location</div>
+      <div className="step-subtext">One last step — then you're done</div>
+      <div className="form-stack">
+        <div className="field-row">
+          <div>
+            <div className="field-wrap">
+              <input id="age" type="text" inputMode="numeric" maxLength={2} placeholder=" "
+                value={form.age} onChange={e => set('age', e.target.value)} />
+              <label htmlFor="age">Age</label>
+            </div>
+            {errors.age && <div className="field-error">{errors.age}</div>}
+          </div>
+          <div>
+            <div className="field-wrap select-wrap">
+              <select id="state" className={form.state ? 'has-value' : ''} value={form.state}
+                onChange={e => set('state', e.target.value)} autoComplete="address-level1">
+                <option value="" disabled></option>
+                {US_STATES.map(s => (<option key={s} value={s}>{s}</option>))}
+              </select>
+              <label htmlFor="state">State</label>
+            </div>
+            {errors.state && <div className="field-error">{errors.state}</div>}
+          </div>
+        </div>
+      </div>
+      <button className="btn-primary" onClick={handleSubmit}>
+        See My Offer
+        <span className="material-icons-outlined" style={{fontSize:'18px'}}>arrow_forward</span>
+      </button>
+      <div className="legal-text">
+        By continuing, you agree to receive communications from us and consent to our Terms of Service
+        and Privacy Policy. You may opt out at any time. Your information is encrypted and never sold.
+      </div>
+      <EwaBlurb />
+    </div>
+  );
+}
+
+/* ─── Processing Screen ──────────────────────────────────────── */
+function Processing({ onDone }) {
+  const [msgIdx, setMsgIdx] = useState(0);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    let idx = 0;
+    const interval = setInterval(() => {
+      idx++;
+      if (idx < PROCESSING_MSGS.length) {
+        setMsgIdx(idx);
+      } else {
+        clearInterval(interval);
+        setTimeout(() => setDone(true), 400);
+      }
+    }, 900);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (done) {
+      const t = setTimeout(() => onDone(), 1800);
+      return () => clearTimeout(t);
+    }
+  }, [done, onDone]);
+
+  return (
+    <div className="processing-screen">
+      {!done ? (
+        <>
+          <div className="orbit-system" aria-hidden="true">
+            <div className="orbit-track orbit-track-1" />
+            <div className="orbit-track orbit-track-2" />
+            <div className="orbit-center" />
+          </div>
+          <div className="processing-msg" key={msgIdx}>
+            {PROCESSING_MSGS[msgIdx]}
+          </div>
+        </>
+      ) : (
+        <div className="done-check">
+          <span className="material-icons-outlined">check_circle</span>
+          <div className="done-check-label">User Redirected</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── App ────────────────────────────────────────────────────── */
+function App() {
+  const [step, setStep] = useState(1);
+  const [tileId, setTileId] = useState(null);
+  const [processing, setProcessing] = useState(false);
+  const [finished, setFinished] = useState(false);
+
+  const handleStep1 = (id) => {
+    setTileId(id);
+    setStep(2);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleStep2 = () => {
+    setProcessing(true);
+  };
+
+  const handleDone = () => {
+    setProcessing(false);
+    setFinished(true);
+  };
+
+  return (
+    <>
+      <div className="bg-cosmos" aria-hidden="true">
+        <div className="bg-stars" />
+        <div className="cosmos-orb cosmos-orb-1" />
+        <div className="cosmos-orb cosmos-orb-2" />
+        <div className="cosmos-orb cosmos-orb-3" />
+        <div className="cosmos-ring cosmos-ring-1" />
+        <div className="cosmos-ring cosmos-ring-2" />
+        <div className="cosmos-ring cosmos-ring-3" />
+        <div className="cosmos-ring cosmos-ring-4" />
+      </div>
+      <div className="cosmos-wrap">
+        <LeftPanel />
+        <div className="right-panel">
+          <div className="right-inner">
+            {step === 1 && <Step1 onContinue={handleStep1} />}
+            {step === 2 && <FormWizard onContinue={handleStep2} />}
+          </div>
+        </div>
+      </div>
+
+      {processing && !finished && (
+        <Processing onDone={handleDone} />
+      )}
+
+      {finished && (
+        <div className="processing-screen">
+          <div className="done-check">
+            <span className="material-icons-outlined">check_circle</span>
+            <div className="done-check-label">User Redirected</div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>

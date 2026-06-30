@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>EWA POC — Variant 8: App Native</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Material+Icons+Outlined&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons+Outlined');
+
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f5f5f5;
+  --surface-grouped: #f5f5f5;
+  --accent: #4a9c3f;
+  --accent-dark: #3a7a30;
+  --accent-light: rgba(74,156,63,0.10);
+  --text: #000000;
+  --text-secondary: #3c3c43;
+  --text-muted: #8e8e93;
+  --separator: rgba(60,60,67,0.29);
+  --border: rgba(60,60,67,0.18);
+  --brand-green: #4a9c3f;
+  --success: #34c759;
+  --destructive: #ff3b30;
+  --font: 'Montserrat', -apple-system, 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --font-display: 'Montserrat', -apple-system, 'SF Pro Display', 'Helvetica Neue', system-ui, sans-serif;
+  --radius: 13px;
+  --radius-lg: 20px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* Site Header */
+.site-header {
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid var(--separator);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.site-header img { height: 36px; width: auto; }
+
+/* Progress Bar */
+.progress-bar-wrap {
+  width: 100%;
+  height: 6px;
+  background: rgba(0,0,0,0.06);
+  position: sticky;
+  top: 61px;
+  z-index: 4;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--brand-green);
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Flow Wrapper — full width; each screen centers its own content */
+.flow-wrap {
+  width: 100%;
+  flex: 1;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+/* ===================== SCREEN BASE ===================== */
+.screen {
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1), opacity 0.32s ease;
+  will-change: transform, opacity;
+  width: 100%;
+}
+.screen.slide-hidden-left  { position: absolute; top: 0; left: 0; right: 0; transform: translateX(-100%); opacity: 0; pointer-events: none; }
+.screen.slide-hidden-right { position: absolute; top: 0; left: 0; right: 0; transform: translateX(100%);  opacity: 0; pointer-events: none; }
+.screen.slide-visible      { position: relative; transform: translateX(0); opacity: 1; pointer-events: auto; }
+.screen.fade-hidden        { position: absolute; top: 0; left: 0; right: 0; opacity: 0; pointer-events: none; transform: none; }
+.screen.fade-visible       { position: relative; opacity: 1; pointer-events: auto; transform: none; }
+
+/* Content column inside each screen — centered, max 480px */
+.content-col {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+
+/* ===================== SCREEN 1 ===================== */
+.s1-headline {
+  font-size: 32px;
+  font-weight: 300;
+  text-align: center;
+  font-family: var(--font-display);
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.tip-block {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+.tip-text {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.tip-toggle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  letter-spacing: 0.01em;
+}
+
+/* Account Cards */
+.account-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.account-card-wrap-full {
+  grid-column: 1 / -1;
+}
+
+.account-card {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.10);
+  border: 2px solid transparent;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.08s;
+  padding: 16px 12px;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.account-card:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.account-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.account-card.pressing { transform: scale(0.96); }
+.account-card .card-icon {
+  font-size: 28px;
+  color: var(--accent);
+}
+.account-card .card-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* Button Row */
+.btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 75px;
+  align-items: center;
+}
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  padding: 8px 4px;
+  min-height: 48px;
+  transition: opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-back:active { opacity: 0.6; }
+.btn-back .material-icons-outlined { font-size: 18px; }
+
+.btn-continue {
+  flex: 1;
+  background: var(--brand-green);
+  color: #fff;
+  border: none;
+  min-height: 52px;
+  border-radius: 99px;
+  font-size: 17px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: transform 0.08s, opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-continue:active { opacity: 0.85; transform: scale(0.97); }
+
+.ssl-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ===================== SCREEN 2 ===================== */
+.s2-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 10;
+  transition: opacity 0.4s ease;
+}
+.s2-backdrop.hidden { opacity: 0; pointer-events: none; }
+.s2-backdrop.visible { opacity: 1; }
+
+.bottom-sheet {
+  position: fixed;
+  top: 67px; /* below site-header (61px) + progress-bar (6px) */
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  z-index: 11;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+}
+.bottom-sheet.hidden { transform: translateX(-50%) translateY(100%); }
+.bottom-sheet.visible { transform: translateX(-50%) translateY(0); }
+
+.sheet-handle {
+  width: 36px;
+  height: 5px;
+  background: rgba(60,60,67,0.3);
+  border-radius: 3px;
+  margin: 10px auto 0;
+}
+
+.sheet-inner { padding: 20px 20px 40px; }
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.sheet-header-icon { font-size: 20px; color: var(--accent); }
+.sheet-header-title { font-size: 18px; font-weight: 700; color: var(--text); }
+.sheet-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4; }
+
+.trust-chip {
+  display: block;
+  font-size: 11px;
+  background: rgba(74,156,63,0.08);
+  color: var(--accent);
+  padding: 6px 12px;
+  border-radius: 99px;
+  text-align: center;
+  margin-bottom: 24px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* iOS Form Group */
+.ios-form-group {
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.ios-form-row {
+  padding: 0 16px;
+  border-bottom: 0.5px solid var(--separator);
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+}
+.ios-form-row:last-child { border-bottom: none; }
+.ios-form-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  width: 110px;
+  flex-shrink: 0;
+}
+.ios-form-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  color: var(--text);
+  text-align: right;
+  font-family: var(--font);
+  min-height: 52px;
+}
+.ios-form-input:focus { outline: none; }
+.ios-form-input::placeholder { color: var(--text-muted); }
+
+
+.sheet-cta {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  min-height: 52px;
+  border-radius: var(--radius);
+  font-size: 17px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: transform 0.08s, opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.sheet-cta:active { opacity: 0.85; transform: scale(0.98); }
+
+.sheet-legal {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  text-align: center;
+}
+.sheet-legal + .sheet-legal { margin-top: 8px; }
+
+/* ===================== SCREEN 3 — ACTIVITY RINGS ===================== */
+.s3-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px 60px;
+  min-height: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+}
+
+.rings-headline {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--text);
+  margin-bottom: 6px;
+  text-align: center;
+}
+.rings-sub {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.rings-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin-bottom: 28px;
+}
+.rings-svg {
+  display: block;
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+.ring-center-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease;
+}
+.ring-center-icon .material-icons-outlined {
+  font-size: 32px;
+  color: var(--text-muted);
+  transition: color 0.4s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.ring-center-icon.complete .material-icons-outlined {
+  color: var(--success);
+  transform: scale(1.2);
+}
+
+/* Ring labels */
+.ring-labels {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+.ring-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.ring-label-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+.ring-label-text {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* Status messages */
+.ring-status {
+  font-size: 15px;
+  color: var(--text-secondary);
+  text-align: center;
+  min-height: 22px;
+  transition: opacity 0.3s ease;
+}
+.ring-status.complete {
+  font-weight: 700;
+  color: var(--success);
+}
+
+/* ===================== SCREEN 4 — OFFERS LIST ===================== */
+.s4-wrap { padding: 0 0 80px; max-width: 560px; margin: 0 auto; }
+
+.s4-header {
+  padding: 28px 20px 16px;
+  background: var(--bg);
+  transition: padding 0.2s ease;
+}
+.s4-large-title {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  font-family: var(--font-display);
+  color: var(--text);
+  line-height: 1.1;
+  transition: font-size 0.2s ease, padding-top 0.2s ease;
+}
+.s4-large-title.compact { font-size: 20px; }
+.s4-sub {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.s4-content { padding: 0 16px; }
+
+/* Offers List View */
+.offers-list-view {
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  margin: 0 0 16px;
+}
+
+.offer-list-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 0.5px solid var(--separator);
+  cursor: pointer;
+  gap: 14px;
+  min-height: 72px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.offer-list-row:last-child { border-bottom: none; }
+.offer-list-row:active { background: rgba(0,0,0,0.04); }
+
+.offer-logo-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 11px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.offer-logo-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.offer-list-main { flex: 1; min-width: 0; }
+.offer-list-name { font-size: 16px; font-weight: 600; color: var(--text); }
+.offer-list-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.offer-list-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.offer-list-amount { font-size: 17px; font-weight: 700; color: var(--text); }
+.offer-list-chevron { color: var(--text-muted); font-size: 16px; margin-top: 2px; }
+.offer-list-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-light);
+  border-radius: 4px;
+  padding: 2px 6px;
+  letter-spacing: 0.04em;
+}
+
+/* Trust footer */
+.trust-footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 16px 20px 0;
+  line-height: 1.5;
+}
+
+/* ===================== OFFER DRAWER ===================== */
+.offer-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 49;
+  opacity: 0;
+  transition: opacity 0.32s;
+  pointer-events: none;
+}
+.offer-drawer-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.offer-drawer {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.94);
+  width: 90%;
+  max-width: 440px;
+  background: var(--surface);
+  border-radius: 20px;
+  z-index: 50;
+  padding: 52px 24px 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.22);
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s ease;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  opacity: 0;
+  pointer-events: none;
+}
+.offer-drawer.open {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-grouped);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 18px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.drawer-close:active { background: rgba(0,0,0,0.1); }
+.drawer-close .material-icons-outlined { font-size: 18px; }
+
+.drawer-offer-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.drawer-offer-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.drawer-offer-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.drawer-offer-name { font-size: 20px; font-weight: 700; color: var(--text); }
+.drawer-offer-tagline { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+.drawer-section-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.amount-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.amount-pill {
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: var(--surface-grouped);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.08s;
+  font-family: var(--font);
+  -webkit-tap-highlight-color: transparent;
+}
+.amount-pill:active { transform: scale(0.95); }
+.amount-pill.selected {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.drawer-cta {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  min-height: 52px;
+  border-radius: var(--radius);
+  font-size: 17px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: transform 0.08s, opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.drawer-cta:active { opacity: 0.85; transform: scale(0.98); }
+
+.drawer-trust {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ===================== MISC ===================== */
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ===================== DATA =====================
+const userData = { firstName: "Jason", email: "jason@example.com" };
+
+const ewaOffers = [
+  {
+    id: "dave",
+    name: "Dave",
+    logo: "../media/dave.png",
+    logoBg: "#1a7a32",
+    bclr: "#1a7a32",
+    badge: "BEST MATCH",
+    tagline: "Pre-qualified up to $500",
+    delivery: "Instant Transfer",
+    trust: "No credit check · 4.8★ · 200K+ users",
+    maxAmt: 500,
+    amounts: [100, 200, 300, 400, 500],
+    ctaBase: "Get My Advance",
+    url: "#"
+  },
+  {
+    id: "albert",
+    name: "Albert",
+    logo: "../media/albert.png",
+    logoBg: "#5b3fd9",
+    bclr: "#5b3fd9",
+    badge: null,
+    tagline: "No interest · No fees ever",
+    delivery: "Same-day delivery",
+    trust: "Free to try · 4.7★ · 200K+ reviews",
+    maxAmt: 250,
+    amounts: [50, 100, 150, 200, 250],
+    ctaBase: "Try Albert Free",
+    url: "#"
+  },
+  {
+    id: "earnin",
+    name: "Earnin",
+    logo: "../media/EarnIn_Logo.png",
+    logoBg: "#f5c518",
+    bclr: "#f5c518",
+    badge: null,
+    tagline: "Access wages you've already earned",
+    delivery: "Lightning Speed delivery",
+    trust: "Up to $100/day · You choose what to pay · 4.6★",
+    maxAmt: 100,
+    amounts: [25, 50, 75, 100],
+    ctaBase: "Get Started",
+    url: "#"
+  }
+];
+
+const US_STATES = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+
+const PROGRESS_MAP = { 1: 0.50, 2: 0.62, 3: 0.80, 4: 1.0 };
+
+// ===================== HAPTIC BUTTON =====================
+function useHaptic() {
+  const [pressing, setPressing] = useState(false);
+  const start = () => { setPressing(true); setTimeout(() => setPressing(false), 80); };
+  return { pressing, start };
+}
+
+// ===================== SITE HEADER =====================
+function SiteHeader() {
+  return (
+    <header className="site-header" role="banner">
+      <img src="../media/logo.svg" alt="Company Logo" />
+    </header>
+  );
+}
+
+// ===================== PROGRESS BAR =====================
+function ProgressBar({ screen }) {
+  const pct = PROGRESS_MAP[screen] || 0.5;
+  return (
+    <div className="progress-bar-wrap" role="progressbar" aria-valuenow={Math.round(pct*100)} aria-valuemin={0} aria-valuemax={100}>
+      <div className="progress-bar-fill" style={{ width: `${pct * 100}%` }} />
+    </div>
+  );
+}
+
+// ===================== SCREEN 1 =====================
+function Screen1({ slideState, selectedAccount, onSelect, onContinue, onBack }) {
+  const cards = [
+    { id: 'checking', label: 'Checking', icon: 'account_balance' },
+    { id: 'savings',  label: 'Savings',  icon: 'savings' },
+    { id: 'none',     label: 'No Bank Account', icon: 'money_off', fullWidth: true }
+  ];
+
+  const [pressing, setPressing] = useState(null);
+  const handleCardPress = (id) => {
+    setPressing(id);
+    setTimeout(() => setPressing(null), 80);
+    onSelect(id);
+  };
+
+  return (
+    <section
+      className={`screen ${slideState}`}
+      aria-label="Bank account type selection"
+    >
+      <div className="content-col">
+        <h1 className="s1-headline">What type of bank account do you have?</h1>
+
+        <div className="tip-block" role="note">
+          <p className="tip-text">
+            Most EWA providers work with standard checking accounts. Having a direct deposit set up may increase your available advance amount.
+          </p>
+          <span className="tip-toggle">A HELPFUL TIP! ∧</span>
+        </div>
+
+        <div className="account-cards-grid" role="group" aria-label="Account type options">
+          {cards.filter(c => !c.fullWidth).map(card => (
+            <div
+              key={card.id}
+              className={`account-card${selectedAccount === card.id ? ' selected' : ''}${pressing === card.id ? ' pressing' : ''}`}
+              role="button"
+              tabIndex={0}
+              aria-pressed={selectedAccount === card.id}
+              onClick={() => handleCardPress(card.id)}
+              onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleCardPress(card.id)}
+            >
+              <span className="material-icons-outlined card-icon">{card.icon}</span>
+              <span className="card-label">{card.label}</span>
+            </div>
+          ))}
+          <div className="account-card-wrap-full">
+            {cards.filter(c => c.fullWidth).map(card => (
+              <div
+                key={card.id}
+                className={`account-card${selectedAccount === card.id ? ' selected' : ''}${pressing === card.id ? ' pressing' : ''}`}
+                role="button"
+                tabIndex={0}
+                aria-pressed={selectedAccount === card.id}
+                onClick={() => handleCardPress(card.id)}
+                onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleCardPress(card.id)}
+                style={{ flexDirection: 'row', justifyContent: 'center', gap: 12, padding: '16px 20px' }}
+              >
+                <span className="material-icons-outlined card-icon">{card.icon}</span>
+                <span className="card-label">{card.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="btn-row">
+          <button className="btn-back" onClick={onBack} aria-label="Go back">
+            <span className="material-icons-outlined">arrow_back_ios</span>
+            Back
+          </button>
+          <button
+            className="btn-continue"
+            onClick={onContinue}
+            disabled={!selectedAccount}
+            style={{ opacity: selectedAccount ? 1 : 0.5 }}
+          >
+            Continue
+          </button>
+        </div>
+
+        <p className="ssl-footer">
+          🔒 256-bit SSL encrypted · Your information is never sold
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ===================== CUSTOM STATE SELECT =====================
+function StateSelect({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState(null);
+  const btnRef = useRef(null);
+
+  const toggle = () => {
+    if (!open && btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect();
+      setPos({ top: r.bottom, left: r.left, width: r.width });
+    }
+    setOpen(o => !o);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => {
+      if (btnRef.current && btnRef.current.contains(e.target)) return;
+      setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
+  return (
+    <div style={{ flex: 1 }}>
+      <button
+        ref={btnRef}
+        type="button"
+        style={{
+          width: '100%', textAlign: 'right', background: 'transparent', border: 'none',
+          fontFamily: 'inherit', fontSize: 16, color: value ? 'var(--text)' : 'var(--text-muted)',
+          cursor: 'pointer', minHeight: 52, padding: '0 0 0 8px',
+        }}
+        onClick={toggle}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        {value || 'Select'}
+      </button>
+      {open && pos && ReactDOM.createPortal(
+        <div
+          role="listbox"
+          style={{
+            position: 'fixed', top: pos.top, left: pos.left, width: pos.width,
+            background: '#ffffff', borderRadius: 12,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            zIndex: 9999, maxHeight: 260, overflowY: 'auto',
+            border: '1px solid #d4ead1',
+          }}
+        >
+          {US_STATES.map(s => (
+            <div
+              key={s}
+              role="option"
+              aria-selected={s === value}
+              style={{
+                padding: '11px 16px', fontSize: 15, textAlign: 'left', cursor: 'pointer',
+                color: s === value ? '#4a9c3f' : '#1a1a2e',
+                background: s === value ? 'rgba(74,156,63,0.1)' : 'transparent',
+              }}
+              onMouseDown={(e) => { e.preventDefault(); onChange(s); setOpen(false); }}
+            >
+              {s}
+            </div>
+          ))}
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
+// ===================== SCREEN 2 — BOTTOM SHEET =====================
+function Screen2({ slideState, sheetVisible, formData, onChange, onSubmit }) {
+  return (
+    <section
+      className={`screen ${slideState}`}
+      aria-label="EWA Options form"
+      style={{ minHeight: 'calc(100vh - 67px)', background: 'var(--bg)' }}
+    >
+      {/* Backdrop */}
+      <div className={`s2-backdrop ${sheetVisible ? 'visible' : 'hidden'}`} aria-hidden="true" />
+
+      {/* Bottom Sheet */}
+      <div
+        className={`bottom-sheet ${sheetVisible ? 'visible' : 'hidden'}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Your EWA Options"
+      >
+        <div className="sheet-handle" aria-hidden="true" />
+        <div className="sheet-inner">
+          <div className="sheet-header">
+            <span className="material-icons-outlined sheet-header-icon">verified</span>
+            <h2 className="sheet-header-title">EWA Options Available</h2>
+          </div>
+          <p className="sheet-sub">Fill in a few details to see your matches</p>
+
+          <span className="trust-chip">🔒 Encrypted · Not a loan · No credit check</span>
+
+          {/* Name Group */}
+          <div className="ios-form-group">
+            <div className="ios-form-row">
+              <label className="ios-form-label" htmlFor="s2-fname">First Name</label>
+              <input
+                id="s2-fname"
+                className="ios-form-input"
+                type="text"
+                placeholder="Required"
+                value={formData.firstName}
+                onChange={e => onChange('firstName', e.target.value)}
+                autoComplete="given-name"
+              />
+            </div>
+            <div className="ios-form-row">
+              <label className="ios-form-label" htmlFor="s2-lname">Last Name</label>
+              <input
+                id="s2-lname"
+                className="ios-form-input"
+                type="text"
+                placeholder="Required"
+                value={formData.lastName}
+                onChange={e => onChange('lastName', e.target.value)}
+                autoComplete="family-name"
+              />
+            </div>
+          </div>
+
+          {/* Email Group */}
+          <div className="ios-form-group">
+            <div className="ios-form-row">
+              <label className="ios-form-label" htmlFor="s2-email">Email</label>
+              <input
+                id="s2-email"
+                className="ios-form-input"
+                type="email"
+                placeholder="Required"
+                value={formData.email}
+                onChange={e => onChange('email', e.target.value)}
+                autoComplete="email"
+              />
+            </div>
+          </div>
+
+          {/* Age + State Group */}
+          <div className="ios-form-group">
+            <div className="ios-form-row">
+              <label className="ios-form-label" htmlFor="s2-age">Age</label>
+              <input
+                id="s2-age"
+                className="ios-form-input"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="18+"
+                value={formData.age}
+                onChange={e => onChange('age', e.target.value)}
+                autoComplete="age"
+              />
+            </div>
+            <div className="ios-form-row">
+              <label className="ios-form-label">State</label>
+              <StateSelect value={formData.state} onChange={v => onChange('state', v)} />
+            </div>
+          </div>
+
+          <button className="sheet-cta" onClick={onSubmit}>
+            See My Options
+          </button>
+
+          <p className="sheet-legal">
+            By continuing, you authorize us to share your information with EWA providers to find your best match. This is not a loan application.
+          </p>
+          <p className="sheet-legal" style={{ marginTop: 8 }}>
+            You may receive communications from matched providers. Amounts vary by provider and eligibility.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ===================== ACTIVITY RINGS =====================
+function ActivityRings({ progress }) {
+  const rings = [
+    { r: 76, color: '#4a9c3f', circ: 477.5, key: 'speed',       sw: 13 },
+    { r: 58, color: '#2d6a27', circ: 364.4, key: 'amount',      sw: 13 },
+    { r: 40, color: '#34c759', circ: 251.3, key: 'eligibility', sw: 13 },
+  ];
+
+  return (
+    <div className="rings-container" aria-hidden="true">
+      <svg className="rings-svg" viewBox="0 0 200 200" width="200" height="200" style={{ overflow: 'visible' }}>
+        {rings.map(ring => {
+          const pct = progress[ring.key] || 0;
+          const offset = ring.circ * (1 - pct);
+          const glowing = pct >= 0.99;
+          return (
+            <g key={ring.key}>
+              {/* Track */}
+              <circle
+                cx="100" cy="100" r={ring.r}
+                fill="none"
+                stroke={ring.color}
+                strokeOpacity="0.15"
+                strokeWidth={ring.sw}
+              />
+              {/* Fill */}
+              <circle
+                cx="100" cy="100" r={ring.r}
+                fill="none"
+                stroke={ring.color}
+                strokeWidth={ring.sw}
+                strokeDasharray={ring.circ}
+                strokeDashoffset={offset}
+                strokeLinecap="round"
+                style={{
+                  transition: 'stroke-dashoffset 0.08s linear',
+                  filter: glowing ? `drop-shadow(0 0 6px ${ring.color})` : 'none',
+                }}
+              />
+            </g>
+          );
+        })}
+      </svg>
+
+      {/* Center icon */}
+      <div className={`ring-center-icon${progress.eligibility >= 0.99 ? ' complete' : ''}`}>
+        <span className="material-icons-outlined">
+          {progress.eligibility >= 0.99 ? 'check_circle' : 'search'}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ===================== SCREEN 3 =====================
+function Screen3({ fadeState, onComplete }) {
+  const [progress, setProgress] = useState({ speed: 0, amount: 0, eligibility: 0 });
+  const [statusIdx, setStatusIdx] = useState(0);
+  const completedRef = useRef(false);
+
+  const STATUSES = [
+    { text: 'Checking EWA providers...', delay: 0 },
+    { text: 'Verifying your eligibility...', delay: 1000 },
+    { text: 'Calculating best match...', delay: 2000 },
+    { text: 'All 3 checks complete!', delay: 3000, complete: true },
+  ];
+
+  useEffect(() => {
+    if (fadeState !== 'fade-visible') return;
+    completedRef.current = false;
+    setProgress({ speed: 0, amount: 0, eligibility: 0 });
+    setStatusIdx(0);
+
+    // Ring fill: speed at 0ms, amount at 400ms, eligibility at 800ms
+    // Each fills over ~2s
+    const TICK = 40; // ms per tick
+    const STEPS = 50; // 2000ms / 40ms
+
+    const intervals = [];
+    const startRing = (key, delayMs) => {
+      const timer = setTimeout(() => {
+        let step = 0;
+        const iv = setInterval(() => {
+          step++;
+          const pct = Math.min(step / STEPS, 1);
+          setProgress(prev => ({ ...prev, [key]: pct }));
+          if (pct >= 1) clearInterval(iv);
+        }, TICK);
+        intervals.push(iv);
+      }, delayMs);
+      intervals.push(timer);
+    };
+
+    startRing('speed', 0);
+    startRing('amount', 400);
+    startRing('eligibility', 800);
+
+    // Status messages
+    STATUSES.forEach((s, i) => {
+      const t = setTimeout(() => setStatusIdx(i), s.delay);
+      intervals.push(t);
+    });
+
+    // Transition to Screen 4
+    const done = setTimeout(() => {
+      if (!completedRef.current) {
+        completedRef.current = true;
+        onComplete();
+      }
+    }, 3600);
+    intervals.push(done);
+
+    return () => intervals.forEach(i => { clearTimeout(i); clearInterval(i); });
+  }, [fadeState]);
+
+  const currentStatus = STATUSES[statusIdx];
+
+  return (
+    <section
+      className={`screen ${fadeState}`}
+      aria-label="Searching for your options"
+      style={{ background: 'var(--bg)' }}
+    >
+      <div className="s3-wrap">
+        <h2 className="rings-headline">Finding Your Match</h2>
+        <p className="rings-sub">Checking 3 EWA providers now</p>
+
+        <ActivityRings progress={progress} />
+
+        {/* Ring labels */}
+        <div className="ring-labels">
+          <div className="ring-label">
+            <div className="ring-label-dot" style={{ background: '#4a9c3f' }} />
+            <span className="ring-label-text" style={{ color: '#4a9c3f' }}>Speed</span>
+          </div>
+          <div className="ring-label">
+            <div className="ring-label-dot" style={{ background: '#2d6a27' }} />
+            <span className="ring-label-text" style={{ color: '#2d6a27' }}>Amount</span>
+          </div>
+          <div className="ring-label">
+            <div className="ring-label-dot" style={{ background: '#34c759' }} />
+            <span className="ring-label-text" style={{ color: '#34c759' }}>Eligibility</span>
+          </div>
+        </div>
+
+        <p
+          className={`ring-status${currentStatus && currentStatus.complete ? ' complete' : ''}`}
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {currentStatus ? currentStatus.text : ''}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ===================== OFFER DRAWER =====================
+function OfferDrawer({ offer, onClose }) {
+  const [selectedAmt, setSelectedAmt] = useState(null);
+  const modalRef = useRef(null);
+  const closeRef = useRef(null);
+  const triggerRef = useRef(null);
+
+  useEffect(() => {
+    if (offer) setSelectedAmt(offer.amounts[offer.amounts.length - 1]);
+  }, [offer]);
+
+  // Save trigger element, focus close button on open; restore focus on close
+  useEffect(() => {
+    if (offer) {
+      triggerRef.current = document.activeElement;
+      const t = setTimeout(() => closeRef.current?.focus(), 50);
+      return () => clearTimeout(t);
+    } else {
+      triggerRef.current?.focus();
+    }
+  }, [offer]);
+
+  // Tab trap + Escape to close
+  useEffect(() => {
+    if (!offer) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') { onClose(); return; }
+      if (e.key !== 'Tab') return;
+      const modal = modalRef.current;
+      if (!modal) return;
+      const focusable = Array.from(modal.querySelectorAll(
+        'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      ));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [offer, onClose]);
+
+  const isOpen = !!offer;
+  const o = offer;
+
+  const isEarnin = o && o.id === 'earnin';
+  const textColor = o && o.id === 'earnin' ? '#1a1a1a' : '#fff';
+
+  return ReactDOM.createPortal(
+    <>
+      <div
+        className={`offer-drawer-backdrop${isOpen ? ' visible' : ''}`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div
+        ref={modalRef}
+        className={`offer-drawer${isOpen ? ' open' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={o ? `${o.name} offer details` : 'Offer details'}
+      >
+        {o && (
+          <>
+            <button ref={closeRef} className="drawer-close" onClick={onClose} aria-label="Close">
+              <span className="material-icons-outlined">close</span>
+            </button>
+
+            <div className="drawer-offer-header">
+              <div className="drawer-offer-logo" style={{ background: o.logoBg }}>
+                <img src={o.logo} alt={o.name + ' logo'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <div>
+                <div className="drawer-offer-name">{o.name}</div>
+                <div className="drawer-offer-tagline">{o.delivery}</div>
+              </div>
+            </div>
+
+            <p className="drawer-section-label">Choose your amount</p>
+            <div className="amount-pills" role="group" aria-label="Amount selection">
+              {o.amounts.map(amt => (
+                <button
+                  key={amt}
+                  className={`amount-pill${selectedAmt === amt ? ' selected' : ''}`}
+                  onClick={() => setSelectedAmt(amt)}
+                  aria-pressed={selectedAmt === amt}
+                >
+                  ${amt}
+                </button>
+              ))}
+            </div>
+
+            <button
+              className="drawer-cta"
+              style={{ background: o.bclr, color: textColor }}
+              onClick={() => window.open(o.url, '_blank')}
+            >
+              {o.ctaBase} ${selectedAmt} from {o.name}
+              <span className="material-icons-outlined" style={{ fontSize: 18 }}>arrow_forward</span>
+            </button>
+
+            <p className="drawer-trust">{o.trust}</p>
+          </>
+        )}
+      </div>
+    </>,
+    document.body
+  );
+}
+
+// ===================== SCREEN 4 =====================
+function Screen4({ fadeState }) {
+  const [expandedOffer, setExpandedOffer] = useState(null);
+  const [compact, setCompact] = useState(false);
+  const headerRef = useRef(null);
+
+  useEffect(() => {
+    if (fadeState !== 'fade-visible') return;
+    window.scrollTo(0, 0);
+  }, [fadeState]);
+
+  // Scroll compact title via window scroll
+  useEffect(() => {
+    if (fadeState !== 'fade-visible') return;
+    const handleScroll = () => setCompact(window.scrollY > 40);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [fadeState]);
+
+  return (
+    <section
+      className={`screen ${fadeState}`}
+      aria-label="Your EWA offer results"
+      style={{ background: 'var(--bg)' }}
+    >
+      <div className="s4-wrap">
+        <header className="s4-header" ref={headerRef}>
+          <h1 className={`s4-large-title${compact ? ' compact' : ''}`}>Your Options</h1>
+          <p className="s4-sub">3 EWA offers matched</p>
+        </header>
+
+        <div className="s4-content">
+          <div className="offers-list-view" role="list">
+            {ewaOffers.map((offer, i) => {
+              const isEarnin = offer.id === 'earnin';
+              return (
+                <div
+                  key={offer.id}
+                  className="offer-list-row"
+                  role="listitem"
+                  onClick={() => setExpandedOffer(offer)}
+                  tabIndex={0}
+                  aria-label={`${offer.name}: up to $${offer.maxAmt}. ${offer.tagline}`}
+                  onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setExpandedOffer(offer)}
+                >
+                  <div className="offer-logo-wrap" style={{ background: offer.logoBg }}>
+                    <img src={offer.logo} alt={offer.name} />
+                  </div>
+                  <div className="offer-list-main">
+                    <div className="offer-list-name">{offer.name}</div>
+                    <div className="offer-list-sub">{offer.delivery}</div>
+                  </div>
+                  <div className="offer-list-right">
+                    <span className="offer-list-amount">${offer.maxAmt}</span>
+                    {offer.badge && <span className="offer-list-badge">{offer.badge}</span>}
+                    <span className="material-icons-outlined offer-list-chevron">chevron_right</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="trust-footer">
+            🔒 Secured by SSL · All offers verified · Not a loan
+          </p>
+        </div>
+      </div>
+
+      <OfferDrawer offer={expandedOffer} onClose={() => setExpandedOffer(null)} />
+    </section>
+  );
+}
+
+// ===================== APP =====================
+function App() {
+  const [screen, setScreen] = useState(1);
+  const [prevScreen, setPrevScreen] = useState(null);
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: userData.firstName,
+    lastName: 'Williams',
+    email: userData.email,
+    age: '',
+    state: ''
+  });
+
+  // S1 → S2: iOS horizontal slide
+  const [s1State, setS1State] = useState('slide-visible');
+  const [s2State, setS2State] = useState('slide-hidden-right');
+  // S2 → S3 → S4: fade
+  const [s3State, setS3State] = useState('fade-hidden');
+  const [s4State, setS4State] = useState('fade-hidden');
+
+  const goToScreen2 = useCallback(() => {
+    if (transitioning) return;
+    setTransitioning(true);
+    // Slide S1 out left, S2 in from right simultaneously
+    setS1State('slide-hidden-left');
+    setS2State('slide-visible');
+    setScreen(2);
+    setTimeout(() => {
+      setTransitioning(false);
+      // Show the bottom sheet slightly after screen change
+      setTimeout(() => setSheetVisible(true), 80);
+    }, 340);
+  }, [transitioning]);
+
+  const goBack = useCallback(() => {
+    if (transitioning || screen !== 2) return;
+    setTransitioning(true);
+    setSheetVisible(false);
+    setTimeout(() => {
+      setS1State('slide-visible');
+      setS2State('slide-hidden-right');
+      setScreen(1);
+      setTransitioning(false);
+    }, 340);
+  }, [transitioning, screen]);
+
+  const handleAccountSelect = useCallback((id) => {
+    setSelectedAccount(id);
+    if (id === 'none') {
+      setTimeout(() => goToScreen2(), 160);
+    }
+  }, [goToScreen2]);
+
+  const handleContinue = useCallback(() => {
+    if (!selectedAccount) return;
+    goToScreen2();
+  }, [selectedAccount, goToScreen2]);
+
+  const handleFormChange = useCallback((field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleFormSubmit = useCallback(() => {
+    // S2 → S3: fade
+    setSheetVisible(false);
+    setTimeout(() => {
+      setS2State('fade-hidden');
+      setS3State('fade-visible');
+      setScreen(3);
+    }, 320);
+  }, []);
+
+  const handleS3Complete = useCallback(() => {
+    setS3State('fade-hidden');
+    setTimeout(() => {
+      setS4State('fade-visible');
+      setScreen(4);
+    }, 50);
+  }, []);
+
+  // Screen 1 goes back — if we pressed "Back" while on S2
+  const handleBack = useCallback(() => {
+    if (screen === 2) goBack();
+  }, [screen, goBack]);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', alignItems: 'stretch', background: 'var(--bg)' }}>
+      <SiteHeader />
+      <ProgressBar screen={screen} />
+
+      <div className="flow-wrap">
+        <Screen1
+          slideState={s1State}
+          selectedAccount={selectedAccount}
+          onSelect={handleAccountSelect}
+          onContinue={handleContinue}
+          onBack={() => {/* handled by browser back */}}
+        />
+        <Screen2
+          slideState={s2State}
+          sheetVisible={sheetVisible}
+          formData={formData}
+          onChange={handleFormChange}
+          onSubmit={handleFormSubmit}
+        />
+        <Screen3
+          fadeState={s3State}
+          onComplete={handleS3Complete}
+        />
+        <Screen4
+          fadeState={s4State}
+        />
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

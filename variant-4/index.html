@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find EWA Options | Variant 4 — Clean &amp; Trustworthy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ========================
+       DESIGN TOKENS
+    ======================== */
+    :root {
+      --bg:           #ffffff;
+      --surface:      #f9fafb;
+      --surface-2:    #f0fdf4;
+      --accent:       #4a9c3f;
+      --accent-light: #c8e6c4;
+      --accent-dark:  #3a7a30;
+      --text:         #111827;
+      --text-muted:   #6b7280;
+      --border:       #e5e7eb;
+      --brand-green:  #4a9c3f;
+      --success:      #10b981;
+      --font:         'Montserrat', system-ui, sans-serif;
+      --radius:       12px;
+      --shadow:       0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: #ffffff;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    /* ========================
+       FLOW WRAPPER
+    ======================== */
+    .flow-wrap {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      align-self: center;
+      flex: 1;
+      background: #ffffff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========================
+       SITE HEADER
+    ======================== */
+    .site-header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .site-header img {
+      height: 40px;
+      width: auto;
+    }
+
+    /* ========================
+       PROGRESS BAR
+    ======================== */
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e0e0e0;
+      flex-shrink: 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--brand-green);
+      transition: width 0.5s ease;
+    }
+
+    /* ========================
+       ACCENT NAV BAR
+    ======================== */
+    .nav-progress-bar {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 3px;
+      background: var(--accent);
+      z-index: 1000;
+      transition: left 0.6s ease;
+      pointer-events: none;
+    }
+    .nav-progress-bar.active { left: 0; }
+
+    /* ========================
+       PAGE TRANSITION OVERLAY
+    ======================== */
+    .page-overlay {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      z-index: 999;
+      pointer-events: none;
+      clip-path: circle(0% at 50% 72%);
+    }
+    @keyframes overlayExpand {
+      from { clip-path: circle(0% at 50% 72%); }
+      to   { clip-path: circle(170% at 50% 72%); }
+    }
+    @keyframes overlayRetract {
+      from { clip-path: circle(170% at 50% 4%); }
+      to   { clip-path: circle(0% at 50% 4%); }
+    }
+
+    /* ========================
+       SCREEN BASE
+    ======================== */
+    .screen {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 24px 20px 32px;
+      animation: fadeSlideUp 0.3s ease;
+    }
+    .screen.fading-out {
+      opacity: 0;
+      transform: scale(0.97) translateY(-8px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .screen.no-anim { animation: none; }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========================
+       SCREEN 1 STYLES
+    ======================== */
+    .s1-screen { padding-top: 0; }
+
+    .s1-headline {
+      font-size: 32px;
+      font-weight: 300;
+      color: #111827;
+      text-align: center;
+      margin: 20px 0 18px;
+      line-height: 1.2;
+    }
+
+    .tip-block {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .tip-block p {
+      font-size: 12px;
+      color: #6b7280;
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+    .tip-toggle {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .no-bank-card { grid-column: 1 / -1; }
+
+    .acct-card {
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      background: var(--surface);
+      min-height: 90px;
+    }
+    .acct-card:hover {
+      border-color: var(--accent);
+      background: var(--surface-2);
+    }
+    .acct-card.selected {
+      border-color: var(--accent);
+      background: var(--surface-2);
+      transform: scale(0.985);
+    }
+    .acct-card .card-icon {
+      font-size: 36px;
+      line-height: 1;
+      color: var(--accent);
+    }
+    .acct-card .card-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .s1-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 75px;
+    }
+    .btn-back {
+      width: 52px;
+      height: 52px;
+      min-height: 52px;
+      flex-shrink: 0;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-continue {
+      flex: 1;
+      padding: 16px;
+      min-height: 52px;
+      background: var(--brand-green);
+      color: #fff;
+      font-size: 17px;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-family: var(--font);
+      transition: opacity 0.2s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-continue:hover  { opacity: 0.9; }
+    .btn-continue:active { transform: scale(0.98); }
+
+    .ssl-footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #f0f0f0;
+      line-height: 1.5;
+    }
+    .ssl-footer a { color: var(--text-muted); text-decoration: underline; }
+
+    /* ========================
+       SCREEN 2 STYLES
+    ======================== */
+    .s2-hero-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 20px 16px 20px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .s2-hero-icon {
+      font-size: 38px;
+      color: var(--accent);
+      flex-shrink: 0;
+      line-height: 1;
+      animation: breathe 3s ease-in-out infinite;
+    }
+    @keyframes breathe {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.08); }
+    }
+    .s2-headline {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 5px;
+      line-height: 1.25;
+    }
+    .s2-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .s2-form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 16px 18px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .float-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .float-group.full { grid-template-columns: 1fr; }
+    .float-group:last-child { margin-bottom: 0; }
+
+    .float-field { position: relative; }
+    .float-field input,
+    .float-field select {
+      width: 100%;
+      padding: 22px 16px 8px;
+      font-size: 16px;
+      font-family: var(--font);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -moz-appearance: textfield;
+    }
+    .float-field select {
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      padding-right: 34px;
+    }
+    .float-field input::-webkit-outer-spin-button,
+    .float-field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .float-field input:focus,
+    .float-field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(74,156,63,0.12);
+    }
+    .float-field input.error,
+    .float-field select.error { border-color: #ef4444; }
+
+    .float-field label {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--text-muted);
+      pointer-events: none;
+      transition: all 0.16s ease;
+      font-family: var(--font);
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .float-field input:focus + label,
+    .float-field input:not(:placeholder-shown) + label {
+      top: 11px;
+      transform: translateY(0);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .float-field input.error + label { color: #ef4444; }
+
+    .float-field.has-select label {
+      top: 11px;
+      transform: translateY(0);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .float-field.has-select select:focus + label { color: var(--accent); }
+    .float-field.has-select select.error + label  { color: #ef4444; }
+    .float-field.has-select::after {
+      content: '▾';
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      pointer-events: none;
+      font-size: 13px;
+    }
+
+    .trust-signal-row {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-accent {
+      width: 100%;
+      padding: 18px;
+      min-height: 52px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 17px;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-family: var(--font);
+      margin-top: 4px;
+      transition: background 0.2s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-accent:hover  { background: var(--accent-dark); }
+    .btn-accent:active { transform: scale(0.98); }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      transform: scale(0);
+      animation: rippleAnim 0.6s linear;
+      pointer-events: none;
+    }
+    @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+    .legal-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0 16px;
+    }
+    .legal-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .legal-text strong { color: var(--text); font-weight: 600; }
+    .legal-text p { margin-bottom: 10px; }
+    .legal-text p:last-child { margin-bottom: 0; }
+
+    /* ========================
+       SCREEN 3 STYLES
+    ======================== */
+    .s3-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .pulse-dots {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+    .pulse-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulseDot 1.2s ease-in-out infinite;
+    }
+    .pulse-dot:nth-child(2) { animation-delay: 0.2s; }
+    .pulse-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulseDot {
+      0%,100% { opacity: 0.3; transform: scale(0.8); }
+      50%      { opacity: 1;   transform: scale(1.2); }
+    }
+
+    .s3-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 28px;
+      text-align: center;
+    }
+
+    .step-list {
+      width: 100%;
+      max-width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .step-icon-wrap {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step-icon-wrap .material-icons-outlined {
+      font-size: 22px;
+      color: var(--border);
+      transition: color 0.2s;
+    }
+    .step-label {
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: color 0.2s, font-weight 0.2s;
+      line-height: 1.3;
+    }
+
+    .step-item.active .step-icon-wrap .material-icons-outlined { color: var(--accent); }
+    .step-item.active .step-label { color: var(--accent); font-weight: 600; }
+
+    .step-item.done .step-icon-wrap .material-icons-outlined { color: var(--accent); }
+    .step-item.done .step-label {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin-icon { animation: spin 0.8s linear infinite; display: inline-block; }
+
+    @keyframes checkPop {
+      0%   { transform: scale(0); }
+      70%  { transform: scale(1.25); }
+      100% { transform: scale(1); }
+    }
+    .check-pop { animation: checkPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+    .s3-found {
+      margin-top: 32px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .s3-found.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .s3-found .material-icons-outlined { font-size: 20px; }
+
+    /* ========================
+       SCREEN 4 STYLES — 3D Card Flip
+    ======================== */
+    .s4-header {
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+    .s4-headline {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+    .s4-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .s4-counter {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .offers-list {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      perspective: 1200px;
+      padding-bottom: 8px;
+    }
+
+    .offer-card-wrap {
+      position: relative;
+      margin-bottom: 16px;
+      min-height: 360px;
+    }
+
+    .offer-card {
+      width: 100%;
+      min-height: 360px;
+      transform-style: preserve-3d;
+      position: relative;
+      transform: rotateY(180deg);
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: var(--radius);
+    }
+    .offer-card.flipped {
+      transform: rotateY(0deg);
+    }
+    .offer-card.flipped.best-match {
+      animation: cardLand 0.5s 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes cardLand {
+      0%   { transform: rotateY(0deg) translateY(-8px); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
+      60%  { transform: rotateY(0deg) translateY(1px);  box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+      100% { transform: rotateY(0deg) translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
+    }
+
+    .card-face {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      border-radius: var(--radius);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .card-back {
+      background: linear-gradient(135deg, #4a9c3f 0%, #22c55e 60%, #3a7a30 100%);
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .card-back-icon {
+      font-size: 44px;
+      color: rgba(255,255,255,0.85);
+    }
+    .card-back-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .card-back-hint {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-front {
+      transform: rotateY(0deg);
+      border: 2px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .offer-card.best-match .card-front {
+      border-color: var(--bclr, var(--accent));
+    }
+
+    .offer-header {
+      background: linear-gradient(135deg, var(--bclr, #4a9c3f), var(--bclr2, #22c55e));
+      padding: 18px 20px 14px;
+      text-align: center;
+      color: var(--btext, #fff);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .offer-ribbon {
+      position: absolute;
+      top: 24px;
+      right: -28px;
+      width: 124px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(255,255,255,1), rgba(255,255,255,0.9));
+      color: var(--accent);
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-align: center;
+      padding: 5px 0;
+      transform: rotate(35deg);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      line-height: 1;
+    }
+
+    .offer-logo {
+      height: 26px;
+      width: auto;
+      max-width: 110px;
+      object-fit: contain;
+      margin-bottom: 10px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .offer-tagline { font-size: 13px; opacity: 0.78; margin-bottom: 2px; }
+    .offer-big-amt {
+      font-size: 52px;
+      font-weight: 800;
+      line-height: 1.05;
+      margin-bottom: 6px;
+      letter-spacing: -1px;
+    }
+    .offer-delivery {
+      font-size: 12px;
+      opacity: 0.88;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+    .offer-delivery .material-icons-outlined { font-size: 14px; }
+
+    .offer-body { padding: 14px 16px 18px; }
+    .offer-select-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .offer-amts-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .amt-btn {
+      padding: 7px 13px;
+      border: 2px solid var(--border);
+      border-radius: 99px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      min-height: 36px;
+    }
+    .amt-btn.selected {
+      background: var(--bclr, var(--accent));
+      border-color: var(--bclr, var(--accent));
+      color: var(--btext, #fff);
+      animation: pillPop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes pillPop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    .amt-btn:hover:not(.selected) {
+      border-color: var(--bclr, var(--accent));
+      color: var(--text);
+    }
+
+    .offer-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--cclr, var(--bclr, var(--accent)));
+      color: var(--ctext, #fff);
+      padding: 14px 20px;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: 16px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+      min-height: 52px;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .offer-cta:hover { opacity: 0.88; }
+    .offer-trust-line {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .s4-trust {
+      flex-shrink: 0;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      line-height: 1.6;
+    }
+
+    /* ========================
+       UTILITY
+    ======================== */
+    @media (max-width: 340px) {
+      .s1-headline { font-size: 26px; }
+      .s4-headline { font-size: 17px; }
+      .float-group { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const US_STATES = [
+  'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut',
+  'Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa',
+  'Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan',
+  'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada',
+  'New Hampshire','New Jersey','New Mexico','New York','North Carolina',
+  'North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island',
+  'South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont',
+  'Virginia','Washington','West Virginia','Wisconsin','Wyoming'
+];
+
+const ewaOffers = [
+  {
+    id: 'dave', name: 'Dave',
+    logo: '../media/dave.png', logoFilter: 'brightness(0) invert(1)',
+    bclr: '#1a7a32', bclr2: '#22a347', btext: '#fff', cclr: '#1a7a32', ctext: '#fff',
+    badge: 'YOUR BEST OPTION',
+    tagline: "You're pre-qualified for",
+    maxAmt: 500, amounts: [100,200,300,400,500],
+    delivery: 'Instant Transfer',
+    trust: 'No credit check · Repays automatically · 4.8★',
+    ctaBase: 'Get My Advance', url: '#'
+  },
+  {
+    id: 'albert', name: 'Albert',
+    logo: '../media/albert.png', logoFilter: 'brightness(0) invert(1)',
+    bclr: '#5b3fd9', bclr2: '#7c63e8', btext: '#fff', cclr: '#5b3fd9', ctext: '#fff',
+    badge: null,
+    tagline: 'Instant cash available',
+    maxAmt: 250, amounts: [50,100,150,200,250],
+    delivery: 'No interest · No fees ever',
+    trust: 'Free to try · 4.7★ · 200K+ reviews',
+    ctaBase: 'Try Albert Free', url: '#'
+  },
+  {
+    id: 'earnin', name: 'Earnin',
+    logo: '../media/EarnIn_Logo.png', logoFilter: 'none',
+    bclr: '#f5c518', bclr2: '#ffd94d', btext: '#1a1a1a', cclr: '#1a1a1a', ctext: '#fff',
+    badge: null,
+    tagline: 'Access your earned pay',
+    maxAmt: 100, amounts: [25,50,75,100],
+    delivery: 'Lightning Speed delivery',
+    trust: 'Up to $100/day · You choose what to pay · 4.6★',
+    ctaBase: 'Get Started', url: '#'
+  }
+];
+
+const STEPS = [
+  { label: 'Verifying your profile',           delay: 0    },
+  { label: 'Checking EWA provider eligibility', delay: 700  },
+  { label: 'Matching offers to your state',    delay: 1400 },
+  { label: 'Ranking by fastest approval',      delay: 2100 }
+];
+
+/* ==============================
+   OFFER CARD (Screen 4)
+============================== */
+function OfferCard({ offer, flipped }) {
+  const [selectedAmt, setSelectedAmt] = useState(offer.maxAmt);
+
+  const cardStyle = {
+    '--bclr':  offer.bclr,
+    '--bclr2': offer.bclr2,
+    '--btext': offer.btext || '#fff',
+    '--cclr':  offer.cclr  || offer.bclr,
+    '--ctext': offer.ctext || '#fff'
+  };
+
+  return (
+    <div className="offer-card-wrap">
+      <div
+        className={`offer-card${offer.badge ? ' best-match' : ''}${flipped ? ' flipped' : ''}`}
+        style={cardStyle}
+      >
+        {/* Back face */}
+        <div className="card-face card-back">
+          <div className="card-back-hint">
+            <span className="material-icons-outlined card-back-icon" style={{fontSize:30,color:'rgba(255,255,255,0.85)'}}>
+              account_balance_wallet
+            </span>
+          </div>
+          <span className="card-back-name">{offer.name}</span>
+        </div>
+
+        {/* Front face */}
+        <div className="card-face card-front">
+          <div className="offer-header">
+            {offer.badge && <div className="offer-ribbon">{offer.badge}</div>}
+            <img
+              src={offer.logo} alt={offer.name} className="offer-logo"
+              style={{ filter: offer.logoFilter }}
+            />
+            <div className="offer-tagline">{offer.tagline}</div>
+            <div className="offer-big-amt">${selectedAmt}</div>
+            <div className="offer-delivery">
+              <span className="material-icons-outlined" aria-hidden="true">bolt</span>
+              {offer.delivery}
+            </div>
+          </div>
+          <div className="offer-body">
+            <div className="offer-select-label">Select amount</div>
+            <div className="offer-amts-grid">
+              {offer.amounts.map(amt => (
+                <button
+                  key={amt}
+                  className={`amt-btn${amt === selectedAmt ? ' selected' : ''}`}
+                  onClick={() => setSelectedAmt(amt)}
+                >
+                  ${amt}
+                </button>
+              ))}
+            </div>
+            <a href={offer.url} className="offer-cta">
+              {offer.ctaBase} ${selectedAmt} →
+            </a>
+            <div className="offer-trust-line">{offer.trust}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ==============================
+   SCREEN 1
+============================== */
+function Screen1({ onNoBankSelect, onCardSelect, selectedCard }) {
+  return (
+    <div className="screen s1-screen">
+      <h1 className="s1-headline">What type of bank account do you have?</h1>
+
+      <div className="tip-block">
+        <p>"Lenders are significantly more likely to fund checking accounts than savings accounts."</p>
+        <div className="tip-toggle">A HELPFUL TIP! ∧</div>
+      </div>
+
+      <div className="cards-grid">
+        <div
+          className={`acct-card${selectedCard === 'checking' ? ' selected' : ''}`}
+          role="button" tabIndex={0}
+          onClick={() => onCardSelect('checking')}
+          onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onCardSelect('checking')}
+        >
+          <span className="material-icons-outlined card-icon" aria-hidden="true">account_balance</span>
+          <span className="card-label">Checking</span>
+        </div>
+        <div
+          className={`acct-card${selectedCard === 'savings' ? ' selected' : ''}`}
+          role="button" tabIndex={0}
+          onClick={() => onCardSelect('savings')}
+          onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onCardSelect('savings')}
+        >
+          <span className="material-icons-outlined card-icon" aria-hidden="true">savings</span>
+          <span className="card-label">Savings</span>
+        </div>
+        <div
+          className={`acct-card no-bank-card${selectedCard === 'nobank' ? ' selected' : ''}`}
+          role="button" tabIndex={0}
+          onClick={onNoBankSelect}
+          onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onNoBankSelect()}
+        >
+          <span className="material-icons-outlined card-icon" aria-hidden="true">money_off</span>
+          <span className="card-label">No Bank Account</span>
+        </div>
+      </div>
+
+      <div className="s1-actions">
+        <button className="btn-back" onClick={() => history.back()} aria-label="Go back">‹</button>
+        <button
+          className="btn-continue"
+          onClick={() => selectedCard && selectedCard !== 'nobank' && alert('Normal adchain continues here. This POC demonstrates the "No Bank Account" branch only.')}
+        >
+          Continue
+        </button>
+      </div>
+
+      <div className="ssl-footer">
+        We use 256 bit SSL technology to encrypt your data.<br/>
+        <a href="#">Disclosures</a>
+      </div>
+    </div>
+  );
+}
+
+/* ==============================
+   SCREEN 2
+============================== */
+function Screen2({ onSubmit, fadingOut }) {
+  const [form, setForm] = useState({
+    firstName: 'Jason', lastName: 'Williams', email: 'jason@example.com',
+    age: '', state: ''
+  });
+  const [errors, setErrors] = useState({});
+
+  function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
+
+  function handleSubmit(e) {
+    const errs = {};
+    if (!form.firstName.trim()) errs.firstName = true;
+    if (!form.lastName.trim())  errs.lastName  = true;
+    if (!form.email.trim() || !form.email.includes('@')) errs.email = true;
+    const a = parseInt(form.age, 10);
+    if (!form.age || a < 18 || a > 99) errs.age = true;
+    if (!form.state) errs.state = true;
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    setErrors({});
+    onSubmit();
+  }
+
+  function addRipple(e) {
+    const btn = e.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 2;
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top  - size / 2;
+    const rip = document.createElement('span');
+    rip.className = 'ripple';
+    rip.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px;`;
+    btn.appendChild(rip);
+    setTimeout(() => rip.remove(), 700);
+  }
+
+  return (
+    <div className={`screen${fadingOut ? ' fading-out' : ''}`}>
+      <div className="s2-hero-card">
+        <span className="material-icons-outlined s2-hero-icon" aria-hidden="true">verified</span>
+        <div>
+          <h2 className="s2-headline">You have options — even without a bank account.</h2>
+          <p className="s2-sub">EWA services let you access wages you've already earned.</p>
+        </div>
+      </div>
+
+      <div className="s2-form-card">
+        <div className="float-group">
+          <div className="float-field">
+            <input type="text" placeholder=" " value={form.firstName} onChange={e => set('firstName', e.target.value)}
+              className={errors.firstName ? 'error' : ''} autoComplete="given-name" />
+            <label>First Name</label>
+          </div>
+          <div className="float-field">
+            <input type="text" placeholder=" " value={form.lastName} onChange={e => set('lastName', e.target.value)}
+              className={errors.lastName ? 'error' : ''} autoComplete="family-name" />
+            <label>Last Name</label>
+          </div>
+        </div>
+        <div className="float-group full">
+          <div className="float-field">
+            <input type="email" placeholder=" " value={form.email} onChange={e => set('email', e.target.value)}
+              className={errors.email ? 'error' : ''} autoComplete="email" />
+            <label>Email Address</label>
+          </div>
+        </div>
+        <div className="float-group">
+          <div className="float-field">
+            <input
+              type="text" inputMode="numeric" pattern="[0-9]*"
+              placeholder=" " value={form.age} onChange={e => set('age', e.target.value)}
+              className={errors.age ? 'error' : ''}
+            />
+            <label>Age</label>
+          </div>
+          <div className="float-field has-select">
+            <select value={form.state} onChange={e => set('state', e.target.value)}
+              className={errors.state ? 'error' : ''}>
+              <option value=""></option>
+              {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <label>State</label>
+          </div>
+        </div>
+      </div>
+
+      <div className="trust-signal-row">
+        🔒 Your info stays private &nbsp;·&nbsp; Never sold &nbsp;·&nbsp; No credit impact
+      </div>
+
+      <button className="btn-accent" onClick={e => { addRipple(e); handleSubmit(e); }}>
+        See My EWA Options →
+      </button>
+
+      <div className="legal-divider" />
+      <div className="legal-text">
+        <p><strong>What is Early Wage Access?</strong><br/>
+        EWA services let you access earned wages before payday. Unlike traditional loans, advances are based on hours already worked — not your credit score. Most services charge a small optional tip or subscription fee rather than interest.</p>
+        <p>By clicking "See My EWA Options," you may be matched with third-party EWA providers. EPCVIP does not guarantee approval, funding amounts, or terms. Availability may vary by state.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ==============================
+   SCREEN 3
+============================== */
+function Screen3({ onDone, fadingOut }) {
+  // stepState[i]: 'idle' | 'active' | 'done'
+  const [stepStates, setStepStates] = useState(STEPS.map(() => 'idle'));
+  const [stepIcons, setStepIcons] = useState(STEPS.map(() => 'radio_button_unchecked'));
+  const [checkPop, setCheckPop] = useState(STEPS.map(() => false));
+  const [foundVisible, setFoundVisible] = useState(false);
+
+  useEffect(() => {
+    const timers = [];
+
+    STEPS.forEach((step, i) => {
+      // Activate step
+      timers.push(setTimeout(() => {
+        setStepStates(s => { const n=[...s]; n[i]='active'; return n; });
+        setStepIcons(ic => { const n=[...ic]; n[i]='sync'; return n; });
+      }, step.delay));
+
+      // Complete step
+      timers.push(setTimeout(() => {
+        setStepStates(s => { const n=[...s]; n[i]='done'; return n; });
+        setStepIcons(ic => { const n=[...ic]; n[i]='check_circle'; return n; });
+        setCheckPop(cp => { const n=[...cp]; n[i]=true; return n; });
+        setTimeout(() => {
+          setCheckPop(cp => { const n=[...cp]; n[i]=false; return n; });
+        }, 400);
+      }, step.delay + 500));
+    });
+
+    // Show found
+    timers.push(setTimeout(() => setFoundVisible(true), 2800));
+
+    // Advance to S4
+    timers.push(setTimeout(() => onDone(), 2800));
+
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div className={`screen${fadingOut ? ' fading-out' : ''}`}>
+      <div className="s3-wrap">
+        <div className="pulse-dots">
+          <div className="pulse-dot" />
+          <div className="pulse-dot" />
+          <div className="pulse-dot" />
+        </div>
+
+        <p className="s3-title">Finding your best options…</p>
+
+        <div className="step-list">
+          {STEPS.map((step, i) => (
+            <div key={i} className={`step-item ${stepStates[i]}`}>
+              <div className="step-icon-wrap">
+                <span className={`material-icons-outlined${stepStates[i]==='active' ? ' spin-icon' : ''}${checkPop[i] ? ' check-pop' : ''}`}>
+                  {stepIcons[i]}
+                </span>
+              </div>
+              <span className="step-label">{step.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className={`s3-found${foundVisible ? ' visible' : ''}`}>
+          <span className="material-icons-outlined">check_circle</span>
+          <span>3 offers matched for you</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ==============================
+   SCREEN 4
+============================== */
+function Screen4() {
+  const [flipped, setFlipped] = useState({ dave: false, albert: false, earnin: false });
+  const [counter, setCounter] = useState(0);
+
+  useEffect(() => {
+    const delays = { dave: 100, albert: 450, earnin: 800 };
+    const timers = ewaOffers.map(o =>
+      setTimeout(() => setFlipped(f => ({ ...f, [o.id]: true })), delays[o.id])
+    );
+
+    // Animate counter 0→3
+    const start = performance.now();
+    const duration = 600;
+    function tick(now) {
+      const elapsed = Math.min(now - start, duration);
+      setCounter(Math.round(3 * elapsed / duration));
+      if (elapsed < duration) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div className="screen no-anim">
+      <div className="s4-header">
+        <h2 className="s4-headline">Your verified offers</h2>
+        <p className="s4-sub">
+          Matched and ranked for your profile —{' '}
+          <span className="s4-counter">{counter}</span> offers found
+        </p>
+      </div>
+      <div className="offers-list">
+        {ewaOffers.map(o => (
+          <OfferCard key={o.id} offer={o} flipped={flipped[o.id]} />
+        ))}
+      </div>
+      <div className="s4-trust">
+        Offers updated daily &nbsp;·&nbsp; Ranked by approval speed &nbsp;·&nbsp; Results based on your profile
+      </div>
+    </div>
+  );
+}
+
+/* ==============================
+   APP
+============================== */
+function App() {
+  const [screen, setScreen] = useState(1);
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [overlayPhase, setOverlayPhase] = useState('idle');
+  const [navActive, setNavActive] = useState(false);
+  const [fadingOut, setFadingOut] = useState(false);
+
+  // Ink ripple transition: S1 → S2
+  function runRippleTransition() {
+    setNavActive(true);
+    setOverlayPhase('expanding');
+    setTimeout(() => {
+      setNavActive(false);
+      setScreen(2);
+      setOverlayPhase('retracting');
+      setTimeout(() => setOverlayPhase('idle'), 500);
+    }, 420);
+  }
+
+  // Fade transition: S2 → S3 or S3 → S4
+  function fadeTo(next) {
+    setFadingOut(true);
+    setTimeout(() => {
+      setScreen(next);
+      setFadingOut(false);
+    }, 260);
+  }
+
+  let overlayStyle = {};
+  if (overlayPhase === 'expanding') {
+    overlayStyle = { animation: 'overlayExpand 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards' };
+  } else if (overlayPhase === 'retracting') {
+    overlayStyle = { animation: 'overlayRetract 0.48s cubic-bezier(0.4, 0, 0.2, 1) forwards' };
+  } else {
+    overlayStyle = { clipPath: 'circle(0% at 50% 72%)' };
+  }
+
+  return (
+    <>
+      <div className={`nav-progress-bar${navActive ? ' active' : ''}`} />
+      <div className="page-overlay" style={overlayStyle} />
+
+      <div className="site-header">
+        <img src="../media/logo.svg" alt="Fast Loan Advance" />
+      </div>
+
+      {screen === 1 && (
+        <div className="progress-bar">
+          <div className="progress-fill" style={{ width: '75%' }} />
+        </div>
+      )}
+
+      <div className="flow-wrap">
+        {screen === 1 && (
+          <Screen1
+            selectedCard={selectedCard}
+            onCardSelect={setSelectedCard}
+            onNoBankSelect={() => {
+              setSelectedCard('nobank');
+              setTimeout(() => runRippleTransition(), 160);
+            }}
+          />
+        )}
+        {screen === 2 && (
+          <Screen2
+            fadingOut={fadingOut}
+            onSubmit={() => fadeTo(3)}
+          />
+        )}
+        {screen === 3 && (
+          <Screen3
+            fadingOut={fadingOut}
+            onDone={() => fadeTo(4)}
+          />
+        )}
+        {screen === 4 && <Screen4 />}
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Find EWA Options | Get Paid Before Payday</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ========================
+       DESIGN TOKENS
+    ======================== */
+    :root {
+      --bg:           #ffffff;
+      --surface:      #ffffff;
+      --surface-2:    #f0f5f0;
+      --accent:       #4a9c3f;
+      --accent-light: rgba(74,156,63,0.10);
+      --text:         #1a1a2e;
+      --text-muted:   #6b7280;
+      --border:       #d4ead1;
+      --brand-green:  #4a9c3f;
+      --radius:       20px;
+      --font:         'Montserrat', system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: #ffffff;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    /* ========================
+       FLOW WRAPPER
+    ======================== */
+    .flow-wrap {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      align-self: center;
+      flex: 1;
+      background: #ffffff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========================
+       SITE HEADER
+    ======================== */
+    .site-header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .site-header img { height: 40px; width: auto; }
+
+    /* ========================
+       PROGRESS BAR
+    ======================== */
+    .progress-bar { width: 100%; height: 6px; background: #e0e0e0; flex-shrink: 0; }
+    .progress-fill { height: 100%; background: var(--brand-green); transition: width 0.5s ease; }
+
+    /* ========================
+       SCREEN MANAGEMENT
+    ======================== */
+    .screen {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      padding: 24px 20px 32px;
+    }
+    .screen.active {
+      display: flex;
+      animation: fadeSlideUp 0.35s ease;
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-overlay {
+      position: fixed; inset: 0;
+      background: #ffffff; z-index: 999;
+      pointer-events: none;
+      clip-path: circle(0% at 50% 72%);
+    }
+    @keyframes overlayExpand {
+      from { clip-path: circle(0% at 50% 72%); }
+      to   { clip-path: circle(170% at 50% 72%); }
+    }
+    @keyframes overlayRetract {
+      from { clip-path: circle(170% at 50% 4%); }
+      to   { clip-path: circle(0% at 50% 4%); }
+    }
+
+    #screen1 { padding-top: 0; }
+    #screen2 { padding: 0; overflow: hidden; }
+
+    /* ========================
+       SCREEN 1
+    ======================== */
+    .s1-headline {
+      font-size: 32px; font-weight: 300; color: #2d3748;
+      text-align: center; margin: 20px 0 18px; line-height: 1.2;
+    }
+    .tip-block { background: #fff; border: 1px solid #e4e4e7; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; }
+    .tip-block p { font-size: 12px; color: #6b7280; font-style: italic; line-height: 1.5; margin-bottom: 6px; }
+    .tip-toggle { font-size: 11px; font-weight: 700; color: var(--brand-green); text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; }
+
+    .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .no-bank-card { grid-column: 1 / -1; }
+
+    .acct-card {
+      border: 2px solid var(--border); border-radius: 16px;
+      padding: 18px 12px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 8px;
+      cursor: pointer; transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      background: var(--surface); min-height: 90px;
+    }
+    .acct-card:hover { border-color: var(--accent); background: var(--accent-light); }
+    .acct-card.selected { border-color: var(--accent); background: var(--accent-light); transform: scale(0.985); }
+    .acct-card:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .acct-card .card-icon { font-size: 38px; line-height: 1; color: #4a9c3f; }
+    .acct-card .card-label { font-size: 14px; font-weight: 600; color: var(--text); text-align: center; }
+
+    .s1-actions { display: flex; align-items: center; gap: 10px; margin-top: 75px; }
+    .btn-back {
+      width: 52px; height: 52px; min-height: 52px; flex-shrink: 0;
+      border: 2px solid var(--border); border-radius: 14px; background: var(--surface);
+      font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-back:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+    .btn-continue {
+      flex: 1; padding: 16px; min-height: 52px;
+      background: var(--brand-green); color: #fff;
+      font-size: 17px; font-weight: 700; border: none;
+      border-radius: 16px; cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s; font-family: var(--font);
+    }
+    .btn-continue:hover  { opacity: 0.9; }
+    .btn-continue:active { transform: scale(0.98); }
+    .btn-continue:focus  { outline: 3px solid #3a7a30; outline-offset: 2px; }
+
+    .ssl-footer { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 14px; padding-top: 12px; border-top: 1px solid #f0f0f0; }
+    .ssl-footer a { color: var(--text-muted); text-decoration: underline; }
+
+    /* ========================
+       SCREEN 2 — ONE-FIELD WIZARD
+    ======================== */
+    .wiz-prog-wrap { height: 4px; background: #f0f0f0; flex-shrink: 0; }
+    .wiz-prog-fill { height: 100%; background: var(--brand-green); transition: width 0.45s ease; }
+
+    .wizard-body { flex: 1; display: flex; flex-direction: column; padding: 28px 22px 22px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+    .step-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 32px; }
+    .dot { width: 8px; height: 8px; border-radius: 4px; background: #e5e7eb; transition: all 0.3s; }
+    .dot.done { background: var(--accent); }
+    .dot.active { background: var(--accent); width: 26px; }
+
+    .wiz-step { flex: 1; display: flex; flex-direction: column; animation: stepIn 0.3s cubic-bezier(.22,1,.36,1) both; }
+    @keyframes stepIn {
+      from { opacity: 0; transform: translateX(36px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .step-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); margin-bottom: 10px; }
+    .step-question { font-size: 24px; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
+    .step-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; font-weight: 500; line-height: 1.5; }
+
+    .confirm-box { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
+    .confirm-icon { color: var(--accent); font-size: 22px; flex-shrink: 0; }
+    .confirm-details { flex: 1; }
+    .confirm-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); }
+    .confirm-value { font-size: 17px; font-weight: 700; color: var(--text); margin-top: 2px; }
+    .confirm-check { color: var(--accent); font-size: 24px; flex-shrink: 0; }
+
+    .wiz-age-input {
+      width: 100%; padding: 17px 16px; font-size: 24px;
+      font-family: var(--font); font-weight: 700;
+      border: 2px solid var(--border); border-radius: 14px;
+      color: var(--text); text-align: center;
+      transition: border-color .15s, box-shadow .15s; outline: none;
+      -moz-appearance: textfield;
+    }
+    .wiz-age-input::-webkit-inner-spin-button,
+    .wiz-age-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .wiz-age-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,156,63,.12); }
+    .wiz-age-hint { font-size: 12px; color: #9ca3af; margin-top: 8px; text-align: center; font-weight: 500; }
+
+    .wiz-select {
+      width: 100%; padding: 17px 42px 17px 16px; font-size: 16px;
+      font-family: var(--font); font-weight: 600;
+      border: 2px solid var(--border); border-radius: 14px;
+      background: white; color: var(--text); cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%234a9c3f' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat; background-position: right 16px center; background-size: 16px;
+      transition: border-color .15s, box-shadow .15s; outline: none;
+    }
+    .wiz-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,156,63,.12); }
+
+    .wiz-nav { margin-top: auto; padding-top: 24px; }
+    .wiz-btn-main {
+      display: block; width: 100%; padding: 18px;
+      background: var(--accent); color: white; font-size: 16px; font-weight: 700;
+      border: none; border-radius: 16px; cursor: pointer;
+      font-family: var(--font); margin-bottom: 10px; transition: opacity 0.15s;
+    }
+    .wiz-btn-main:hover:not(:disabled) { opacity: 0.9; }
+    .wiz-btn-main:disabled { opacity: 0.4; cursor: not-allowed; }
+    .wiz-btn-main:focus-visible { outline: 3px solid #3a7a30; outline-offset: 2px; }
+
+    .wiz-btn-back {
+      display: block; width: 100%; padding: 12px;
+      background: transparent; color: #9ca3af; font-size: 13px; font-weight: 600;
+      border: none; cursor: pointer; font-family: var(--font); transition: color 0.15s;
+    }
+    .wiz-btn-back:hover { color: #6b7280; }
+    .wiz-btn-back.hide { visibility: hidden; }
+    .wiz-btn-back:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .wiz-ewa-def { font-size: 12px; color: #9ca3af; line-height: 1.65; font-weight: 500; margin-top: 14px; padding-top: 14px; border-top: 1px solid #f0f0f0; }
+    .wiz-ewa-def strong { color: #6b7280; }
+
+    .wiz-change-link {
+      display: inline-block; margin-top: 12px; font-size: 13px; font-weight: 600;
+      color: var(--accent); cursor: pointer; text-decoration: underline;
+      text-underline-offset: 2px; background: none; border: none; padding: 0;
+      font-family: var(--font);
+    }
+    .wiz-change-link:hover { opacity: 0.8; }
+    .wiz-change-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+    .wiz-email-input {
+      width: 100%; padding: 17px 16px; font-size: 16px;
+      font-family: var(--font); font-weight: 600;
+      border: 2px solid var(--border); border-radius: 14px;
+      color: var(--text); transition: border-color .15s, box-shadow .15s; outline: none;
+    }
+    .wiz-email-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,156,63,.12); }
+
+    .wiz-use-original {
+      display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 600;
+      color: var(--text-muted); cursor: pointer; background: none; border: none;
+      padding: 0; font-family: var(--font); transition: color 0.15s;
+    }
+    .wiz-use-original:hover { color: var(--text); }
+    .wiz-use-original:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+    /* ========================
+       SCREEN 3 — RING LOADER
+    ======================== */
+    .s3-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; text-align: center; padding: 20px; }
+    .ring-container { position: relative; width: 180px; height: 180px; }
+    .ring-container svg { width: 180px; height: 180px; transform: rotate(-90deg); }
+    .ring-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 44px; line-height: 1; opacity: 1; transition: opacity 0.25s ease; color: var(--accent); display: flex; align-items: center; justify-content: center; }
+    .s3-msg { font-size: 18px; font-weight: 600; color: var(--text); transition: opacity 0.25s ease; min-height: 28px; }
+
+    /* ========================
+       SCREEN 4 — TILE SELECTOR
+    ======================== */
+    #screen4 { padding: 20px 16px 20px; }
+
+    .tile-scroll { flex: 1; }
+
+    .tile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+
+    .offer-tile {
+      background: white; border-radius: 16px; padding: 16px 8px 14px;
+      text-align: center; cursor: pointer;
+      border: 2px solid #e5e7eb;
+      transition: all 0.2s cubic-bezier(.22,1,.36,1);
+      position: relative; -webkit-tap-highlight-color: transparent; user-select: none;
+    }
+    .offer-tile:hover { border-color: #d1d5db; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+    .offer-tile.tile-selected { border-color: var(--tile-color); box-shadow: 0 4px 24px rgba(0,0,0,.12); transform: translateY(-3px); }
+    .offer-tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .best-badge { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; padding: 3px 9px; border-radius: 10px; white-space: nowrap; }
+
+    .tile-logo { width: 56px; height: 32px; border-radius: 8px; overflow: hidden; margin: 0 auto 8px; background: white; border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center; padding: 4px; }
+    .tile-logo img { width: 100%; height: 100%; object-fit: contain; }
+
+    .tile-name { font-size: 13px; font-weight: 700; color: #111; }
+    .tile-amount { font-size: 11px; color: #6b7280; margin-top: 3px; font-weight: 600; }
+
+    .tile-check { position: absolute; bottom: 9px; right: 9px; width: 18px; height: 18px; border-radius: 9px; background: var(--tile-color, var(--accent)); color: white; font-size: 12px; display: none; align-items: center; justify-content: center; font-weight: 700; }
+    .offer-tile.tile-selected .tile-check { display: flex; }
+
+    .detail-panel { background: white; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 4px 20px rgba(0,0,0,.07); overflow: hidden; margin-bottom: 16px; }
+    .detail-inner { padding: 22px 20px 20px; animation: stepIn 0.25s ease both; }
+
+    .detail-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .detail-logo { width: 72px; height: 40px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: white; border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center; padding: 5px; }
+    .detail-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .detail-title { font-size: 20px; font-weight: 800; color: var(--text); }
+    .detail-tagline { font-size: 12px; color: #6b7280; margin-top: 2px; font-weight: 500; }
+
+    .detail-bullets { list-style: none; margin-bottom: 20px; }
+    .detail-bullets li { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; color: #374151; padding: 9px 0; border-bottom: 1px solid #f0f0f0; }
+    .detail-bullets li:last-child { border-bottom: none; }
+    .bullet-icon { color: var(--accent); font-size: 18px; flex-shrink: 0; }
+
+    .detail-footer { display: flex; align-items: center; gap: 12px; }
+    .detail-rating { font-size: 12px; color: #6b7280; white-space: nowrap; font-weight: 500; }
+    .stars { color: #f59e0b; }
+    .tile-cta-btn {
+      flex: 1; padding: 14px; border-radius: 12px; font-size: 13px; font-weight: 700;
+      border: none; cursor: pointer; background: var(--accent); color: white;
+      font-family: var(--font); transition: opacity 0.15s;
+    }
+    .tile-cta-btn:hover { opacity: 0.88; }
+    .tile-cta-btn:focus-visible { outline: 2px solid #3a7a30; outline-offset: 2px; }
+
+    .s4-trust { text-align: center; font-size: 12px; color: var(--text-muted); padding-top: 4px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const US_STATES = [
+      'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut',
+      'Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa',
+      'Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan',
+      'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada',
+      'New Hampshire','New Jersey','New Mexico','New York','North Carolina',
+      'North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island',
+      'South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont',
+      'Virginia','Washington','West Virginia','Wisconsin','Wyoming'
+    ];
+
+    const processingSteps = [
+      { pct: 20,  msg: 'Looking for offers near you...', icon: 'manage_search', delay: 0    },
+      { pct: 52,  msg: "No bank account? That's fine.", icon: 'bolt',           delay: 800  },
+      { pct: 80,  msg: 'Scanning EWA providers...',     icon: 'bolt',           delay: 1500 },
+      { pct: 100, msg: 'Found some great options!',     icon: 'task_alt',       delay: 2200 },
+    ];
+
+    const TILE_OFFERS = [
+      {
+        id: 'dave', name: 'Dave', logo: '../media/dave.png', tileColor: '#4a9c3f',
+        amount: 'Up to $500', best: true,
+        tagline: 'Get up to $500 before payday',
+        bullets: [
+          'No credit check required',
+          'Funds in minutes',
+          'Optional tip — no hidden fees',
+          'Automatic repayment on payday'
+        ],
+        rating: '4.8', reviews: '500K+', cta: 'Get My Advance'
+      },
+      {
+        id: 'albert', name: 'Albert', logo: '../media/albert.png', tileColor: '#5b3fd9',
+        amount: 'Up to $250', best: false,
+        tagline: 'Instant cash when you need it',
+        bullets: [
+          'Advance up to $250',
+          'Zero interest — always',
+          'Free trial for 30 days',
+          '$14.99/month after trial'
+        ],
+        rating: '4.7', reviews: '200K+', cta: 'Try Albert Free'
+      },
+      {
+        id: 'earnin', name: 'Earnin', logo: '../media/EarnIn_Logo.png', tileColor: '#c49b00',
+        amount: '$100/day', best: false,
+        tagline: "Access money you've already earned",
+        bullets: [
+          'Up to $100/day, $750/pay period',
+          'Lightning Speed instant delivery',
+          'Pay what you want (even $0)',
+          'No bank account required'
+        ],
+        rating: '4.6', reviews: '300K+', cta: 'Get Started'
+      }
+    ];
+
+    /* ======================== SCREEN 1 ======================== */
+    function Screen1({ onNoBank }) {
+      const [selected, setSelected] = useState(null);
+
+      function selectCard(type) {
+        setSelected(type);
+        if (type === 'nobank') setTimeout(() => onNoBank(), 160);
+      }
+
+      function handleKeyDown(type, e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectCard(type); }
+      }
+
+      return (
+        <div className="screen active" id="screen1">
+          <h1 className="s1-headline">What type of bank account do you have?</h1>
+          <div className="tip-block">
+            <p>"Lenders are significantly more likely to fund checking accounts than savings accounts."</p>
+            <div className="tip-toggle">A HELPFUL TIP! ∧</div>
+          </div>
+          <div className="cards-grid">
+            {[
+              { type: 'checking', icon: 'account_balance', label: 'Checking' },
+              { type: 'savings',  icon: 'savings',         label: 'Savings'  },
+            ].map(({ type, icon, label }) => (
+              <div key={type}
+                className={`acct-card${selected === type ? ' selected' : ''}`}
+                onClick={() => selectCard(type)}
+                onKeyDown={e => handleKeyDown(type, e)}
+                tabIndex={0} role="button" aria-pressed={selected === type}>
+                <span className="material-icons-outlined card-icon" aria-hidden="true">{icon}</span>
+                <span className="card-label">{label}</span>
+              </div>
+            ))}
+            <div
+              className={`acct-card no-bank-card${selected === 'nobank' ? ' selected' : ''}`}
+              onClick={() => selectCard('nobank')}
+              onKeyDown={e => handleKeyDown('nobank', e)}
+              tabIndex={0} role="button" aria-pressed={selected === 'nobank'}>
+              <span className="material-icons-outlined card-icon" aria-hidden="true">money_off</span>
+              <span className="card-label">No Bank Account</span>
+            </div>
+          </div>
+          <div className="s1-actions">
+            <button className="btn-back" onClick={() => window.history.back()} aria-label="Go back">&#8249;</button>
+            <button className="btn-continue" onClick={() => {
+              if (!selected || selected === 'nobank') return;
+              alert('Normal adchain continues here. This POC demonstrates the "No Bank Account" branch only.');
+            }}>Continue</button>
+          </div>
+          <div className="ssl-footer">
+            We use 256 bit SSL technology to encrypt your data.<br />
+            <a href="#">Disclosures</a>
+          </div>
+        </div>
+      );
+    }
+
+    /* ======================== SCREEN 2 — ONE-FIELD WIZARD ======================== */
+    function Screen2({ onSubmit }) {
+      const [step, setStep] = useState(0);
+      const [ageVal, setAgeVal] = useState('');
+      const [stateVal, setStateVal] = useState('');
+      const [editingEmail, setEditingEmail] = useState(false);
+      const [customEmail, setCustomEmail] = useState('');
+      const [editingName, setEditingName] = useState(false);
+      const [customName, setCustomName] = useState('');
+      const ageInputRef = useRef(null);
+      const stateSelectRef = useRef(null);
+      const emailInputRef = useRef(null);
+      const nameInputRef = useRef(null);
+
+      const STEPS = [
+        {
+          label: 'Step 1 of 4',
+          q: "No bank account, no problem. First let's verify your name?",
+          sub: "You've still got great options. Every app we match you with works without one. To start, we pulled from your earlier application.",
+          type: 'confirm', icon: 'person', confirmLabel: 'Full Name', val: 'Jason Williams', editable: true, changeLabel: "That's not my name — let me update it"
+        },
+        {
+          label: 'Step 2 of 4',
+          q: 'Is this your primary email?',
+          sub: "We'll send your offer details here.",
+          type: 'confirm', icon: 'email', confirmLabel: 'Email Address', val: 'jason@example.com', editable: true, changeLabel: "That's not my email — let me update it"
+        },
+        {
+          label: 'Step 3 of 4',
+          q: 'How old are you?',
+          sub: 'Enter your age — used to find EWA services available to you.',
+          type: 'age'
+        },
+        {
+          label: 'Step 4 of 4',
+          q: 'What state are you in?',
+          sub: 'EWA availability varies by state.',
+          type: 'state'
+        }
+      ];
+
+      const progPct = [10, 35, 62, 88];
+      const s = STEPS[step];
+      const isLast = step === STEPS.length - 1;
+      const isNameStep  = step === 0;
+      const isEmailStep = step === 1;
+
+      // Reset edit state when leaving the relevant step
+      useEffect(() => {
+        if (!isEmailStep) { setEditingEmail(false); setCustomEmail(''); }
+        if (!isNameStep)  { setEditingName(false);  setCustomName(''); }
+      }, [step]);
+
+      useEffect(() => {
+        if (s.type === 'age' && ageInputRef.current) ageInputRef.current.focus();
+        if (s.type === 'state' && stateSelectRef.current) stateSelectRef.current.focus();
+        if (editingEmail && emailInputRef.current) emailInputRef.current.focus();
+        if (editingName  && nameInputRef.current)  nameInputRef.current.focus();
+      }, [step, editingEmail, editingName]);
+
+      function emailValid(val) { return val.includes('@') && val.indexOf('@') < val.lastIndexOf('.') && val.length > 5; }
+
+      function canContinue() {
+        if (s.type === 'confirm') {
+          if (isNameStep  && editingName)  return customName.trim().length > 0;
+          if (isEmailStep && editingEmail) return emailValid(customEmail);
+          return true;
+        }
+        if (s.type === 'age') { const n = parseInt(ageVal, 10); return !!ageVal && n >= 18 && n <= 99; }
+        if (s.type === 'state') return !!stateVal;
+        return false;
+      }
+
+      function handleNext() {
+        if (!canContinue()) return;
+        if (isLast) onSubmit();
+        else setStep(p => p + 1);
+      }
+
+      function handleBack() {
+        if (step > 0) setStep(p => p - 1);
+      }
+
+      function startEditEmail() { setEditingEmail(true); setCustomEmail(''); }
+      function cancelEditEmail() { setEditingEmail(false); setCustomEmail(''); }
+      function startEditName()  { setEditingName(true);  setCustomName(''); }
+      function cancelEditName() { setEditingName(false); setCustomName(''); }
+
+      const can = canContinue();
+      let btnLabel;
+      if (s.type === 'confirm') {
+        if (isNameStep  && editingName)  btnLabel = 'Confirm Name →';
+        else if (isEmailStep && editingEmail) btnLabel = 'Confirm Email →';
+        else btnLabel = 'Looks Good ✓';
+      } else {
+        btnLabel = isLast ? 'Show Me EWA Offers →' : 'Continue →';
+      }
+
+      return (
+        <div className="screen active" id="screen2">
+          <div className="wiz-prog-wrap">
+            <div className="wiz-prog-fill" style={{ width: progPct[step] + '%' }} />
+          </div>
+
+          <div className="wizard-body">
+            <div className="step-dots" aria-label={`Step ${step + 1} of ${STEPS.length}`} role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={STEPS.length}>
+              {STEPS.map((_, i) => (
+                <div key={i} className={`dot${i < step ? ' done' : i === step ? ' active' : ''}`} />
+              ))}
+            </div>
+
+            <div className="wiz-step" key={step} aria-live="polite" aria-atomic="true">
+              <div className="step-eyebrow">{s.label}</div>
+              <div className="step-question">{s.q}</div>
+              <div className="step-sub">{s.sub}</div>
+
+              {s.type === 'confirm' && !editingEmail && !editingName && (
+                <>
+                  <div className="confirm-box">
+                    <span className="material-icons-outlined confirm-icon" aria-hidden="true">{s.icon}</span>
+                    <div className="confirm-details">
+                      <div className="confirm-label">{s.confirmLabel}</div>
+                      <div className="confirm-value">{s.val}</div>
+                    </div>
+                    <span className="material-icons-outlined confirm-check" aria-hidden="true">check_circle</span>
+                  </div>
+                  {s.editable && (
+                    <button className="wiz-change-link" onClick={isNameStep ? startEditName : startEditEmail}>
+                      {s.changeLabel}
+                    </button>
+                  )}
+                </>
+              )}
+
+              {isNameStep && editingName && (
+                <>
+                  <input
+                    ref={nameInputRef}
+                    type="text"
+                    placeholder="Enter your full name"
+                    className="wiz-email-input"
+                    value={customName}
+                    onChange={e => setCustomName(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && can) handleNext(); }}
+                    aria-label="Your full name"
+                    autoComplete="name"
+                  />
+                  <button className="wiz-use-original" onClick={cancelEditName}>
+                    ← Use original name
+                  </button>
+                </>
+              )}
+
+              {isEmailStep && editingEmail && (
+                <>
+                  <input
+                    ref={emailInputRef}
+                    type="email"
+                    placeholder="Enter your email address"
+                    className="wiz-email-input"
+                    value={customEmail}
+                    onChange={e => setCustomEmail(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && can) handleNext(); }}
+                    aria-label="Your email address"
+                    autoComplete="email"
+                  />
+                  <button className="wiz-use-original" onClick={cancelEditEmail}>
+                    ← Use original email
+                  </button>
+                </>
+              )}
+
+              {s.type === 'age' && (
+                <>
+                  <input
+                    ref={ageInputRef}
+                    type="number" min="18" max="99" placeholder="e.g. 28"
+                    className="wiz-age-input"
+                    value={ageVal}
+                    onChange={e => setAgeVal(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && can) handleNext(); }}
+                    aria-label="Your age"
+                  />
+                  <div className="wiz-age-hint">Must be 18 or older</div>
+                </>
+              )}
+
+              {s.type === 'state' && (
+                <select
+                  ref={stateSelectRef}
+                  className="wiz-select"
+                  value={stateVal}
+                  onChange={e => setStateVal(e.target.value)}
+                  aria-label="Your state">
+                  <option value="">Select your state...</option>
+                  {US_STATES.map(st => <option key={st} value={st}>{st}</option>)}
+                </select>
+              )}
+            </div>
+
+            <div className="wiz-nav">
+              <button className="wiz-btn-main" disabled={!can} onClick={handleNext}>{btnLabel}</button>
+              <button className={`wiz-btn-back${step === 0 ? ' hide' : ''}`} onClick={handleBack} aria-hidden={step === 0}>← Back</button>
+            </div>
+
+            <div className="wiz-ewa-def">
+              <strong>What is Early Wage Access?</strong><br />
+              EWA services let you access earned wages before payday. Unlike traditional financial products, advances are based on hours already worked — not your credit score. Most services charge a small optional tip or subscription fee.<br /><br />
+              By clicking "Show Me EWA Offers," you may be matched with third-party EWA providers. EPCVIP does not guarantee approval, funding amounts, or terms. Availability may vary by state.
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ======================== SCREEN 3 — RING LOADER ======================== */
+    function Screen3({ onDone }) {
+      const ringRef = useRef(null);
+      const iconRef = useRef(null);
+      const msgRef  = useRef(null);
+      const timers  = useRef([]);
+
+      useEffect(() => {
+        const circumference = 477.5;
+        if (ringRef.current) ringRef.current.style.strokeDashoffset = circumference;
+
+        processingSteps.forEach((step, i) => {
+          const t = setTimeout(() => {
+            if (ringRef.current) ringRef.current.style.strokeDashoffset = circumference * (1 - step.pct / 100);
+            if (i === 0) {
+              if (iconRef.current) iconRef.current.textContent = step.icon;
+              if (msgRef.current)  msgRef.current.textContent  = step.msg;
+              return;
+            }
+            if (iconRef.current) {
+              iconRef.current.style.opacity = '0';
+              setTimeout(() => { if (iconRef.current) { iconRef.current.textContent = step.icon; iconRef.current.style.opacity = '1'; } }, 130);
+            }
+            if (msgRef.current) {
+              msgRef.current.style.opacity = '0';
+              setTimeout(() => { if (msgRef.current) { msgRef.current.textContent = step.msg; msgRef.current.style.opacity = '1'; } }, 130);
+            }
+          }, step.delay);
+          timers.current.push(t);
+        });
+
+        const doneTimer = setTimeout(() => onDone(), 2800);
+        timers.current.push(doneTimer);
+
+        return () => timers.current.forEach(clearTimeout);
+      }, []);
+
+      return (
+        <div className="screen active">
+          <div className="s3-wrap">
+            <div className="ring-container">
+              <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="90" cy="90" r="76" fill="none" stroke="#d4ead1" strokeWidth="10" />
+                <circle cx="90" cy="90" r="76" fill="none"
+                  stroke="#4a9c3f" strokeWidth="10" strokeLinecap="round"
+                  strokeDasharray="477.5" strokeDashoffset="477.5"
+                  ref={ringRef}
+                  style={{ transition: 'stroke-dashoffset 0.6s ease' }} />
+              </svg>
+              <span className="ring-icon material-icons-outlined" ref={iconRef} aria-hidden="true">manage_search</span>
+            </div>
+            <div className="s3-msg" ref={msgRef} aria-live="polite">Looking for offers near you...</div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ======================== SCREEN 4 — ICON TILE SELECTOR ======================== */
+    function Screen4() {
+      const [selected, setSelected] = useState('dave');
+      const offer = TILE_OFFERS.find(o => o.id === selected);
+
+      return (
+        <div className="screen active" id="screen4">
+          <div className="s4-header" style={{ marginBottom: '30px', flexShrink: 0 }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text)', marginBottom: '3px' }}>Choose Your EWA App</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Tap an option to see details and apply</p>
+          </div>
+
+          <div className="tile-scroll">
+            <div className="tile-grid" role="radiogroup" aria-label="EWA offer selection">
+              {TILE_OFFERS.map(o => (
+                <div key={o.id}
+                  className={`offer-tile${selected === o.id ? ' tile-selected' : ''}`}
+                  style={{ '--tile-color': o.tileColor }}
+                  onClick={() => setSelected(o.id)}
+                  role="radio" aria-checked={selected === o.id}
+                  aria-label={`${o.name} — ${o.amount}${o.best ? ', Best Match' : ''}`}
+                  tabIndex={0}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(o.id); } }}>
+                  {o.best && <div className="best-badge">⭐ Best Match</div>}
+                  <div className="tile-logo">
+                    <img src={o.logo} alt={o.name} />
+                  </div>
+                  <div className="tile-name">{o.name}</div>
+                  <div className="tile-amount">{o.amount}</div>
+                  <div className="tile-check" aria-hidden="true">✓</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="detail-panel" aria-live="polite" aria-atomic="true">
+              <div className="detail-inner" key={selected}>
+                <div className="detail-header">
+                  <div className="detail-logo">
+                    <img src={offer.logo} alt={offer.name} />
+                  </div>
+                  <div>
+                    <div className="detail-title">{offer.name}</div>
+                    <div className="detail-tagline">{offer.tagline}</div>
+                  </div>
+                </div>
+                <ul className="detail-bullets">
+                  {offer.bullets.map((b, i) => (
+                    <li key={i}>
+                      <span className="material-icons-outlined bullet-icon" aria-hidden="true">check_circle</span>
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+                <div className="detail-footer">
+                  <div className="detail-rating"><span className="stars" aria-hidden="true">★★★★★</span> {offer.rating} · {offer.reviews} reviews</div>
+                  <button className="tile-cta-btn" aria-label={`${offer.cta} with ${offer.name}`}>{offer.cta} →</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="s4-trust">🔒 256-bit SSL · We never share your data without consent</div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ======================== APP ======================== */
+    function App() {
+      const [screen, setScreen] = useState(1);
+      const overlayRef = useRef(null);
+
+      function pushToScreen(num) {
+        const overlay = overlayRef.current;
+        if (!overlay) { setScreen(num); return; }
+        overlay.style.animation = 'overlayExpand 0.42s cubic-bezier(0.4,0,0.2,1) forwards';
+        setTimeout(() => {
+          setScreen(num);
+          overlay.style.animation = 'overlayRetract 0.48s cubic-bezier(0.4,0,0.2,1) forwards';
+          setTimeout(() => { overlay.style.animation = ''; overlay.style.clipPath = 'circle(0% at 50% 72%)'; }, 500);
+        }, 420);
+      }
+
+      function fadeToScreen(num) { setScreen(num); }
+
+      return (
+        <>
+          <div className="page-overlay" ref={overlayRef} />
+          <div className="site-header">
+            <img src="../media/logo.svg" alt="Fast Loan Advance" />
+          </div>
+          {screen === 1 && (
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: '75%' }} />
+            </div>
+          )}
+          <div className="flow-wrap">
+            {screen === 1 && <Screen1 onNoBank={() => pushToScreen(2)} />}
+            {screen === 2 && <Screen2 onSubmit={() => fadeToScreen(3)} />}
+            {screen === 3 && <Screen3 onDone={() => fadeToScreen(4)} />}
+            {screen === 4 && <Screen4 />}
+          </div>
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Find EWA Options | Early Wage Access</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ========================
+       DESIGN TOKENS — BOLD & MODERN
+    ======================== */
+    :root {
+      --bg:          #ffffff;
+      --surface:     #f5faf5;
+      --surface-2:   #eef6ee;
+      --accent:      #4a9c3f;
+      --accent-alt:  #22c55e;
+      --accent-dark: #3a7a30;
+      --text:        #1a1a1a;
+      --text-muted:  #6b7280;
+      --border:      #c8e6c4;
+      --brand-green: #4a9c3f;
+      --success:     #16a34a;
+      --font:        'Montserrat', system-ui, sans-serif;
+      --radius:      14px;
+      --shadow:      0 4px 20px rgba(74,156,63,0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: #ffffff;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    #root { display: flex; flex-direction: column; flex: 1; align-items: stretch; min-height: 100vh; }
+
+    /* ========================
+       FLOW WRAPPER
+    ======================== */
+    .flow-wrap {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      align-self: center;
+      flex: 1;
+      background: #ffffff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========================
+       SITE HEADER
+    ======================== */
+    .site-header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+      width: 100%;
+    }
+    .site-header img { height: 40px; width: auto; }
+
+    /* ========================
+       PROGRESS BAR
+    ======================== */
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e0e0e0;
+      flex-shrink: 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--brand-green);
+      transition: width 0.5s ease;
+    }
+
+    /* ========================
+       SCREEN BASE
+    ======================== */
+    .screen {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 24px 20px 32px;
+      animation: fadeSlideUp 0.35s ease both;
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .screen-fade-out {
+      animation: fadeScaleOut 0.25s ease forwards;
+    }
+    @keyframes fadeScaleOut {
+      to { opacity: 0; transform: scale(0.97) translateY(-8px); }
+    }
+    #screen1-wrap { padding-top: 0; }
+
+    /* ========================
+       POLYGON WIPE OVERLAY
+    ======================== */
+    .page-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      pointer-events: none;
+      background: var(--accent);
+      clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+    }
+    @keyframes wipeIn {
+      from { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); }
+      to   { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+    }
+    @keyframes wipeOut {
+      from { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+      to   { clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%); }
+    }
+    .overlay-wipe-in  { animation: wipeIn  0.38s cubic-bezier(0.4,0,0.2,1) forwards; }
+    .overlay-wipe-out { animation: wipeOut 0.38s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+    /* ========================
+       SCREEN 1 STYLES
+    ======================== */
+    .s1-headline {
+      font-size: 32px;
+      font-weight: 300;
+      color: #1a1a1a;
+      text-align: center;
+      margin: 20px 0 18px;
+      line-height: 1.2;
+    }
+    .tip-block {
+      background: #fff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .tip-block p {
+      font-size: 12px;
+      color: #6b7280;
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+    .tip-toggle {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .no-bank-card { grid-column: 1 / -1; }
+    .acct-card {
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      background: var(--surface);
+      min-height: 90px;
+    }
+    .acct-card:hover { border-color: var(--accent); background: var(--surface-2); }
+    .acct-card.selected { border-color: var(--accent); background: var(--surface-2); transform: scale(0.985); }
+    .acct-card .card-icon { font-size: 38px; line-height: 1; color: var(--accent); }
+    .acct-card .card-label { font-size: 14px; font-weight: 600; color: var(--text); text-align: center; }
+    .s1-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 75px;
+    }
+    .btn-back {
+      width: 52px; height: 52px; min-height: 52px;
+      flex-shrink: 0;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-size: 22px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-continue {
+      flex: 1;
+      padding: 16px;
+      min-height: 52px;
+      background: var(--brand-green);
+      color: #fff;
+      font-size: 17px;
+      font-weight: 700;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      font-family: var(--font);
+    }
+    .btn-continue:hover  { opacity: 0.9; }
+    .btn-continue:active { transform: scale(0.98); }
+    .ssl-footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .ssl-footer a { color: var(--text-muted); text-decoration: underline; }
+
+    /* ========================
+       SCREEN 2 STYLES
+    ======================== */
+    .s2-inner {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .deco-dot {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.12;
+      pointer-events: none;
+    }
+    .deco-dot:nth-child(1) { width: 60px; height: 60px; top: -20px; right: -10px; }
+    .deco-dot:nth-child(2) { width: 28px; height: 28px; top: 80px; right: 30px; opacity: 0.07; }
+    .deco-dot:nth-child(3) { width: 44px; height: 44px; top: 160px; left: -14px; opacity: 0.08; }
+    .deco-dot:nth-child(4) { width: 18px; height: 18px; top: 40px; left: 20px; opacity: 0.1; }
+    .deco-dot:nth-child(5) { width: 36px; height: 36px; bottom: 120px; right: 10px; opacity: 0.06; }
+    .deco-dot:nth-child(6) { width: 22px; height: 22px; bottom: 200px; left: 5px; opacity: 0.09; }
+    .deco-dot:nth-child(7) { width: 50px; height: 50px; bottom: 80px; left: -16px; opacity: 0.05; }
+    .s2-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 10px; font-weight: 800;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 5px 12px; border-radius: 99px;
+      margin-bottom: 14px; align-self: flex-start;
+    }
+    .s2-headline-wrap { border-left: 5px solid var(--accent); padding-left: 16px; margin-bottom: 12px; }
+    .s2-headline { font-size: 28px; font-weight: 900; line-height: 1.15; color: var(--text); position: relative; }
+    .s2-headline .underline-word { position: relative; display: inline-block; }
+    .s2-headline .underline-word::after {
+      content: '';
+      position: absolute; bottom: -3px; left: 0;
+      width: 0; height: 3px;
+      background: var(--accent); border-radius: 2px;
+      animation: drawLine 0.7s 0.6s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    @keyframes drawLine { from { width: 0; } to { width: 100%; } }
+    .s2-sub { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+    .s2-form-card {
+      background: #fff; border: 2px solid var(--border);
+      border-radius: var(--radius); padding: 16px 16px 18px;
+      margin-bottom: 16px; box-shadow: var(--shadow);
+    }
+    .float-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .float-group.full { grid-template-columns: 1fr; }
+    .float-group:last-child { margin-bottom: 0; }
+    .float-field { position: relative; }
+    .float-field input,
+    .float-field select {
+      width: 100%;
+      padding: 22px 16px 8px;
+      font-size: 16px;
+      font-family: var(--font);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -moz-appearance: textfield;
+    }
+    .float-field select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 34px; }
+    .float-field input::-webkit-outer-spin-button,
+    .float-field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .float-field input:focus,
+    .float-field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,156,63,0.15); }
+    .float-field input.error,
+    .float-field select.error { border-color: #ef4444; }
+    .float-field label {
+      position: absolute; left: 16px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px; color: var(--text-muted);
+      pointer-events: none; transition: all 0.16s ease;
+      font-family: var(--font); white-space: nowrap; line-height: 1;
+    }
+    .float-field input:focus + label,
+    .float-field input:not(:placeholder-shown) + label {
+      top: 11px; transform: translateY(0);
+      font-size: 10px; font-weight: 700;
+      color: var(--accent); letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .float-field input.error + label { color: #ef4444; }
+    .float-field.has-select label {
+      top: 11px; transform: translateY(0);
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .float-field.has-select select:focus + label { color: var(--accent); }
+    .float-field.has-select select.error + label { color: #ef4444; }
+    .float-field.has-select::after {
+      content: '▾'; position: absolute; right: 13px; top: 50%;
+      transform: translateY(-50%); color: var(--accent);
+      pointer-events: none; font-size: 13px;
+    }
+    .btn-accent {
+      width: 100%; padding: 18px 24px; min-height: 56px;
+      background: var(--accent); color: #fff;
+      font-size: 17px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.03em;
+      border: none; border-radius: var(--radius); cursor: pointer;
+      font-family: var(--font); margin-top: 6px;
+      box-shadow: 0 6px 24px rgba(74,156,63,0.3);
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-accent .arrow-icon { transition: transform 0.2s; display: inline-block; }
+    .btn-accent:hover { background: var(--accent-dark); box-shadow: 0 8px 32px rgba(74,156,63,0.4); }
+    .btn-accent:hover .arrow-icon { transform: translateX(4px); }
+    .btn-accent:active { transform: scale(0.97) translateY(2px); box-shadow: inset 0 3px 8px rgba(0,0,0,0.2); }
+    .legal-divider { height: 1px; background: var(--border); margin: 20px 0 16px; }
+    .legal-text { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
+    .legal-text strong { color: var(--text); font-weight: 600; }
+    .legal-text p { margin-bottom: 10px; }
+    .legal-text p:last-child { margin-bottom: 0; }
+
+    /* ========================
+       SCREEN 3 STYLES
+    ======================== */
+    .s3-wrap {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 28px; text-align: center; padding: 20px;
+      background: radial-gradient(circle at 50% 45%, rgba(74,156,63,0.08) 0%, transparent 70%);
+    }
+    .ring-container { position: relative; width: 200px; height: 200px; }
+    .ring-spinner {
+      position: absolute; inset: 0;
+      border: 4px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    .ring-spinner.done { animation: none; border-color: var(--accent); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .counter-wrap {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .counter-amount { font-size: 48px; font-weight: 900; color: var(--text); letter-spacing: -2px; line-height: 1; }
+    .counter-amount .dollar-sign { color: var(--accent); }
+    .counter-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 500; line-height: 1.2; max-width: 130px; }
+    .sparks-container { position: absolute; inset: 0; pointer-events: none; }
+    .spark {
+      position: absolute; top: 50%; left: 50%;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent); opacity: 0;
+      transform: translate(-50%, -50%) scale(0);
+    }
+    .spark.burst { animation: sparkOut 0.7s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
+    @keyframes sparkOut {
+      0%   { opacity: 1; transform: translate(calc(-50% + 0px), calc(-50% + 0px)) scale(1); }
+      100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.3); }
+    }
+    .s3-msg { font-size: 18px; font-weight: 700; color: var(--text); min-height: 28px; transition: opacity 0.25s ease; }
+    .s3-msg.pop { animation: msgPop 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    @keyframes msgPop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* ========================
+       SCREEN 4 STYLES
+    ======================== */
+    .s4-header { margin-bottom: 16px; flex-shrink: 0; }
+    .s4-headline { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+    .s4-sub { font-size: 13px; color: var(--text-muted); }
+    .count-num { color: var(--accent); font-weight: 900; }
+    .offers-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; position: relative; }
+    .offer-card {
+      background: #fff; border: 2px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
+      opacity: 0; transform: translateY(24px) scale(0.96);
+    }
+    .offer-card.best-match { border-color: var(--bclr, var(--accent)); box-shadow: 0 6px 24px rgba(0,0,0,0.12); }
+    .offer-card.visible { animation: cardBounce 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    @keyframes cardBounce { from { opacity: 0; transform: translateY(24px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .offer-card:hover { transform: rotate(0.5deg) translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .offer-header {
+      background: linear-gradient(135deg, var(--bclr, #4a9c3f), var(--bclr2, #22c55e));
+      padding: 18px 20px 14px; text-align: center;
+      color: var(--btext, #fff); position: relative; overflow: hidden;
+    }
+    .offer-ribbon {
+      position: absolute; top: 24px; right: -28px; width: 124px;
+      background: rgba(255,255,255,0.95); color: var(--bclr, var(--accent));
+      font-size: 8px; font-weight: 800; letter-spacing: 0.08em;
+      text-align: center; padding: 5px 0;
+      transform: rotate(35deg); box-shadow: 0 2px 8px rgba(0,0,0,0.2); line-height: 1;
+    }
+    .offer-logo { height: 26px; width: auto; max-width: 110px; object-fit: contain; margin-bottom: 10px; }
+    .offer-tagline { font-size: 13px; opacity: 0.78; margin-bottom: 2px; }
+    .offer-big-amt { font-size: 52px; font-weight: 800; line-height: 1.05; margin-bottom: 6px; letter-spacing: -1px; }
+    .offer-delivery { font-size: 12px; opacity: 0.88; display: flex; align-items: center; justify-content: center; gap: 3px; }
+    .offer-delivery .material-icons-outlined { font-size: 14px; }
+    .offer-body { padding: 14px 16px 18px; }
+    .offer-select-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; text-align: center; }
+    .offer-amts-grid { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-bottom: 14px; }
+    .amt-btn {
+      padding: 7px 13px; border: 2px solid var(--border); border-radius: 99px;
+      background: #fff; font-size: 13px; font-weight: 600;
+      font-family: var(--font); color: var(--text-muted); cursor: pointer;
+      transition: all 0.15s; min-height: 36px;
+    }
+    .amt-btn.selected { background: var(--bclr, var(--accent)); border-color: var(--bclr, var(--accent)); color: var(--btext, #fff); }
+    .amt-btn:hover:not(.selected) { border-color: var(--bclr, var(--accent)); color: var(--text); }
+    .amt-btn:active { transform: scale(0.9); }
+    .offer-cta {
+      display: flex; align-items: center; justify-content: center; text-align: center;
+      background: var(--cclr, var(--bclr, var(--accent)));
+      color: var(--ctext, #fff);
+      padding: 14px 20px; border-radius: 99px;
+      font-weight: 700; font-size: 16px;
+      text-decoration: none; transition: opacity 0.2s;
+      min-height: 52px; line-height: 1.4; margin-bottom: 10px;
+    }
+    .offer-cta:hover { opacity: 0.88; }
+    .offer-trust-line { font-size: 11px; color: var(--text-muted); text-align: center; line-height: 1.5; }
+    .s4-trust {
+      flex-shrink: 0; text-align: center; font-size: 12px;
+      color: var(--text-muted); margin-top: 8px; padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+/* ========================
+   CONSTANTS
+======================== */
+const US_STATES = [
+  'Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut',
+  'Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa',
+  'Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan',
+  'Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada',
+  'New Hampshire','New Jersey','New Mexico','New York','North Carolina',
+  'North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island',
+  'South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont',
+  'Virginia','Washington','West Virginia','Wisconsin','Wyoming'
+];
+
+const EWA_OFFERS = [
+  {
+    id: 'dave', name: 'Dave',
+    logo: '../media/dave.png', logoFilter: 'brightness(0) invert(1)',
+    bclr: '#1a7a32', bclr2: '#22a347', btext: '#fff', cclr: '#1a7a32', ctext: '#fff',
+    badge: 'BEST FOR YOU', tagline: "You're pre-qualified for",
+    maxAmt: 500, amounts: [100, 200, 300, 400, 500],
+    delivery: 'Instant Transfer',
+    trust: 'No credit check · Repays automatically · 4.8★',
+    ctaBase: 'Get My Advance', url: '#'
+  },
+  {
+    id: 'albert', name: 'Albert',
+    logo: '../media/albert.png', logoFilter: 'brightness(0) invert(1)',
+    bclr: '#5b3fd9', bclr2: '#7c63e8', btext: '#fff', cclr: '#5b3fd9', ctext: '#fff',
+    badge: null, tagline: 'Instant cash available',
+    maxAmt: 250, amounts: [50, 100, 150, 200, 250],
+    delivery: 'No interest · No fees ever',
+    trust: 'Free to try · 4.7★ · 200K+ reviews',
+    ctaBase: 'Try Albert Free', url: '#'
+  },
+  {
+    id: 'earnin', name: 'Earnin',
+    logo: '../media/EarnIn_Logo.png', logoFilter: 'none',
+    bclr: '#f5c518', bclr2: '#ffd94d', btext: '#1a1a1a', cclr: '#1a1a1a', ctext: '#fff',
+    badge: null, tagline: 'Access your earned pay',
+    maxAmt: 100, amounts: [25, 50, 75, 100],
+    delivery: 'Lightning Speed delivery',
+    trust: 'Up to $100/day · You choose what to pay · 4.6★',
+    ctaBase: 'Get Started', url: '#'
+  }
+];
+
+const PROCESSING_MSGS = [
+  'Searching for your best options...',
+  'No bank account? No problem.',
+  'Almost there...',
+  'Found 3 offers for you! 🎉'
+];
+
+/* ========================
+   SCREEN 1
+======================== */
+function Screen1({ onContinue }) {
+  const [selected, setSelected] = useState(null);
+
+  function handleSelect(type) {
+    setSelected(type);
+    if (type === 'nobank') {
+      setTimeout(() => onContinue('wipe'), 160);
+    }
+  }
+
+  return (
+    <div className="screen" id="screen1-wrap">
+      <h1 className="s1-headline">What type of bank account do you have?</h1>
+
+      <div className="tip-block">
+        <p>"Lenders are significantly more likely to fund checking accounts than savings accounts."</p>
+        <div className="tip-toggle">A HELPFUL TIP! ∧</div>
+      </div>
+
+      <div className="cards-grid">
+        {[
+          { type: 'checking', icon: 'account_balance', label: 'Checking' },
+          { type: 'savings',  icon: 'savings',         label: 'Savings'  },
+        ].map(c => (
+          <div
+            key={c.type}
+            className={`acct-card${selected === c.type ? ' selected' : ''}`}
+            onClick={() => handleSelect(c.type)}
+            tabIndex={0}
+            role="button"
+            aria-pressed={selected === c.type}
+            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleSelect(c.type)}
+          >
+            <span className="material-icons-outlined card-icon" aria-hidden="true">{c.icon}</span>
+            <span className="card-label">{c.label}</span>
+          </div>
+        ))}
+        <div
+          className={`acct-card no-bank-card${selected === 'nobank' ? ' selected' : ''}`}
+          onClick={() => handleSelect('nobank')}
+          tabIndex={0}
+          role="button"
+          aria-pressed={selected === 'nobank'}
+          onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleSelect('nobank')}
+        >
+          <span className="material-icons-outlined card-icon" aria-hidden="true">money_off</span>
+          <span className="card-label">No Bank Account</span>
+        </div>
+      </div>
+
+      <div className="s1-actions">
+        <button className="btn-back" onClick={() => history.back()} aria-label="Go back">‹</button>
+        <button
+          className="btn-continue"
+          onClick={() => selected && selected !== 'nobank' && alert('Normal adchain continues here. This POC demonstrates the "No Bank Account" branch only.')}
+        >
+          Continue
+        </button>
+      </div>
+
+      <div className="ssl-footer">
+        We use 256 bit SSL technology to encrypt your data.<br/>
+        <a href="#">Disclosures</a>
+      </div>
+    </div>
+  );
+}
+
+/* ========================
+   SCREEN 2
+======================== */
+function Screen2({ onSubmit }) {
+  const [form, setForm] = useState({ firstName: 'Jason', lastName: 'Williams', email: 'jason@example.com', age: '', state: '' });
+  const [errors, setErrors] = useState({});
+
+  function set(field, val) { setForm(f => ({ ...f, [field]: val })); }
+
+  function validate() {
+    const e = {};
+    if (!form.firstName.trim()) e.firstName = true;
+    if (!form.lastName.trim())  e.lastName  = true;
+    if (!form.email.trim() || !form.email.includes('@')) e.email = true;
+    const age = parseInt(form.age, 10);
+    if (!form.age || age < 18 || age > 99) e.age = true;
+    if (!form.state) e.state = true;
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }
+
+  function handleSubmit() {
+    if (validate()) onSubmit();
+  }
+
+  return (
+    <div className="screen">
+      <div className="s2-inner">
+        {[...Array(7)].map((_, i) => <div key={i} className="deco-dot" />)}
+
+        <div className="s2-badge">⚡ Early Wage Access</div>
+
+        <div className="s2-headline-wrap">
+          <h2 className="s2-headline">Your bank <span className="underline-word">won't</span> help. We will.</h2>
+        </div>
+
+        <p className="s2-sub">Access your earned wages in minutes. No bank account needed.</p>
+
+        <div className="s2-form-card">
+          <div className="float-group">
+            <div className="float-field">
+              <input type="text" placeholder=" " value={form.firstName} onChange={e => set('firstName', e.target.value)} className={errors.firstName ? 'error' : ''} id="v3-firstName" autoComplete="given-name" />
+              <label htmlFor="v3-firstName">First Name</label>
+            </div>
+            <div className="float-field">
+              <input type="text" placeholder=" " value={form.lastName} onChange={e => set('lastName', e.target.value)} className={errors.lastName ? 'error' : ''} id="v3-lastName" autoComplete="family-name" />
+              <label htmlFor="v3-lastName">Last Name</label>
+            </div>
+          </div>
+
+          <div className="float-group full">
+            <div className="float-field">
+              <input type="email" placeholder=" " value={form.email} onChange={e => set('email', e.target.value)} className={errors.email ? 'error' : ''} id="v3-email" autoComplete="email" />
+              <label htmlFor="v3-email">Email Address</label>
+            </div>
+          </div>
+
+          <div className="float-group">
+            <div className="float-field">
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder=" "
+                value={form.age}
+                onChange={e => set('age', e.target.value.replace(/\D/g, ''))}
+                className={errors.age ? 'error' : ''}
+                id="v3-age"
+                autoComplete="off"
+              />
+              <label htmlFor="v3-age">Age</label>
+            </div>
+            <div className="float-field has-select">
+              <select value={form.state} onChange={e => set('state', e.target.value)} className={errors.state ? 'error' : ''} id="v3-state">
+                <option value="">Select state</option>
+                {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <label htmlFor="v3-state">State</label>
+            </div>
+          </div>
+        </div>
+
+        <button className="btn-accent" onClick={handleSubmit}>
+          Show Me EWA Offers
+          <span className="arrow-icon">→</span>
+        </button>
+
+        <div className="legal-divider" />
+        <div className="legal-text">
+          <p><strong>What is Early Wage Access?</strong><br/>
+          EWA services let you access earned wages before payday. Unlike traditional financial products, advances are based on hours already worked — not your credit score. Most services charge a small optional tip or subscription fee.</p>
+          <p>By clicking "Show Me EWA Offers," you may be matched with third-party EWA providers. EPCVIP does not guarantee approval, funding amounts, or terms. Availability may vary by state.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ========================
+   SCREEN 3
+======================== */
+function Screen3({ onDone }) {
+  const [counterVal, setCounterVal] = useState(0);
+  const [ringDone, setRingDone]     = useState(false);
+  const [msg, setMsg]               = useState(PROCESSING_MSGS[0]);
+  const [msgPop, setMsgPop]         = useState(false);
+  const [sparks, setSparks]         = useState([]);
+  const rafRef   = useRef(null);
+  const startRef = useRef(null);
+  const timerRefs = useRef([]);
+
+  useEffect(() => {
+    const TARGET = 1500, DURATION = 2200;
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+    function tick(ts) {
+      if (!startRef.current) startRef.current = ts;
+      const elapsed  = ts - startRef.current;
+      const progress = Math.min(elapsed / DURATION, 1);
+      setCounterVal(Math.round(easeOutCubic(progress) * TARGET));
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        setRingDone(true);
+        // Spark burst
+        const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+        const dist = 75;
+        setSparks(angles.map((a, i) => {
+          const rad = (a * Math.PI) / 180;
+          return { id: i, dx: Math.round(Math.cos(rad) * dist), dy: Math.round(Math.sin(rad) * dist), delay: i * 40 };
+        }));
+      }
+    }
+    rafRef.current = requestAnimationFrame(tick);
+
+    // Status messages
+    const msgSchedule = [
+      { text: PROCESSING_MSGS[0], delay: 0,    pop: false },
+      { text: PROCESSING_MSGS[1], delay: 800,  pop: false },
+      { text: PROCESSING_MSGS[2], delay: 1600, pop: false },
+      { text: PROCESSING_MSGS[3], delay: 2300, pop: true  }
+    ];
+    msgSchedule.forEach(m => {
+      const t = setTimeout(() => {
+        if (m.pop) {
+          setMsg(''); setMsgPop(false);
+          setTimeout(() => { setMsg(m.text); setMsgPop(true); }, 50);
+        } else {
+          setMsg(m.text); setMsgPop(false);
+        }
+      }, m.delay);
+      timerRefs.current.push(t);
+    });
+
+    // Advance to Screen 4
+    const doneTimer = setTimeout(() => onDone(), 2800);
+    timerRefs.current.push(doneTimer);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      timerRefs.current.forEach(clearTimeout);
+    };
+  }, []);
+
+  return (
+    <div className="screen">
+      <div className="s3-wrap">
+        <div className="ring-container">
+          <div className={`ring-spinner${ringDone ? ' done' : ''}`} />
+
+          <div className="sparks-container">
+            {sparks.map(s => (
+              <div
+                key={s.id}
+                className="spark burst"
+                style={{ '--dx': `${s.dx}px`, '--dy': `${s.dy}px`, animationDelay: `${s.delay}ms` }}
+              />
+            ))}
+          </div>
+
+          <div className="counter-wrap">
+            <div className="counter-amount">
+              <span className="dollar-sign">$</span>
+              <span>{counterVal.toLocaleString()}</span>
+            </div>
+            <div className="counter-sub">in potential advances</div>
+          </div>
+        </div>
+
+        <div className={`s3-msg${msgPop ? ' pop' : ''}`}>{msg}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ========================
+   SCREEN 4
+======================== */
+function Screen4() {
+  const [amounts, setAmounts]       = useState(() => Object.fromEntries(EWA_OFFERS.map(o => [o.id, o.maxAmt])));
+  const [visibleCards, setVisible]  = useState([]);
+  const [offerCount, setOfferCount] = useState(0);
+
+  useEffect(() => {
+    // Staggered card entrance
+    EWA_OFFERS.forEach((o, i) => {
+      setTimeout(() => setVisible(v => [...v, o.id]), 100 + i * 140);
+    });
+    // Count-up offer number 0→3
+    [0, 1, 2, 3].forEach((n, i) => setTimeout(() => setOfferCount(n), i * 200));
+  }, []);
+
+  return (
+    <div className="screen">
+      <div className="s4-header">
+        <h2 className="s4-headline">Your instant cash options</h2>
+        <p className="s4-sub"><span className="count-num">{offerCount}</span> offers matched to your profile</p>
+      </div>
+
+      <div className="offers-list">
+        {EWA_OFFERS.map(o => (
+          <div
+            key={o.id}
+            className={`offer-card${o.badge ? ' best-match' : ''}${visibleCards.includes(o.id) ? ' visible' : ''}`}
+            style={{ '--bclr': o.bclr, '--bclr2': o.bclr2, '--btext': o.btext, '--cclr': o.cclr, '--ctext': o.ctext }}
+          >
+            <div className="offer-header">
+              {o.badge && <div className="offer-ribbon">{o.badge}</div>}
+              <img src={o.logo} alt={o.name} className="offer-logo" style={{ filter: o.logoFilter }} />
+              <div className="offer-tagline">{o.tagline}</div>
+              <div className="offer-big-amt">${o.maxAmt}</div>
+              <div className="offer-delivery">
+                <span className="material-icons-outlined" aria-hidden="true">bolt</span>
+                {o.delivery}
+              </div>
+            </div>
+            <div className="offer-body">
+              <div className="offer-select-label">Select amount</div>
+              <div className="offer-amts-grid">
+                {o.amounts.map(amt => (
+                  <button
+                    key={amt}
+                    className={`amt-btn${amounts[o.id] === amt ? ' selected' : ''}`}
+                    onClick={() => setAmounts(a => ({ ...a, [o.id]: amt }))}
+                  >
+                    ${amt}
+                  </button>
+                ))}
+              </div>
+              <a href={o.url} className="offer-cta">
+                {o.ctaBase} ${amounts[o.id]} →
+              </a>
+              <div className="offer-trust-line">{o.trust}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="s4-trust">
+        🔒 256-bit SSL · 3 verified offers matched to you
+      </div>
+    </div>
+  );
+}
+
+/* ========================
+   APP ROOT
+======================== */
+function App() {
+  const [screen, setScreen]         = useState(1);
+  const [overlayPhase, setOverlay]  = useState('none'); // none | wipe-in | wipe-out
+  const [progressPct, setProgress]  = useState(75);
+  const [showProgress, setShowProg] = useState(true);
+
+  // Polygon wipe transition (Screen 1 → 2)
+  function doWipeTransition() {
+    setOverlay('wipe-in');
+    setTimeout(() => {
+      setScreen(2);
+      setShowProg(false);
+      setOverlay('wipe-out');
+      setTimeout(() => setOverlay('none'), 400);
+    }, 380);
+  }
+
+  // Fade transition (Screen 2 → 3 → 4)
+  function doFadeTransition(nextScreen) {
+    setScreen(nextScreen);
+    setShowProg(false);
+  }
+
+  function handleS1Continue(mode) {
+    if (mode === 'wipe') doWipeTransition();
+  }
+
+  function handleS2Submit() {
+    doFadeTransition(3);
+  }
+
+  function handleS3Done() {
+    doFadeTransition(4);
+  }
+
+  const overlayClass = overlayPhase === 'wipe-in'  ? 'page-overlay overlay-wipe-in'
+                     : overlayPhase === 'wipe-out' ? 'page-overlay overlay-wipe-out'
+                     : 'page-overlay';
+
+  return (
+    <>
+      <div className={overlayClass} />
+
+      <div className="site-header">
+        <img src="../media/logo.svg" alt="Fast Loan Advance" />
+      </div>
+
+      {showProgress && (
+        <div className="progress-bar">
+          <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+        </div>
+      )}
+
+      <div className="flow-wrap">
+        {screen === 1 && <Screen1 onContinue={handleS1Continue} />}
+        {screen === 2 && <Screen2 onSubmit={handleS2Submit} />}
+        {screen === 3 && <Screen3 onDone={handleS3Done} />}
+        {screen === 4 && <Screen4 />}
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
