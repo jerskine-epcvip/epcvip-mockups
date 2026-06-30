@@ -6,6 +6,7 @@
   <title>EPCVIP Mockups</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -126,9 +127,15 @@
     }
 
     .card-icon {
-      font-size: 28px;
+      font-size: 26px;
       line-height: 1;
       margin-bottom: 4px;
+      color: var(--emerald);
+    }
+
+    .card-icon .material-symbols-outlined {
+      font-size: inherit;
+      font-variation-settings: 'opsz' 24, 'wght' 400, 'FILL' 0, 'GRAD' 0;
     }
 
     .card-title {
@@ -198,7 +205,7 @@
     <div class="grid">
 
       <a class="card" href="ewas/index.html">
-        <div class="card-icon">💸</div>
+        <div class="card-icon"><span class="material-symbols-outlined" aria-hidden="true">payments</span></div>
         <div class="card-title">Early Wage Access</div>
         <div class="card-count">4 variants</div>
         <div class="card-desc">EWA landing page and form funnel concepts. Dark-themed, mobile-first designs for fast-apply lead capture.</div>
