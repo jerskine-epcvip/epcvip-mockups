@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EWA Mockups — EPCVIP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #f4f6f8;
+      --card:    #ffffff;
+      --border:  #e2e6ea;
+      --dark:    #0f1923;
+      --emerald: #059669;
+      --muted:   #6b7280;
+      --font: 'Montserrat', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--dark);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 64px 24px 80px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--emerald);
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 56px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 28px 24px;
+      text-decoration: none;
+      color: var(--dark);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--emerald);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+    }
+
+    .card-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--emerald);
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-cta {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--emerald);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-cta::after {
+      content: '→';
+    }
+
+    footer {
+      margin-top: 72px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card { transition: none; transform: none !important; }
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .page {
+        padding: 40px 20px 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="eyebrow">EPCVIP — Internal</div>
+    <h1>EWA Mockup Variants</h1>
+    <p class="subtitle">Early Wage Access concept explorations — click any variant to preview.</p>
+
+    <div class="grid">
+
+      <a class="card" href="variant-1/index.html">
+        <div class="card-label">Variant 1</div>
+        <div class="card-title">Dark Split — Fast Loan Advance</div>
+        <div class="card-desc">Two-panel dark layout with emerald accents. Left-side hero copy, right-side multi-step form. Montserrat 800 headline.</div>
+        <div class="card-cta">Preview</div>
+      </a>
+
+      <a class="card" href="variant-2/index.html">
+        <div class="card-label">Variant 2</div>
+        <div class="card-title">Cosmos</div>
+        <div class="card-desc">Deep-space dark aesthetic with gradient accents. Bold typography and animated background elements.</div>
+        <div class="card-cta">Preview</div>
+      </a>
+
+      <a class="card" href="variant-3/index.html">
+        <div class="card-label">Variant 3</div>
+        <div class="card-title">Get Paid Today</div>
+        <div class="card-desc">Clean, conversion-focused layout. High-trust messaging and streamlined form flow for maximum lead capture.</div>
+        <div class="card-cta">Preview</div>
+      </a>
+
+      <a class="card" href="variant-4/index.html">
+        <div class="card-label">Variant 4</div>
+        <div class="card-title">Get Paid Now</div>
+        <div class="card-desc">Urgency-forward design with Wise Loan Fronts branding. Bold CTA hierarchy and fast-apply form structure.</div>
+        <div class="card-cta">Preview</div>
+      </a>
+
+    </div>
+
+    <footer>EPCVIP &nbsp;·&nbsp; Internal mockups only &nbsp;·&nbsp; Not for distribution</footer>
+  </div>
+</body>
+</html>
