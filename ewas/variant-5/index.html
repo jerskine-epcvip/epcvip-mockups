@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EWA — The Vault | Early Wage Access</title>
+  <meta name="description" content="Access wages you've already earned before payday. No credit check. No interest. Same-day deposit." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @property --angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+
+    :root {
+      --bg:           #07070b;
+      --violet:       #7c3aed;
+      --violet-lt:    #a78bfa;
+      --violet-soft:  rgba(124,58,237,0.16);
+      --card-bg:      #0d0d13;
+      --card-bg-2:    #0a0a0f;
+      --field-bg:     rgba(255,255,255,0.04);
+      --border:       rgba(255,255,255,0.09);
+      --border-v:     rgba(124,58,237,0.35);
+      --white:        #f5f5f7;
+      --muted:        #8b8b96;
+      --danger:       #f87171;
+      --font:         'Montserrat', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--white);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    #root { min-height: 100vh; }
+
+    /* ── STAGE ─────────────────────────────────────────────────── */
+    .stage {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px 60px;
+      perspective: 1400px;
+    }
+
+    /* ── AMBIENT BACKGROUND ───────────────────────────────────────── */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,58,237,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,58,237,0.05) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(circle at 50% 40%, black 0%, transparent 70%);
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(10px);
+      opacity: 0.55;
+      will-change: transform;
+    }
+
+    .blob-1 {
+      width: 620px;
+      height: 620px;
+      top: -220px;
+      left: -180px;
+      background: radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 70%);
+      animation: drift1 26s ease-in-out infinite;
+    }
+
+    .blob-2 {
+      width: 520px;
+      height: 520px;
+      bottom: -200px;
+      right: -160px;
+      background: radial-gradient(circle, rgba(167,139,250,0.25) 0%, transparent 70%);
+      animation: drift2 32s ease-in-out infinite;
+    }
+
+    .blob-3 {
+      width: 380px;
+      height: 380px;
+      top: 45%;
+      left: 60%;
+      background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
+      animation: drift3 22s ease-in-out infinite;
+    }
+
+    @keyframes drift1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50%      { transform: translate(60px, 40px) scale(1.08); }
+    }
+    @keyframes drift2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50%      { transform: translate(-50px, -30px) scale(1.1); }
+    }
+    @keyframes drift3 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50%      { transform: translate(-40px, 30px) scale(0.92); }
+    }
+
+    /* ── TOP MARK ─────────────────────────────────────────────────── */
+    .top-mark {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+
+    .brand-logo-img {
+      height: 28px;
+      width: auto;
+      filter: brightness(0) invert(1);
+      display: block;
+    }
+
+    .kicker-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 16px;
+      border-radius: 100px;
+      background: var(--violet-soft);
+      border: 1px solid var(--border-v);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--violet-lt);
+    }
+
+    .kicker-pill .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--violet-lt);
+      box-shadow: 0 0 8px var(--violet-lt);
+      animation: pulseDot 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* ── CARD ENTRANCE ────────────────────────────────────────────── */
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(24px) scale(0.94); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .tilt-wrap {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 460px;
+      animation: cardIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+      transform-style: preserve-3d;
+    }
+
+    /* ── ROTATING GRADIENT FRAME ──────────────────────────────────── */
+    .vault-frame {
+      position: relative;
+      border-radius: 28px;
+      padding: 1.5px;
+      background: conic-gradient(
+        from var(--angle),
+        rgba(124,58,237,0) 0%,
+        var(--violet) 12%,
+        var(--violet-lt) 18%,
+        rgba(124,58,237,0) 32%,
+        rgba(124,58,237,0) 100%
+      );
+      animation: rotateAngle 6s linear infinite;
+      box-shadow: 0 30px 80px -20px rgba(0,0,0,0.7), 0 0 60px -30px rgba(124,58,237,0.4);
+      transition: transform 0.2s ease-out;
+      will-change: transform;
+    }
+
+    @keyframes rotateAngle {
+      to { --angle: 360deg; }
+    }
+
+    /* ── CARD ─────────────────────────────────────────────────────── */
+    .vault-card {
+      position: relative;
+      background:
+        radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,0.05), transparent 45%),
+        linear-gradient(180deg, var(--card-bg) 0%, var(--card-bg-2) 100%);
+      border-radius: 26.5px;
+      padding: 36px 32px 30px;
+      overflow: hidden;
+    }
+
+    /* ── PROGRESS ─────────────────────────────────────────────────── */
+    .vault-progress {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 24px;
+    }
+
+    .vault-progress-seg {
+      flex: 1;
+      height: 3px;
+      border-radius: 3px;
+      background: rgba(124,58,237,0.15);
+      overflow: hidden;
+    }
+
+    .vault-progress-seg .fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--violet), var(--violet-lt));
+      border-radius: 3px;
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .vault-progress-seg.on .fill { width: 100%; }
+
+    /* ── STEP FADE ─────────────────────────────────────────────────── */
+    @keyframes stepIn {
+      from { opacity: 0; transform: translateX(14px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .step-pane { animation: stepIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 16px;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--violet-lt); }
+    .back-link .material-icons-outlined { font-size: 15px !important; }
+
+    .headline {
+      font-size: clamp(21px, 3.5vw, 25px);
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      margin-bottom: 6px;
+      text-wrap: balance;
+    }
+
+    .headline .grad {
+      background: linear-gradient(90deg, var(--violet-lt), var(--violet));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .step-sub {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .step-sub strong { color: var(--violet-lt); font-weight: 700; }
+
+    /* ── BULLETS ──────────────────────────────────────────────────── */
+    .vault-bullets {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 22px;
+    }
+
+    .vault-bullet {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #d4d4d8;
+      line-height: 1.4;
+    }
+
+    .vault-bullet-icon {
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: var(--violet-soft);
+      border: 1px solid var(--border-v);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .vault-bullet-icon .material-icons-outlined {
+      font-size: 11px !important;
+      color: var(--violet-lt);
+    }
+
+    /* ── DIAL ─────────────────────────────────────────────────────── */
+    .dial-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .dial {
+      position: relative;
+      width: 208px;
+      height: 208px;
+      touch-action: none;
+      cursor: grab;
+    }
+    .dial:active { cursor: grabbing; }
+
+    .dial svg { width: 100%; height: 100%; display: block; }
+
+    .dial-track { transition: none; }
+    .dial-fill { transition: stroke-dasharray 0.1s linear; }
+
+    .dial-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 26px;
+      height: 26px;
+      margin: -13px 0 0 -13px;
+      border-radius: 50%;
+      background: var(--violet);
+      border: 3px solid #0d0d13;
+      box-shadow: 0 0 0 1px var(--border-v), 0 4px 14px rgba(124,58,237,0.6);
+      cursor: grab;
+    }
+    .dial-handle:active { cursor: grabbing; }
+    .dial-handle:focus-visible {
+      outline: 2px solid var(--violet-lt);
+      outline-offset: 3px;
+    }
+
+    .dial-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      gap: 2px;
+    }
+
+    .dial-value {
+      display: flex;
+      align-items: baseline;
+      gap: 1px;
+      font-variant-numeric: tabular-nums;
+    }
+    .dial-value .cur { font-size: 18px; font-weight: 700; color: var(--violet-lt); }
+    .dial-value .val { font-size: 38px; font-weight: 900; letter-spacing: -0.02em; color: var(--white); }
+
+    .dial-caption {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .dial-manual-toggle {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 11.5px;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      cursor: pointer;
+      margin: 14px 0 20px;
+    }
+    .dial-manual-toggle:hover { color: var(--violet-lt); }
+
+    .dial-manual-input {
+      width: 100%;
+      background: var(--field-bg);
+      border: 1.5px solid var(--violet);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: var(--font);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--white);
+      outline: none;
+      margin-bottom: 18px;
+    }
+
+    /* ── CONVERSATIONAL FIELDS ────────────────────────────────────── */
+    .convo-question {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
+    }
+
+    .convo-hint {
+      font-size: 12.5px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 22px;
+    }
+
+    .convo-input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .convo-input,
+    .convo-select {
+      flex: 1;
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--border);
+      padding: 8px 2px 12px;
+      font-family: var(--font);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--white);
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      border-radius: 0;
+      transition: border-color 0.15s;
+    }
+
+    .convo-select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%238b8b96' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 4px center;
+      padding-right: 30px;
+    }
+    .convo-select option { background: var(--card-bg); color: var(--white); font-size: 15px; }
+
+    .convo-input:focus,
+    .convo-select:focus { border-bottom-color: var(--violet); }
+
+    .convo-input.has-error,
+    .convo-select.has-error { border-bottom-color: var(--danger); }
+
+    .convo-input::placeholder { color: #4b4b56; font-weight: 500; }
+
+    .convo-enter-btn {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: var(--violet);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: filter 0.15s, transform 0.1s;
+      box-shadow: 0 8px 20px -8px rgba(124,58,237,0.6);
+    }
+    .convo-enter-btn:hover { filter: brightness(1.1); }
+    .convo-enter-btn:active { transform: scale(0.94); }
+    .convo-enter-btn .material-icons-outlined { font-size: 20px !important; }
+
+    .convo-error {
+      font-size: 11.5px;
+      color: var(--danger);
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .convo-key-hint {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+    .convo-key-hint kbd {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      font-family: var(--font);
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+
+    /* ── BUTTON ───────────────────────────────────────────────────── */
+    .btn-vault {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(90deg, var(--violet), #9333ea);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: filter 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 8px 24px -8px rgba(124,58,237,0.6);
+    }
+    .btn-vault:hover:not(:disabled) { filter: brightness(1.1); }
+    .btn-vault:active:not(:disabled) { transform: scale(0.99); }
+    .btn-vault:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    .btn-vault .material-icons-outlined { font-size: 18px !important; }
+
+    .legal-text {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.7;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    /* ── EWA BLURB ────────────────────────────────────────────────── */
+    .ewa-blurb {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .ewa-blurb-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--violet-lt);
+      margin-bottom: 6px;
+    }
+
+    .ewa-blurb-text {
+      font-size: 11.5px;
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── FOOTER ───────────────────────────────────────────────────── */
+    .stage-footer {
+      position: relative;
+      z-index: 2;
+      margin-top: 22px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .stage-footer .material-icons-outlined { font-size: 14px !important; color: var(--violet-lt); }
+
+    /* ── PROCESSING (in-card) ─────────────────────────────────────── */
+    .lock-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 20px 0 4px;
+      animation: stepIn 0.35s ease both;
+    }
+
+    .lock-ring {
+      position: relative;
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 26px;
+      background: var(--violet-soft);
+      border: 1.5px solid var(--border-v);
+    }
+
+    .lock-ring.success {
+      background: rgba(52,211,153,0.12);
+      border-color: rgba(52,211,153,0.4);
+    }
+
+    .lock-ring .material-icons-outlined {
+      font-size: 38px !important;
+      color: var(--violet-lt);
+      transition: transform 0.3s, color 0.3s;
+    }
+
+    .lock-ring.success .material-icons-outlined {
+      color: #34d399;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes popIn {
+      0%   { transform: scale(0.4); opacity: 0; }
+      70%  { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .spin-arc {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      border-top-color: var(--violet-lt);
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .processing-msg {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 4px;
+      min-height: 20px;
+    }
+
+    .processing-sub {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    /* ── REDUCED MOTION ───────────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .blob, .vault-frame, .kicker-pill .dot, .tilt-wrap, .lock-ring .material-icons-outlined,
+      .step-pane, .lock-stage, .spin-arc {
+        animation: none !important;
+      }
+      .vault-frame { transform: none !important; background: var(--border-v); }
+      * { transition-duration: 0.01ms !important; }
+    }
+
+    /* ── MOBILE ───────────────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .stage { padding: 28px 14px 40px; }
+      .vault-card { padding: 28px 20px 24px; }
+      .top-mark { margin-bottom: 20px; }
+      .dial { width: 176px; height: 176px; }
+      .dial-value .val { font-size: 32px; }
+      .blob-1, .blob-2, .blob-3 { filter: blur(6px); }
+      .convo-input, .convo-select { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const US_STATES = [
+      'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA',
+      'HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
+      'MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
+      'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC',
+      'SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'
+    ];
+
+    const MIN_AMOUNT = 100;
+    const MAX_AMOUNT = 2500;
+    const STEP_AMOUNT = 50;
+    const DEFAULT_AMOUNT = 500;
+
+    // Dial geometry — a 290° sweep with a 70° gap centered at the bottom.
+    const DIAL_R = 92;
+    const DIAL_CIRC = 2 * Math.PI * DIAL_R;
+    const GAP_DEG = 70;
+    const SWEEP_DEG = 360 - GAP_DEG;
+    const ROTATE_OFFSET = 90 + GAP_DEG / 2;
+
+    const BULLETS = [
+      'Access wages already earned',
+      'No credit check required',
+      'Funds in your account today',
+      'Zero fees, zero interest',
+    ];
+
+    const INFO_FIELDS = [
+      { key: 'firstName', question: "What's your first name?", type: 'text', autoComplete: 'given-name' },
+      { key: 'lastName', question: 'And your last name?', type: 'text', autoComplete: 'family-name' },
+      { key: 'email', question: 'Where should we send confirmation?', type: 'email', autoComplete: 'email', hint: 'Your wage access details will arrive here.' },
+      { key: 'age', question: 'How old are you?', type: 'text', inputMode: 'numeric', maxLength: 2 },
+      { key: 'state', question: 'Which state do you live in?', type: 'select' },
+    ];
+
+    const TOTAL_STEPS = 1 + INFO_FIELDS.length;
+
+    const PROCESSING_MESSAGES = [
+      'Verifying your employer…',
+      'Calculating available wages…',
+      'Unlocking your funds…',
+      'Almost there…',
+    ];
+
+    const prefersReducedMotion = () =>
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+    // ─── TILT WRAPPER ─────────────────────────────────────────────
+    function TiltWrap({ children }) {
+      const ref = useRef(null);
+
+      const handleMove = (e) => {
+        if (prefersReducedMotion()) return;
+        const el = ref.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width;
+        const py = (e.clientY - rect.top) / rect.height;
+        const rotateY = (px - 0.5) * 8;
+        const rotateX = (0.5 - py) * 8;
+        el.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        el.style.setProperty('--mx', `${px * 100}%`);
+        el.style.setProperty('--my', `${py * 100}%`);
+      };
+
+      const handleLeave = () => {
+        const el = ref.current;
+        if (!el) return;
+        el.style.transform = 'rotateX(0deg) rotateY(0deg)';
+      };
+
+      return (
+        <div ref={ref} className="vault-frame" onMouseMove={handleMove} onMouseLeave={handleLeave}>
+          {children}
+        </div>
+      );
+    }
+
+    // ─── PROGRESS ───────────────────────────────────────────────────
+    function VaultProgress({ step, total }) {
+      return (
+        <div className="vault-progress" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={total} aria-label={`Step ${step} of ${total}`}>
+          {Array.from({ length: total }, (_, i) => (
+            <div key={i} className={`vault-progress-seg ${i < step ? 'on' : ''}`}><div className="fill" /></div>
+          ))}
+        </div>
+      );
+    }
+
+    // ─── BULLETS / BLURB ────────────────────────────────────────────
+    function Bullets() {
+      return (
+        <div className="vault-bullets">
+          {BULLETS.map((text, i) => (
+            <div className="vault-bullet" key={i}>
+              <span className="vault-bullet-icon" aria-hidden="true">
+                <span className="material-icons-outlined">check</span>
+              </span>
+              <span>{text}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function EwaBlurb() {
+      return (
+        <div className="ewa-blurb">
+          <div className="ewa-blurb-label">What is Early Wage Access?</div>
+          <p className="ewa-blurb-text">
+            Early Wage Access lets you tap into wages you've already earned before your scheduled
+            payday — without interest, fees, or a credit check. It's not a loan. You're simply
+            getting paid for work you've already done.
+          </p>
+        </div>
+      );
+    }
+
+    // ─── ROTARY DIAL ────────────────────────────────────────────────
+    function angleToAmount(clientX, clientY, rect) {
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = clientX - cx;
+      const dy = clientY - cy;
+      const theta = (Math.atan2(dy, dx) * 180) / Math.PI; // -180..180, 0 = 3 o'clock, clockwise+
+      const theta360 = (theta + 360) % 360;
+      let deltaFromStart = (theta360 - ROTATE_OFFSET + 360) % 360;
+
+      if (deltaFromStart > SWEEP_DEG) {
+        // Pointer is in the gap — snap to whichever end is closer.
+        const distToStart = deltaFromStart - SWEEP_DEG;
+        const distToEnd = 360 - deltaFromStart;
+        deltaFromStart = distToEnd < distToStart ? 0 : SWEEP_DEG;
+      }
+
+      const percent = clamp(deltaFromStart / SWEEP_DEG, 0, 1);
+      const raw = MIN_AMOUNT + percent * (MAX_AMOUNT - MIN_AMOUNT);
+      return Math.round(raw / STEP_AMOUNT) * STEP_AMOUNT;
+    }
+
+    function Dial({ amount, setAmount }) {
+      const dialRef = useRef(null);
+      const draggingRef = useRef(false);
+      const [manualOpen, setManualOpen] = useState(false);
+      const [manualVal, setManualVal] = useState('');
+
+      const percent = (clamp(amount, MIN_AMOUNT, MAX_AMOUNT) - MIN_AMOUNT) / (MAX_AMOUNT - MIN_AMOUNT);
+      const filled = DIAL_CIRC * (SWEEP_DEG / 360) * percent;
+      const trackDasharray = `${DIAL_CIRC * (SWEEP_DEG / 360)} ${DIAL_CIRC * (GAP_DEG / 360)}`;
+      const fillDasharray = `${filled} ${DIAL_CIRC - filled}`;
+
+      const thetaDeg = ROTATE_OFFSET + percent * SWEEP_DEG;
+      const thetaRad = (thetaDeg * Math.PI) / 180;
+      const hx = DIAL_R * Math.cos(thetaRad);
+      const hy = DIAL_R * Math.sin(thetaRad);
+
+      const updateFromPointer = (clientX, clientY) => {
+        if (!dialRef.current) return;
+        const rect = dialRef.current.getBoundingClientRect();
+        setAmount(angleToAmount(clientX, clientY, rect));
+      };
+
+      const onPointerDown = (e) => {
+        draggingRef.current = true;
+        e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId);
+        updateFromPointer(e.clientX, e.clientY);
+      };
+      const onPointerMove = (e) => {
+        if (!draggingRef.current) return;
+        updateFromPointer(e.clientX, e.clientY);
+      };
+      const onPointerUp = () => { draggingRef.current = false; };
+
+      const onKeyDown = (e) => {
+        const bigStep = 250;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+          e.preventDefault(); setAmount(a => clamp(a + STEP_AMOUNT, MIN_AMOUNT, MAX_AMOUNT));
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+          e.preventDefault(); setAmount(a => clamp(a - STEP_AMOUNT, MIN_AMOUNT, MAX_AMOUNT));
+        } else if (e.key === 'PageUp') {
+          e.preventDefault(); setAmount(a => clamp(a + bigStep, MIN_AMOUNT, MAX_AMOUNT));
+        } else if (e.key === 'PageDown') {
+          e.preventDefault(); setAmount(a => clamp(a - bigStep, MIN_AMOUNT, MAX_AMOUNT));
+        } else if (e.key === 'Home') {
+          e.preventDefault(); setAmount(MIN_AMOUNT);
+        } else if (e.key === 'End') {
+          e.preventDefault(); setAmount(MAX_AMOUNT);
+        }
+      };
+
+      const applyManual = () => {
+        const n = parseInt(manualVal.replace(/\D/g, ''), 10);
+        if (!isNaN(n)) setAmount(clamp(n, MIN_AMOUNT, MAX_AMOUNT));
+        setManualOpen(false);
+        setManualVal('');
+      };
+
+      return (
+        <div className="dial-wrap">
+          <div
+            className="dial"
+            ref={dialRef}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+          >
+            <svg viewBox="0 0 208 208" aria-hidden="true">
+              <circle className="dial-track" cx="104" cy="104" r={DIAL_R} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" strokeLinecap="round" strokeDasharray={trackDasharray} transform={`rotate(${ROTATE_OFFSET} 104 104)`} />
+              <circle className="dial-fill" cx="104" cy="104" r={DIAL_R} fill="none" stroke="var(--violet)" strokeWidth="10" strokeLinecap="round" strokeDasharray={fillDasharray} transform={`rotate(${ROTATE_OFFSET} 104 104)`} />
+            </svg>
+            <div
+              className="dial-handle"
+              style={{ transform: `translate(${hx}px, ${hy}px)` }}
+              role="slider"
+              tabIndex={0}
+              aria-valuemin={MIN_AMOUNT}
+              aria-valuemax={MAX_AMOUNT}
+              aria-valuenow={amount}
+              aria-valuetext={`$${amount.toLocaleString('en-US')}`}
+              aria-label="Amount requested"
+              onKeyDown={onKeyDown}
+            />
+            <div className="dial-center">
+              <div className="dial-value">
+                <span className="cur">$</span>
+                <span className="val">{amount.toLocaleString('en-US')}</span>
+              </div>
+              <div className="dial-caption">Drag to adjust</div>
+            </div>
+          </div>
+
+          {!manualOpen ? (
+            <button type="button" className="dial-manual-toggle" onClick={() => setManualOpen(true)}>
+              Enter a specific amount
+            </button>
+          ) : (
+            <input
+              className="dial-manual-input"
+              type="text"
+              inputMode="numeric"
+              aria-label="Enter a specific amount"
+              placeholder="Enter amount (e.g. 350)"
+              value={manualVal}
+              onChange={(e) => setManualVal(e.target.value.replace(/\D/g, ''))}
+              onKeyDown={(e) => e.key === 'Enter' && applyManual()}
+              onBlur={applyManual}
+              autoFocus
+            />
+          )}
+        </div>
+      );
+    }
+
+    // ─── STEP 1 — AMOUNT (DIAL) ─────────────────────────────────────
+    function StepAmount({ amount, setAmount, onContinue }) {
+      return (
+        <div className="step-pane" key="step-amount">
+          <VaultProgress step={1} total={TOTAL_STEPS} />
+          <h1 className="headline">Your paycheck, <span className="grad">unlocked early.</span></h1>
+          <p className="step-sub">Turn the dial to set an amount — funds can land <strong>today</strong>.</p>
+
+          <Bullets />
+
+          <Dial amount={amount} setAmount={setAmount} />
+
+          <button className="btn-vault" onClick={onContinue} style={{ marginTop: '22px' }}>
+            Continue <span className="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+          </button>
+
+          <EwaBlurb />
+        </div>
+      );
+    }
+
+    // ─── CONVERSATIONAL INFO STEPS ──────────────────────────────────
+    function ConvoStep({ field, index, amount, value, error, onChange, onSubmit, onBack }) {
+      const inputRef = useRef(null);
+
+      useEffect(() => {
+        inputRef.current && inputRef.current.focus();
+      }, [index]);
+
+      const handleKeyDown = (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); onSubmit(); }
+      };
+
+      return (
+        <div className="step-pane" key={`convo-${field.key}`}>
+          <button className="back-link" onClick={onBack}>
+            <span className="material-icons-outlined" aria-hidden="true">arrow_back</span> Back
+          </button>
+          <VaultProgress step={index + 2} total={TOTAL_STEPS} />
+
+          <div className="convo-question" id={`convo-q-${field.key}`}>{field.question}</div>
+          {index === 0 && (
+            <div className="convo-hint">Requesting <strong style={{ color: 'var(--violet-lt)' }}>${amount.toLocaleString('en-US')}</strong> today.</div>
+          )}
+          {field.hint && <div className="convo-hint">{field.hint}</div>}
+
+          <div className="convo-input-row">
+            {field.type === 'select' ? (
+              <select
+                ref={inputRef}
+                className={`convo-select${error ? ' has-error' : ''}`}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                aria-labelledby={`convo-q-${field.key}`}
+              >
+                <option value="" disabled></option>
+                {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            ) : (
+              <input
+                ref={inputRef}
+                className={`convo-input${error ? ' has-error' : ''}`}
+                type={field.type}
+                inputMode={field.inputMode}
+                maxLength={field.maxLength}
+                autoComplete={field.autoComplete}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type your answer…"
+                aria-labelledby={`convo-q-${field.key}`}
+              />
+            )}
+            <button type="button" className="convo-enter-btn" aria-label="Continue" onClick={onSubmit}>
+              <span className="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+            </button>
+          </div>
+
+          {error ? (
+            <div className="convo-error">{error}</div>
+          ) : (
+            <div className="convo-key-hint">press <kbd>Enter ↵</kbd></div>
+          )}
+
+          {index === INFO_FIELDS.length - 1 && (
+            <div className="legal-text">
+              By continuing you agree to our Terms of Service and Privacy Policy. This is not a
+              loan application — no credit check will be performed.
+            </div>
+          )}
+          <EwaBlurb />
+        </div>
+      );
+    }
+
+    function InfoWizard({ amount, onBackToDial, onSubmit }) {
+      const [index, setIndex] = useState(0);
+      const [form, setForm] = useState({
+        firstName: 'Jason', lastName: 'Williams', email: 'jason@epcvip.com', age: '', state: '',
+      });
+      const [errors, setErrors] = useState({});
+
+      const field = INFO_FIELDS[index];
+
+      const validate = (key, val) => {
+        if (key === 'firstName' || key === 'lastName') {
+          return val.trim() ? '' : 'Required';
+        }
+        if (key === 'email') {
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim()) ? '' : 'Enter a valid email address';
+        }
+        if (key === 'age') {
+          const n = parseInt(val, 10);
+          return (!isNaN(n) && n >= 18 && n <= 99) ? '' : 'Must be 18–99';
+        }
+        if (key === 'state') {
+          return val ? '' : 'Select a state';
+        }
+        return '';
+      };
+
+      const handleSubmit = () => {
+        const err = validate(field.key, form[field.key]);
+        if (err) { setErrors(e => ({ ...e, [field.key]: err })); return; }
+        setErrors(e => ({ ...e, [field.key]: '' }));
+        if (index < INFO_FIELDS.length - 1) {
+          setIndex(i => i + 1);
+        } else {
+          onSubmit(form);
+        }
+      };
+
+      const handleBack = () => {
+        if (index === 0) { onBackToDial(); return; }
+        setIndex(i => i - 1);
+      };
+
+      return (
+        <ConvoStep
+          field={field}
+          index={index}
+          amount={amount}
+          value={form[field.key]}
+          error={errors[field.key]}
+          onChange={(val) => { setForm(f => ({ ...f, [field.key]: val })); setErrors(e => ({ ...e, [field.key]: '' })); }}
+          onSubmit={handleSubmit}
+          onBack={handleBack}
+        />
+      );
+    }
+
+    // ─── PROCESSING (in-card) ───────────────────────────────────────
+    function VaultProcessing() {
+      const [msgIdx, setMsgIdx] = useState(0);
+      const [done, setDone] = useState(false);
+
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setMsgIdx(i => {
+            if (i >= PROCESSING_MESSAGES.length - 1) {
+              clearInterval(interval);
+              setTimeout(() => setDone(true), 500);
+              return i;
+            }
+            return i + 1;
+          });
+        }, 850);
+        return () => clearInterval(interval);
+      }, []);
+
+      return (
+        <div className="lock-stage">
+          <div className={`lock-ring${done ? ' success' : ''}`}>
+            {!done && <div className="spin-arc" />}
+            <span className="material-icons-outlined" aria-hidden="true">{done ? 'check' : 'lock'}</span>
+          </div>
+          {!done ? (
+            <>
+              <div className="processing-msg">{PROCESSING_MESSAGES[msgIdx]}</div>
+              <div className="processing-sub">Securely processing your request</div>
+            </>
+          ) : (
+            <>
+              <div className="processing-msg">Vault unlocked.</div>
+              <div className="processing-sub">Redirecting to your offer…</div>
+            </>
+          )}
+        </div>
+      );
+    }
+
+    // ─── APP ────────────────────────────────────────────────────────
+    function App() {
+      const [stage, setStage] = useState('dial'); // 'dial' | 'info' | 'processing'
+      const [amount, setAmount] = useState(DEFAULT_AMOUNT);
+
+      return (
+        <div className="stage">
+          <div className="bg-layer" aria-hidden="true">
+            <div className="bg-grid" />
+            <div className="blob blob-1" />
+            <div className="blob blob-2" />
+            <div className="blob blob-3" />
+          </div>
+
+          <div className="top-mark">
+            <img className="brand-logo-img" src="../media/logo.svg" alt="Logo" />
+            <div className="kicker-pill"><span className="dot" />Early Wage Access</div>
+          </div>
+
+          <div className="tilt-wrap">
+            <TiltWrap>
+              <div className="vault-card">
+                {stage === 'dial' && (
+                  <StepAmount amount={amount} setAmount={setAmount} onContinue={() => setStage('info')} />
+                )}
+                {stage === 'info' && (
+                  <InfoWizard amount={amount} onBackToDial={() => setStage('dial')} onSubmit={() => setStage('processing')} />
+                )}
+                {stage === 'processing' && <VaultProcessing />}
+              </div>
+            </TiltWrap>
+          </div>
+
+          <div className="stage-footer">
+            <span className="material-icons-outlined" aria-hidden="true">lock</span>
+            256-bit SSL encrypted · Not a loan
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

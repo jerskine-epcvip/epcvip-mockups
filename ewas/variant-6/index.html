@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EWA — The Dashboard | Early Wage Access</title>
+  <meta name="description" content="Access wages you've already earned before payday. No credit check. No interest. Same-day deposit." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --page-bg:     #0a1020;
+      --page-bg-2:   #0d1428;
+      --cyan:        #06b6d4;
+      --cyan-dk:     #0891b2;
+      --cyan-soft:   rgba(6,182,212,0.12);
+      --cyan-border: rgba(6,182,212,0.3);
+      --tile:        #ffffff;
+      --ink:         #0f172a;
+      --ink-muted:   #64748b;
+      --border:      #e2e8f0;
+      --danger:      #ef4444;
+      --font:        'Montserrat', sans-serif;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: linear-gradient(160deg, var(--page-bg) 0%, var(--page-bg-2) 100%);
+      color: var(--ink);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #root { min-height: 100vh; }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+    }
+
+    /* ── BENTO GRID ───────────────────────────────────────────────── */
+    .bento {
+      width: 100%;
+      max-width: 1120px;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr 1fr;
+      grid-template-areas:
+        "brand stat  stat"
+        "form  how   trust"
+        "form  how   trust";
+      gap: 16px;
+    }
+
+    .tile {
+      border-radius: 20px;
+      padding: 24px;
+      opacity: 0;
+      transform: translateY(18px);
+      animation: tileIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    @keyframes tileIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tile:hover { transform: translateY(-4px); }
+
+    /* ── BRAND TILE ───────────────────────────────────────────────── */
+    .tile-brand {
+      grid-area: brand;
+      background: linear-gradient(155deg, #111a30 0%, #0b1220 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+      animation-delay: 0s;
+    }
+    .tile-brand:hover { box-shadow: 0 16px 40px -14px rgba(0,0,0,0.5); }
+
+    .brand-logo-img {
+      height: 24px;
+      width: auto;
+      filter: brightness(0) invert(1);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-sub {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .brand-bullets {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin: 4px 0 2px;
+    }
+
+    .brand-bullet {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+
+    .brand-bullet-icon {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--cyan-soft);
+      border: 1px solid var(--cyan-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .brand-bullet-icon .material-icons-outlined { font-size: 10px !important; color: var(--cyan); }
+
+    .brand-pill {
+      display: inline-flex;
+      align-self: flex-start;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      padding: 6px 12px;
+      border-radius: 100px;
+      background: var(--cyan-soft);
+      border: 1px solid var(--cyan-border);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+    .brand-pill .material-icons-outlined { font-size: 13px !important; }
+
+    /* ── STAT TILE ────────────────────────────────────────────────── */
+    .tile-stat {
+      grid-area: stat;
+      background: linear-gradient(135deg, var(--cyan) 0%, #0e7490 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+      animation-delay: 0.08s;
+    }
+    .tile-stat:hover { box-shadow: 0 16px 40px -14px rgba(6,182,212,0.5); }
+
+    .stat-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 6px #fff;
+      animation: livePulse 1.6s ease-in-out infinite;
+    }
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    .stat-value {
+      font-size: clamp(28px, 3vw, 36px);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-trend {
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .sparkline {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 28px;
+      margin-top: 10px;
+    }
+
+    .sparkline .bar {
+      flex: 1;
+      background: rgba(255,255,255,0.55);
+      border-radius: 2px;
+      transform: scaleY(0);
+      transform-origin: bottom;
+      animation: barIn 0.5s ease forwards;
+    }
+    .sparkline .bar:last-child { background: #fff; }
+
+    @keyframes barIn { to { transform: scaleY(1); } }
+
+    /* ── FORM TILE ────────────────────────────────────────────────── */
+    .tile-form {
+      grid-area: form;
+      background: var(--tile);
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 50px -24px rgba(0,0,0,0.35);
+      animation-delay: 0.14s;
+    }
+    .tile-form:hover { box-shadow: 0 24px 60px -20px rgba(0,0,0,0.4); }
+
+    .form-progress {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .form-progress-seg {
+      flex: 1;
+      height: 3px;
+      border-radius: 3px;
+      background: #eef2f7;
+      overflow: hidden;
+    }
+    .form-progress-seg .fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--cyan), var(--cyan-dk));
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+    .form-progress-seg.on .fill { width: 100%; }
+
+    @keyframes stepIn {
+      from { opacity: 0; transform: translateX(12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .step-pane { animation: stepIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--ink-muted);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 14px;
+    }
+    .back-link:hover { color: var(--cyan-dk); }
+    .back-link .material-icons-outlined { font-size: 15px !important; }
+
+    .form-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan-dk);
+      margin-bottom: 8px;
+    }
+
+    .form-headline {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
+    }
+
+    .form-sub {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      margin-bottom: 22px;
+    }
+    .form-sub strong { color: var(--cyan-dk); font-weight: 700; }
+
+    /* ── CHART PICKER ─────────────────────────────────────────────── */
+    .chart-readout {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 2px;
+      margin-bottom: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+    .chart-readout .cur { font-size: 20px; font-weight: 700; color: var(--cyan-dk); }
+    .chart-readout .val { font-size: 40px; font-weight: 900; letter-spacing: -0.02em; color: var(--ink); }
+
+    .chart-picker {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 14px 10px;
+      cursor: pointer;
+      touch-action: none;
+      margin-bottom: 8px;
+    }
+    .chart-picker:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 74px;
+    }
+
+    .chart-bar {
+      flex: 1;
+      min-width: 3px;
+      background: #dbeafe;
+      border-radius: 3px 3px 0 0;
+      transition: background 0.1s;
+    }
+    .chart-bar.filled { background: #a5f3fc; }
+    .chart-bar.active { background: var(--cyan); box-shadow: 0 0 0 2px rgba(6,182,212,0.25); }
+
+    .chart-range {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--ink-muted);
+    }
+
+    .chart-caption {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      margin-bottom: 20px;
+    }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* ── DATA GRID (spreadsheet-style info step) ─────────────────── */
+    .data-grid {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .data-row {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding: 4px 12px;
+      transition: background 0.15s;
+    }
+    .data-row:last-child { border-bottom: none; }
+    .data-row:hover, .data-row:focus-within { background: #f8fafc; }
+    .data-row.has-error { background: #fef2f2; }
+
+    .data-row-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .data-row-cell { position: relative; }
+
+    .data-row-cell input,
+    .data-row-cell select {
+      width: 100%;
+      background: transparent;
+      border: none;
+      padding: 12px 4px;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .data-row-cell select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 4px center;
+      padding-right: 26px;
+    }
+    .data-row-cell select option { color: var(--ink); }
+
+    .data-row-error {
+      font-size: 10.5px;
+      color: var(--danger);
+      font-weight: 700;
+      padding: 0 4px 8px;
+    }
+
+    .btn-dash {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(90deg, var(--cyan), var(--cyan-dk));
+      color: #fff;
+      font-family: var(--font);
+      font-size: 14.5px;
+      font-weight: 700;
+      border: none;
+      border-radius: 11px;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: filter 0.15s, transform 0.1s;
+      box-shadow: 0 10px 24px -10px rgba(6,182,212,0.55);
+    }
+    .btn-dash:hover:not(:disabled) { filter: brightness(1.06); }
+    .btn-dash:active:not(:disabled) { transform: scale(0.99); }
+    .btn-dash .material-icons-outlined { font-size: 17px !important; }
+
+    .form-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      margin-top: 12px;
+      text-align: center;
+    }
+    .form-note .material-icons-outlined { font-size: 13px !important; color: var(--cyan-dk); }
+
+    .legal-text { font-size: 10px; color: var(--ink-muted); line-height: 1.7; text-align: center; margin-top: 14px; }
+
+    /* ── PROCESSING ───────────────────────────────────────────────── */
+    .dash-processing {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 28px 0 10px;
+      animation: stepIn 0.32s ease both;
+    }
+    .dash-ring {
+      position: relative;
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+      background: var(--cyan-soft);
+      border: 1.5px solid var(--cyan-border);
+    }
+    .dash-ring .material-icons-outlined { font-size: 34px !important; color: var(--cyan-dk); }
+    .dash-spin { position: absolute; inset: -6px; border-radius: 50%; border: 2px solid transparent; border-top-color: var(--cyan-dk); animation: spin 0.9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .dash-msg { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 4px; min-height: 20px; }
+    .dash-sub { font-size: 12.5px; font-weight: 500; color: var(--ink-muted); }
+
+    /* ── BENTO EXIT TRANSITION ────────────────────────────────────── */
+    @keyframes tileOut {
+      to { opacity: 0; transform: translateY(-14px) scale(0.94); filter: blur(4px); }
+    }
+    .bento-exit .tile {
+      animation: tileOut 0.45s cubic-bezier(0.4, 0, 1, 1) forwards;
+      pointer-events: none;
+    }
+    .bento-exit .tile:nth-child(1) { animation-delay: 0s; }
+    .bento-exit .tile:nth-child(2) { animation-delay: 0.05s; }
+    .bento-exit .tile:nth-child(3) { animation-delay: 0.1s; }
+    .bento-exit .tile:nth-child(4) { animation-delay: 0.15s; }
+    .bento-exit .tile:nth-child(5) { animation-delay: 0.2s; }
+
+    /* ── FULL-SCREEN SUCCESS ──────────────────────────────────────── */
+    @keyframes successIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .success-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: successIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .success-ring-wrap {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+
+    @keyframes pingOut {
+      0%   { width: 96px; height: 96px; opacity: 0.55; }
+      100% { width: 170px; height: 170px; opacity: 0; }
+    }
+    .success-ping {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid var(--cyan);
+      opacity: 0;
+      animation: pingOut 2s ease-out infinite;
+    }
+    .success-ping:nth-child(2) { animation-delay: 0.6s; }
+    .success-ping:nth-child(3) { animation-delay: 1.2s; }
+
+    @keyframes checkPopBig {
+      0%   { transform: scale(0.3); opacity: 0; }
+      70%  { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .success-check-circle {
+      position: relative;
+      z-index: 1;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--cyan-dk));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 20px 50px -12px rgba(6,182,212,0.6);
+      animation: checkPopBig 0.5s 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    .success-check-circle .material-icons-outlined { font-size: 52px !important; color: #fff; }
+
+    .success-title {
+      font-size: clamp(24px, 3vw, 32px);
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .success-sub {
+      font-size: 15px;
+      font-weight: 500;
+      color: #94a3b8;
+    }
+
+    /* ── HOW TILE ─────────────────────────────────────────────────── */
+    .tile-how {
+      grid-area: how;
+      background: var(--tile);
+      border: 1px solid var(--border);
+      animation-delay: 0.2s;
+    }
+    .tile-how:hover { box-shadow: 0 16px 40px -18px rgba(0,0,0,0.3); }
+
+    .tile-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 18px;
+    }
+
+    .timeline { position: relative; display: flex; flex-direction: column; gap: 20px; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--border);
+    }
+    .timeline-step {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .timeline-icon {
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--cyan-soft);
+      border: 1.5px solid var(--cyan-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.6);
+      animation: iconPop 0.4s ease forwards;
+    }
+    @keyframes iconPop { to { opacity: 1; transform: scale(1); } }
+    .timeline-icon .material-icons-outlined { font-size: 15px !important; color: var(--cyan-dk); }
+    .timeline-text-title { font-size: 13.5px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+    .timeline-text-sub { font-size: 12px; font-weight: 500; color: var(--ink-muted); line-height: 1.4; }
+
+    /* ── TRUST / EWA TILE ─────────────────────────────────────────── */
+    .tile-trust {
+      grid-area: trust;
+      background: var(--tile);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      animation-delay: 0.26s;
+    }
+    .tile-trust:hover { box-shadow: 0 16px 40px -18px rgba(0,0,0,0.3); }
+
+    .trust-blurb-text {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .trust-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+    .trust-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .trust-chip .material-icons-outlined { font-size: 12px !important; color: var(--cyan-dk); }
+
+    /* ── REDUCED MOTION ───────────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .tile, .live-dot, .sparkline .bar, .step-pane, .timeline-icon,
+      .dash-spin, .dash-ring .material-icons-outlined,
+      .bento-exit .tile, .success-screen, .success-ping, .success-check-circle {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+      }
+      * { transition-duration: 0.01ms !important; }
+    }
+
+    /* ── RESPONSIVE ───────────────────────────────────────────────── */
+    @media (max-width: 980px) {
+      .bento {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "brand"
+          "stat"
+          "form"
+          "how"
+          "trust";
+      }
+      .page { padding: 24px 16px; align-items: flex-start; }
+    }
+
+    @media (max-width: 480px) {
+      .tile { padding: 20px; border-radius: 16px; }
+      .field-row { gap: 8px; }
+      .chart-readout .val { font-size: 34px; }
+      .data-row { grid-template-columns: 84px 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const US_STATES = [
+      'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA',
+      'HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
+      'MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
+      'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC',
+      'SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'
+    ];
+
+    const MIN_AMOUNT = 100;
+    const MAX_AMOUNT = 2000;
+    const STEP_AMOUNT = 100;
+    const BAR_VALUES = [];
+    for (let v = MIN_AMOUNT; v <= MAX_AMOUNT; v += STEP_AMOUNT) BAR_VALUES.push(v);
+    const DEFAULT_AMOUNT = 500;
+
+    const SPARK_HEIGHTS = [40, 55, 35, 70, 50, 85, 100];
+
+    const BRAND_BULLETS = [
+      'Access wages already earned',
+      'No credit check required',
+      'Funds in your account today',
+    ];
+
+    const PROCESSING_MESSAGES = [
+      'Verifying your employer…',
+      'Calculating available wages…',
+      'Connecting your bank…',
+      'Almost there…',
+    ];
+
+    const prefersReducedMotion = () =>
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+    function useCountUp(target, duration = 900) {
+      const [display, setDisplay] = useState(0);
+      useEffect(() => {
+        if (prefersReducedMotion()) { setDisplay(target); return; }
+        const start = performance.now();
+        let raf;
+        const tick = (now) => {
+          const t = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - t, 3);
+          setDisplay(target * eased);
+          if (t < 1) raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(raf);
+      }, [target, duration]);
+      return display;
+    }
+
+    // ─── BRAND TILE ─────────────────────────────────────────────────
+    function BrandTile() {
+      return (
+        <div className="tile tile-brand">
+          <img className="brand-logo-img" src="../media/logo.svg" alt="Logo" />
+          <div className="brand-title">Early Wage<br/>Access Dashboard</div>
+          <div className="brand-sub">Track and access wages you've already earned — before payday.</div>
+          <div className="brand-bullets">
+            {BRAND_BULLETS.map((text, i) => (
+              <div className="brand-bullet" key={i}>
+                <span className="brand-bullet-icon" aria-hidden="true">
+                  <span className="material-icons-outlined">check</span>
+                </span>
+                <span>{text}</span>
+              </div>
+            ))}
+          </div>
+          <div className="brand-pill">
+            <span className="material-icons-outlined" aria-hidden="true">bolt</span>
+            Up to $2,000 available today
+          </div>
+        </div>
+      );
+    }
+
+    // ─── STAT TILE ──────────────────────────────────────────────────
+    function StatTile() {
+      const [base, setBase] = useState(1247.5);
+      const value = useCountUp(base);
+
+      useEffect(() => {
+        if (prefersReducedMotion()) return;
+        const interval = setInterval(() => {
+          setBase(b => b + (2 + Math.random() * 6));
+        }, 4200);
+        return () => clearInterval(interval);
+      }, []);
+
+      return (
+        <div className="tile tile-stat">
+          <div className="stat-label"><span className="live-dot" aria-hidden="true" />Wages earned this period</div>
+          <div className="stat-value">${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+          <div className="stat-trend">+ ${(value * 0.07).toFixed(0)} since Monday</div>
+          <div className="sparkline" aria-hidden="true">
+            {SPARK_HEIGHTS.map((h, i) => (
+              <div key={i} className="bar" style={{ height: `${h}%`, animationDelay: `${0.3 + i * 0.06}s` }} />
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── CHART PICKER (amount) ──────────────────────────────────────
+    function ChartPicker({ amount, setAmount }) {
+      const ref = useRef(null);
+      const draggingRef = useRef(false);
+      const selectedIndex = BAR_VALUES.indexOf(amount) >= 0 ? BAR_VALUES.indexOf(amount) : 4;
+
+      const setIndex = (idx) => {
+        const clamped = clamp(idx, 0, BAR_VALUES.length - 1);
+        setAmount(BAR_VALUES[clamped]);
+      };
+
+      const updateFromPointer = (clientX) => {
+        const el = ref.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const fraction = clamp((clientX - rect.left) / rect.width, 0, 1);
+        setIndex(Math.round(fraction * (BAR_VALUES.length - 1)));
+      };
+
+      const onPointerDown = (e) => {
+        draggingRef.current = true;
+        e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId);
+        updateFromPointer(e.clientX);
+      };
+      const onPointerMove = (e) => { if (draggingRef.current) updateFromPointer(e.clientX); };
+      const onPointerUp = () => { draggingRef.current = false; };
+
+      const onKeyDown = (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); setIndex(selectedIndex + 1); }
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); setIndex(selectedIndex - 1); }
+        else if (e.key === 'Home') { e.preventDefault(); setIndex(0); }
+        else if (e.key === 'End') { e.preventDefault(); setIndex(BAR_VALUES.length - 1); }
+      };
+
+      return (
+        <React.Fragment>
+          <div className="chart-readout">
+            <span className="cur">$</span>
+            <span className="val">{amount.toLocaleString('en-US')}</span>
+          </div>
+          <div
+            className="chart-picker"
+            ref={ref}
+            role="slider"
+            tabIndex={0}
+            aria-valuemin={MIN_AMOUNT}
+            aria-valuemax={MAX_AMOUNT}
+            aria-valuenow={amount}
+            aria-valuetext={`$${amount.toLocaleString('en-US')}`}
+            aria-label="Amount requested"
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+            onKeyDown={onKeyDown}
+          >
+            <div className="chart-bars" aria-hidden="true">
+              {BAR_VALUES.map((v, i) => {
+                const heightPct = 24 + (i / (BAR_VALUES.length - 1)) * 76;
+                const cls = i === selectedIndex ? 'chart-bar active' : i < selectedIndex ? 'chart-bar filled' : 'chart-bar';
+                return <div key={v} className={cls} style={{ height: `${heightPct}%` }} />;
+              })}
+            </div>
+          </div>
+          <div className="chart-range" aria-hidden="true">
+            <span>${MIN_AMOUNT.toLocaleString('en-US')}</span>
+            <span>${MAX_AMOUNT.toLocaleString('en-US')}</span>
+          </div>
+          <div className="chart-caption">Click, drag, or use arrow keys to adjust</div>
+        </React.Fragment>
+      );
+    }
+
+    // ─── FORM TILE ──────────────────────────────────────────────────
+    function FormProgress({ step }) {
+      return (
+        <div className="form-progress" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={2} aria-label={`Step ${step} of 2`}>
+          <div className={`form-progress-seg ${step >= 1 ? 'on' : ''}`}><div className="fill" /></div>
+          <div className={`form-progress-seg ${step >= 2 ? 'on' : ''}`}><div className="fill" /></div>
+        </div>
+      );
+    }
+
+    function StepAmount({ amount, setAmount, onContinue }) {
+      return (
+        <div className="step-pane" key="amount">
+          <FormProgress step={1} />
+          <div className="form-eyebrow">Apply Now</div>
+          <div className="form-headline">How much do you need?</div>
+          <div className="form-sub">Funds can land in your account <strong>today</strong>.</div>
+
+          <ChartPicker amount={amount} setAmount={setAmount} />
+
+          <button className="btn-dash" onClick={onContinue}>
+            Continue <span className="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+          </button>
+
+          <div className="form-note">
+            <span className="material-icons-outlined" aria-hidden="true">verified_user</span>
+            Not a loan. No credit check required.
+          </div>
+        </div>
+      );
+    }
+
+    const DATA_ROWS = [
+      { key: 'firstName', label: 'First Name', type: 'text', autoComplete: 'given-name' },
+      { key: 'lastName', label: 'Last Name', type: 'text', autoComplete: 'family-name' },
+      { key: 'email', label: 'Email', type: 'email', autoComplete: 'email' },
+      { key: 'age', label: 'Age', type: 'text', inputMode: 'numeric', maxLength: 2 },
+      { key: 'state', label: 'State', type: 'select' },
+    ];
+
+    function StepInfo({ amount, onBack, onSubmit }) {
+      const [form, setForm] = useState({
+        firstName: 'Jason', lastName: 'Williams', email: 'jason@epcvip.com', age: '', state: '',
+      });
+      const [errors, setErrors] = useState({});
+
+      const set = (field, val) => {
+        setForm(f => ({ ...f, [field]: val }));
+        if (errors[field]) setErrors(e => ({ ...e, [field]: '' }));
+      };
+
+      const validate = () => {
+        const e = {};
+        if (!form.firstName.trim()) e.firstName = 'Required';
+        if (!form.lastName.trim()) e.lastName = 'Required';
+        if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Invalid email';
+        const age = parseInt(form.age, 10);
+        if (!form.age || isNaN(age) || age < 18 || age > 99) e.age = 'Must be 18–99';
+        if (!form.state) e.state = 'Required';
+        return e;
+      };
+
+      const handleSubmit = () => {
+        const e = validate();
+        if (Object.keys(e).length) { setErrors(e); return; }
+        onSubmit(form);
+      };
+
+      return (
+        <div className="step-pane" key="info">
+          <button className="back-link" onClick={onBack}>
+            <span className="material-icons-outlined" aria-hidden="true">arrow_back</span> Back
+          </button>
+          <FormProgress step={2} />
+          <div className="form-eyebrow">Your Details</div>
+          <div className="form-headline">Just a few details</div>
+          <div className="form-sub">Requesting <strong>${amount.toLocaleString('en-US')}</strong> today.</div>
+
+          <div className="data-grid">
+            {DATA_ROWS.map(row => (
+              <div key={row.key}>
+                <div className={`data-row${errors[row.key] ? ' has-error' : ''}`}>
+                  <label className="data-row-label" htmlFor={row.key}>{row.label}</label>
+                  <div className="data-row-cell">
+                    {row.type === 'select' ? (
+                      <select
+                        id={row.key}
+                        value={form[row.key]}
+                        onChange={e => set(row.key, e.target.value)}
+                      >
+                        <option value="" disabled></option>
+                        {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    ) : (
+                      <input
+                        id={row.key}
+                        type={row.type}
+                        inputMode={row.inputMode}
+                        maxLength={row.maxLength}
+                        autoComplete={row.autoComplete}
+                        value={form[row.key]}
+                        onChange={e => set(row.key, e.target.value)}
+                      />
+                    )}
+                  </div>
+                </div>
+                {errors[row.key] && <div className="data-row-error">{errors[row.key]}</div>}
+              </div>
+            ))}
+          </div>
+
+          <button className="btn-dash" onClick={handleSubmit}>
+            Get My Funds <span className="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+          </button>
+
+          <div className="legal-text">
+            By continuing you agree to our Terms of Service and Privacy Policy. This is not a loan
+            application — no credit check will be performed.
+          </div>
+        </div>
+      );
+    }
+
+    function DashProcessing({ onDone }) {
+      const [msgIdx, setMsgIdx] = useState(0);
+
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setMsgIdx(i => {
+            if (i >= PROCESSING_MESSAGES.length - 1) {
+              clearInterval(interval);
+              setTimeout(onDone, 600);
+              return i;
+            }
+            return i + 1;
+          });
+        }, 850);
+        return () => clearInterval(interval);
+      }, [onDone]);
+
+      return (
+        <div className="dash-processing">
+          <div className="dash-ring">
+            <div className="dash-spin" />
+            <span className="material-icons-outlined" aria-hidden="true">account_balance</span>
+          </div>
+          <div className="dash-msg">{PROCESSING_MESSAGES[msgIdx]}</div>
+          <div className="dash-sub">Securely processing your request</div>
+        </div>
+      );
+    }
+
+    function FormTile({ onApproved }) {
+      const [step, setStep] = useState(1);
+      const [amount, setAmount] = useState(DEFAULT_AMOUNT);
+      const [processing, setProcessing] = useState(false);
+
+      return (
+        <div className="tile tile-form">
+          {processing ? (
+            <DashProcessing onDone={onApproved} />
+          ) : step === 1 ? (
+            <StepAmount amount={amount} setAmount={setAmount} onContinue={() => setStep(2)} />
+          ) : (
+            <StepInfo amount={amount} onBack={() => setStep(1)} onSubmit={() => setProcessing(true)} />
+          )}
+        </div>
+      );
+    }
+
+    // ─── HOW TILE ───────────────────────────────────────────────────
+    function HowTile() {
+      const steps = [
+        { icon: 'work_outline', title: 'Verify your employer', sub: 'Takes about 30 seconds' },
+        { icon: 'tune', title: 'Choose your amount', sub: 'Up to $2,000 available' },
+        { icon: 'account_balance_wallet', title: 'Get funds today', sub: 'Deposited directly to your bank' },
+      ];
+      return (
+        <div className="tile tile-how">
+          <div className="tile-title">How It Works</div>
+          <div className="timeline">
+            {steps.map((s, i) => (
+              <div className="timeline-step" key={i}>
+                <div className="timeline-icon" style={{ animationDelay: `${0.3 + i * 0.15}s` }} aria-hidden="true">
+                  <span className="material-icons-outlined">{s.icon}</span>
+                </div>
+                <div>
+                  <div className="timeline-text-title">{s.title}</div>
+                  <div className="timeline-text-sub">{s.sub}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── TRUST / EWA EXPLAINER TILE ─────────────────────────────────
+    function TrustTile() {
+      return (
+        <div className="tile tile-trust">
+          <div className="tile-title">What Is Early Wage Access?</div>
+          <p className="trust-blurb-text">
+            Early Wage Access lets you tap into wages you've already earned before your scheduled
+            payday — without interest, fees, or a credit check. It's not a loan. You're simply
+            getting paid for work you've already done.
+          </p>
+          <div className="trust-chips">
+            <span className="trust-chip"><span className="material-icons-outlined" aria-hidden="true">bolt</span>Same-day</span>
+            <span className="trust-chip"><span className="material-icons-outlined" aria-hidden="true">verified_user</span>No credit check</span>
+            <span className="trust-chip"><span className="material-icons-outlined" aria-hidden="true">percent</span>Zero interest</span>
+          </div>
+        </div>
+      );
+    }
+
+    const BENTO_EXIT_MS = 650;
+
+    // ─── FULL-SCREEN SUCCESS ─────────────────────────────────────────
+    function SuccessScreen() {
+      return (
+        <div className="success-screen" role="status">
+          <div className="success-ring-wrap" aria-hidden="true">
+            <div className="success-ping" />
+            <div className="success-ping" />
+            <div className="success-ping" />
+            <div className="success-check-circle">
+              <span className="material-icons-outlined" aria-hidden="true">check</span>
+            </div>
+          </div>
+          <div className="success-title">You're approved.</div>
+          <div className="success-sub">Redirecting to your offer…</div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [phase, setPhase] = useState('bento'); // 'bento' | 'exiting' | 'success'
+
+      const handleApproved = () => {
+        setPhase('exiting');
+        setTimeout(() => setPhase('success'), prefersReducedMotion() ? 0 : BENTO_EXIT_MS);
+      };
+
+      return (
+        <div className="page">
+          {phase === 'success' ? (
+            <SuccessScreen />
+          ) : (
+            <div className={`bento${phase === 'exiting' ? ' bento-exit' : ''}`}>
+              <BrandTile />
+              <StatTile />
+              <FormTile onApproved={handleApproved} />
+              <HowTile />
+              <TrustTile />
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

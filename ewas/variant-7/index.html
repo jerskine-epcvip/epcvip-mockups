@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EWA — The Ledger | Early Wage Access</title>
+  <meta name="description" content="Access wages you've already earned before payday. No credit check. No interest. Same-day deposit." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:          #0c1220;
+      --ink-2:        #111827;
+      --card-bg:      #111827;
+      --card-bg-2:    #0c1220;
+      --mint:        #10b981;
+      --mint-lt:     #34d399;
+      --mint-dk:     #059669;
+      --mint-soft:   rgba(16,185,129,0.12);
+      --mint-border: rgba(16,185,129,0.3);
+      --white:        #fafaf9;
+      --muted:        #a8a29e;
+      --border:       rgba(255,255,255,0.08);
+      --danger:       #f87171;
+      --font:         'Montserrat', sans-serif;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--ink);
+      color: var(--white);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    #root { min-height: 100vh; }
+
+    /* ── SCENE ────────────────────────────────────────────────────── */
+    .scene {
+      position: relative;
+      min-height: 100vh;
+      overflow: hidden;
+      padding: 32px 24px 48px;
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 50% at 25% 15%, rgba(16,185,129,0.07), transparent 60%),
+        radial-gradient(ellipse 60% 60% at 100% 100%, rgba(0,0,0,0.7), transparent 55%);
+    }
+
+    .bg-word {
+      position: absolute;
+      top: 4%;
+      left: -4%;
+      z-index: 0;
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+      font-weight: 900;
+      font-size: clamp(90px, 19vw, 260px);
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1.5px rgba(16,185,129,0.14);
+      transform: rotate(-4deg);
+    }
+
+    .bg-word.second {
+      top: auto;
+      bottom: 2%;
+      left: auto;
+      right: -6%;
+      -webkit-text-stroke: 1.5px rgba(255,255,255,0.05);
+      transform: rotate(-4deg);
+    }
+
+    /* ── TICKER (vertical marquee) ───────────────────────────────── */
+    .ticker-rail {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 168px;
+      z-index: 3;
+      background: linear-gradient(180deg, rgba(12,18,32,0.4), rgba(12,18,32,0.85));
+      border-left: 1px solid var(--border);
+      overflow: hidden;
+      backdrop-filter: blur(6px);
+    }
+
+    .ticker-track {
+      display: flex;
+      flex-direction: column;
+      animation: tickerScroll 22s linear infinite;
+    }
+
+    .ticker-rail:hover .ticker-track { animation-play-state: paused; }
+
+    @keyframes tickerScroll {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-50%); }
+    }
+
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 18px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: normal;
+    }
+
+    .ticker-item .material-icons-outlined {
+      font-size: 15px !important;
+      color: var(--mint);
+      flex-shrink: 0;
+    }
+
+    /* ── TOP BAR ──────────────────────────────────────────────────── */
+    .scene-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 48px;
+    }
+
+    .brand-logo-img {
+      height: 24px;
+      width: auto;
+      filter: brightness(0) invert(1);
+      display: block;
+    }
+
+    .kicker-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 14px;
+      border-radius: 100px;
+      background: var(--mint-soft);
+      border: 1px solid var(--mint-border);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mint-lt);
+    }
+
+    /* ── LAYOUT (layered / overlapping) ──────────────────────────── */
+    .layout {
+      position: relative;
+      padding-right: 190px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+
+    @keyframes headlineIn {
+      from { opacity: 0; transform: translateY(16px) rotate(-4deg); }
+      to   { opacity: 1; transform: translateY(0) rotate(-0.6deg); }
+    }
+
+    .headline-block {
+      position: relative;
+      flex: 1 1 420px;
+      max-width: 480px;
+      transform: rotate(-0.6deg);
+      animation: headlineIn 0.7s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    .headline-rule {
+      width: 46px;
+      height: 2px;
+      background: var(--mint);
+      margin-bottom: 20px;
+    }
+
+    .headline {
+      font-size: clamp(30px, 4vw, 46px);
+      font-weight: 900;
+      line-height: 1.04;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+
+    .headline em {
+      display: block;
+      font-style: italic;
+      color: var(--mint);
+    }
+
+    .headline-sub {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+      max-width: 380px;
+    }
+
+    /* ── BULLETS ──────────────────────────────────────────────────── */
+    .headline-bullets {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 4px;
+    }
+
+    .headline-bullet {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #e7e5e4;
+      line-height: 1.4;
+    }
+
+    .headline-bullet-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--mint-soft);
+      border: 1px solid var(--mint-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .headline-bullet-icon .material-icons-outlined { font-size: 12px !important; color: var(--mint-lt); }
+
+    /* ── EWA BLURB ────────────────────────────────────────────────── */
+    .ewa-blurb {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      max-width: 400px;
+    }
+
+    .ewa-blurb-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mint-lt);
+      margin-bottom: 6px;
+    }
+
+    .ewa-blurb-text {
+      font-size: 11.5px;
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── CARD (offset, overlapping) ──────────────────────────────── */
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(30px) rotate(0deg) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) rotate(0.4deg) scale(1); }
+    }
+
+    .card-wrap {
+      position: relative;
+      flex: 0 0 auto;
+      width: 100%;
+      max-width: 440px;
+      transform: rotate(0.4deg);
+      animation: cardIn 0.7s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+      perspective: 1800px;
+    }
+
+    .entry-tag {
+      position: absolute;
+      top: -14px;
+      right: 22px;
+      z-index: 3;
+      background: var(--ink-2);
+      border: 1px solid var(--mint-border);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--mint-lt);
+      font-variant-numeric: tabular-nums;
+      box-shadow: 0 6px 16px -6px rgba(0,0,0,0.6);
+    }
+
+    .flip-outer {
+      position: relative;
+      box-shadow: 0 40px 90px -30px rgba(0,0,0,0.75), 0 0 0 1px var(--border);
+      border-radius: 24px;
+    }
+
+    .flip-inner {
+      display: grid;
+      transition: transform 0.65s cubic-bezier(0.4, 0.1, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    .flip-inner.flipped { transform: rotateY(180deg); }
+
+    .flip-face {
+      grid-area: 1 / 1;
+      backface-visibility: hidden;
+      background: linear-gradient(180deg, var(--card-bg) 0%, var(--card-bg-2) 100%);
+      border-radius: 24px;
+      padding: 32px 28px 26px;
+    }
+
+    .flip-face-back { transform: rotateY(180deg); }
+
+    /* ── PROGRESS ─────────────────────────────────────────────────── */
+    .ledger-progress {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .ledger-progress-seg {
+      flex: 1;
+      height: 3px;
+      border-radius: 3px;
+      background: rgba(16,185,129,0.14);
+      overflow: hidden;
+    }
+    .ledger-progress-seg .fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--mint-dk), var(--mint));
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+    .ledger-progress-seg.on .fill { width: 100%; }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 16px;
+    }
+    .back-link:hover { color: var(--mint-lt); }
+    .back-link .material-icons-outlined { font-size: 15px !important; }
+
+    .step-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mint-lt);
+      margin-bottom: 10px;
+    }
+
+    .step-headline {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+
+    .step-sub {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .step-sub strong { color: var(--mint-lt); font-weight: 700; }
+
+    /* ── KEYPAD (amount entry) ────────────────────────────────────── */
+    .keypad-readout-wrap {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 12px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .keypad-readout {
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .keypad-readout.is-empty { color: var(--muted); }
+
+    .keypad-cursor {
+      display: inline-block;
+      width: 3px;
+      height: 30px;
+      background: var(--mint);
+      margin-left: 3px;
+      vertical-align: -6px;
+      animation: cursorBlink 1s steps(1) infinite;
+    }
+    @keyframes cursorBlink { 50% { opacity: 0; } }
+
+    .keypad-range {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .key {
+      aspect-ratio: 1.5;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1.5px solid var(--border);
+      color: var(--white);
+      font-family: var(--font);
+      font-size: 19px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    }
+    .key:hover { border-color: var(--mint-border); background: var(--mint-soft); }
+    .key:active { transform: scale(0.95); }
+    .key-func { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: var(--muted); }
+    .key-func .material-icons-outlined { font-size: 18px !important; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .btn-ledger {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(90deg, var(--mint-dk), var(--mint));
+      color: #fff;
+      font-family: var(--font);
+      font-size: 14.5px;
+      font-weight: 800;
+      border: none;
+      border-radius: 11px;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: filter 0.15s, transform 0.1s;
+      box-shadow: 0 10px 24px -10px rgba(16,185,129,0.45);
+    }
+    .btn-ledger:hover:not(:disabled) { filter: brightness(1.08); }
+    .btn-ledger:active:not(:disabled) { transform: scale(0.99); }
+    .btn-ledger:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+    .btn-ledger .material-icons-outlined { font-size: 17px !important; }
+
+    .form-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-top: 12px;
+      text-align: center;
+    }
+    .form-note .material-icons-outlined { font-size: 13px !important; color: var(--mint-lt); }
+
+    .legal-text { font-size: 10px; color: var(--muted); line-height: 1.7; text-align: center; margin-top: 14px; }
+
+    /* ── LEDGER LINES (info fields) ──────────────────────────────── */
+    .ledger-lines {
+      margin-bottom: 18px;
+    }
+
+    .ledger-line {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 11px 0;
+    }
+
+    .ledger-line-label {
+      flex: 0 0 auto;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mint-lt);
+      white-space: nowrap;
+    }
+
+    .ledger-line-dots {
+      flex: 1;
+      min-width: 10px;
+      border-bottom: 2px dotted rgba(255,255,255,0.18);
+      margin-bottom: 5px;
+    }
+
+    .ledger-line-input,
+    .ledger-line-select {
+      flex: 0 1 auto;
+      max-width: 58%;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      text-align: right;
+      font-family: var(--font);
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--white);
+      outline: none;
+      padding: 2px 2px 5px;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .ledger-line-select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0 center;
+      padding-right: 18px;
+    }
+    .ledger-line-select option { background: var(--card-bg); color: var(--white); }
+
+    .ledger-line-input:focus,
+    .ledger-line-select:focus { border-bottom-color: var(--mint); }
+
+    .ledger-line-input.has-error,
+    .ledger-line-select.has-error { border-bottom-color: var(--danger); }
+
+    .ledger-line-error {
+      font-size: 10.5px;
+      color: var(--danger);
+      font-weight: 700;
+      text-align: right;
+      margin-top: -6px;
+      margin-bottom: 4px;
+    }
+
+    /* ── FULL-SCREEN PROCESSING ──────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .processing-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--ink);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      animation: fadeUp 0.3s ease both;
+    }
+
+    @keyframes spinRing { to { transform: rotate(360deg); } }
+
+    .spin-ring {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.08);
+      border-top-color: var(--mint);
+      animation: spinRing 0.8s linear infinite;
+      margin-bottom: 30px;
+    }
+
+    .processing-msg { font-size: 15px; font-weight: 600; color: var(--mint-lt); letter-spacing: 0.03em; text-align: center; max-width: 300px; }
+
+    @keyframes checkPop {
+      0%   { transform: scale(0.4); opacity: 0; }
+      70%  { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .check-circle {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: var(--mint-soft);
+      border: 2px solid var(--mint);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+      animation: checkPop 0.5s ease both;
+    }
+    .check-circle .material-icons-outlined { font-size: 38px !important; color: var(--mint); }
+
+    .processing-done { font-size: 17px; font-weight: 800; color: var(--white); margin-bottom: 8px; text-align: center; }
+    .processing-done-sub { font-size: 13px; color: var(--muted); text-align: center; }
+
+    /* ── REDUCED MOTION ───────────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .ticker-track, .headline-block, .card-wrap, .flip-inner, .processing-screen,
+      .spin-ring, .check-circle, .keypad-cursor {
+        animation: none !important;
+        transition: none !important;
+      }
+      .headline-block { transform: none !important; opacity: 1 !important; }
+      .card-wrap { transform: none !important; opacity: 1 !important; }
+      .flip-inner.flipped { transform: none !important; }
+      .flip-inner:not(.flipped) .flip-face-back { display: none; }
+      .flip-inner.flipped .flip-face-front { display: none; }
+    }
+
+    /* ── RESPONSIVE ───────────────────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .ticker-rail { display: none; }
+      .layout { padding-right: 0; }
+    }
+
+    @media (max-width: 720px) {
+      .scene { padding: 24px 16px 40px; }
+      .bg-word { font-size: 70px; top: 2%; }
+      .bg-word.second { display: none; }
+      .top-bar { margin-bottom: 32px; }
+      .layout { flex-direction: column; align-items: stretch; gap: 28px; }
+      .headline-block, .card-wrap { transform: none; max-width: 100%; }
+      .headline-block { animation: fadeUp 0.5s ease both; }
+      .card-wrap { animation: fadeUp 0.5s 0.1s ease both; }
+      .headline { font-size: 28px; }
+      .flip-face { padding: 26px 20px 22px; }
+      .entry-tag { top: -12px; right: 16px; }
+    }
+
+    @media (max-width: 400px) {
+      .keypad-readout { font-size: 34px; }
+      .ledger-line-input, .ledger-line-select { max-width: 50%; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const US_STATES = [
+      'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA',
+      'HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
+      'MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
+      'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC',
+      'SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'
+    ];
+
+    const MIN_AMOUNT = 100;
+    const MAX_AMOUNT = 2500;
+    const MAX_DIGITS = 4;
+    const DEFAULT_DIGITS = '';
+
+    const HEADLINE_BULLETS = [
+      'Access wages already earned',
+      'No credit check required',
+      'Funds in your account today',
+      'Zero fees, zero interest',
+    ];
+
+    const TICKER_ITEMS = [
+      { icon: 'bolt', text: 'Same-day funds' },
+      { icon: 'verified_user', text: 'No credit check' },
+      { icon: 'percent', text: 'Zero interest' },
+      { icon: 'lock', text: 'Bank-level security' },
+      { icon: 'support_agent', text: '24/7 support' },
+      { icon: 'receipt_long', text: 'No hidden fees' },
+    ];
+
+    const PROCESSING_MESSAGES = [
+      'Verifying your employer…',
+      'Calculating available wages…',
+      'Posting your ledger entry…',
+      'Almost there…',
+    ];
+
+    // ─── TICKER ─────────────────────────────────────────────────────
+    function TickerRail() {
+      const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
+      return (
+        <aside className="ticker-rail" aria-hidden="true">
+          <div className="ticker-track">
+            {items.map((item, i) => (
+              <div className="ticker-item" key={i}>
+                <span className="material-icons-outlined">{item.icon}</span>
+                {item.text}
+              </div>
+            ))}
+          </div>
+        </aside>
+      );
+    }
+
+    // ─── HEADLINE BULLETS / BLURB ───────────────────────────────────
+    function HeadlineBullets() {
+      return (
+        <div className="headline-bullets">
+          {HEADLINE_BULLETS.map((text, i) => (
+            <div className="headline-bullet" key={i}>
+              <span className="headline-bullet-icon" aria-hidden="true">
+                <span className="material-icons-outlined">check</span>
+              </span>
+              <span>{text}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function EwaBlurb() {
+      return (
+        <div className="ewa-blurb">
+          <div className="ewa-blurb-label">What is Early Wage Access?</div>
+          <p className="ewa-blurb-text">
+            Early Wage Access lets you tap into wages you've already earned before your scheduled
+            payday — without interest, fees, or a credit check. It's not a loan. You're simply
+            getting paid for work you've already done.
+          </p>
+        </div>
+      );
+    }
+
+    // ─── PROGRESS ───────────────────────────────────────────────────
+    function LedgerProgress({ step }) {
+      return (
+        <div className="ledger-progress" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={2} aria-label={`Step ${step} of 2`}>
+          <div className={`ledger-progress-seg ${step >= 1 ? 'on' : ''}`}><div className="fill" /></div>
+          <div className={`ledger-progress-seg ${step >= 2 ? 'on' : ''}`}><div className="fill" /></div>
+        </div>
+      );
+    }
+
+    // ─── KEYPAD (amount entry) ──────────────────────────────────────
+    function Keypad({ digits, setDigits, active }) {
+      const tabIndex = active ? undefined : -1;
+      const amount = digits === '' ? 0 : parseInt(digits, 10);
+
+      const pressDigit = (d) => {
+        setDigits(prev => {
+          if (prev.length >= MAX_DIGITS) return prev;
+          const next = prev === '0' ? d : prev + d;
+          const n = parseInt(next, 10);
+          return n > MAX_AMOUNT ? prev : next;
+        });
+      };
+      const backspace = () => setDigits(prev => prev.slice(0, -1));
+      const clearAll = () => setDigits('');
+
+      useEffect(() => {
+        if (!active) return;
+        const onKeyDown = (e) => {
+          const tag = document.activeElement && document.activeElement.tagName;
+          if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+          if (e.key >= '0' && e.key <= '9') pressDigit(e.key);
+          else if (e.key === 'Backspace') backspace();
+          else if (e.key === 'Escape') clearAll();
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+      }, [active]);
+
+      const KEYS = ['1','2','3','4','5','6','7','8','9'];
+
+      return (
+        <div>
+          <div className="keypad-readout-wrap">
+            <div className={`keypad-readout${digits === '' ? ' is-empty' : ''}`}>
+              ${digits === '' ? '0' : Number(digits).toLocaleString('en-US')}
+              <span className="keypad-cursor" aria-hidden="true" />
+            </div>
+            <div className="keypad-range">Min ${MIN_AMOUNT} · Max ${MAX_AMOUNT.toLocaleString('en-US')}</div>
+          </div>
+
+          <div className="keypad" role="group" aria-label="Amount keypad">
+            {KEYS.map(k => (
+              <button type="button" key={k} tabIndex={tabIndex} className="key" onClick={() => pressDigit(k)}>{k}</button>
+            ))}
+            <button type="button" tabIndex={tabIndex} className="key key-func" onClick={clearAll}>Clear</button>
+            <button type="button" tabIndex={tabIndex} className="key" onClick={() => pressDigit('0')}>0</button>
+            <button type="button" tabIndex={tabIndex} className="key key-func" onClick={backspace} aria-label="Backspace">
+              <span className="material-icons-outlined" aria-hidden="true">backspace</span>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── STEP 1 FACE — AMOUNT KEYPAD ────────────────────────────────
+    function StepAmount({ digits, setDigits, onContinue, active }) {
+      const amount = digits === '' ? 0 : parseInt(digits, 10);
+      const canContinue = amount >= MIN_AMOUNT && amount <= MAX_AMOUNT;
+      const tabIndex = active ? undefined : -1;
+
+      return (
+        <div>
+          <LedgerProgress step={1} />
+          <div className="step-eyebrow">Ledger Entry</div>
+          <div className="step-headline">How much do you need?</div>
+          <div className="step-sub">Key in an amount — funds can post to your account <strong>today</strong>.</div>
+
+          <Keypad digits={digits} setDigits={setDigits} active={active} />
+
+          <button className="btn-ledger" tabIndex={tabIndex} onClick={onContinue} disabled={!canContinue} style={{ marginTop: '4px' }}>
+            Continue <span className="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+          </button>
+
+          <div className="form-note">
+            <span className="material-icons-outlined" aria-hidden="true">verified_user</span>
+            Not a loan. Accessing wages you've already earned.
+          </div>
+        </div>
+      );
+    }
+
+    // ─── STEP 2 FACE — LEDGER LINES ──────────────────────────────────
+    const LEDGER_FIELDS = [
+      { key: 'firstName', label: 'First Name', type: 'text', autoComplete: 'given-name' },
+      { key: 'lastName', label: 'Last Name', type: 'text', autoComplete: 'family-name' },
+      { key: 'email', label: 'Email', type: 'email', autoComplete: 'email' },
+      { key: 'age', label: 'Age', type: 'text', inputMode: 'numeric', maxLength: 2 },
+      { key: 'state', label: 'State', type: 'select' },
+    ];
+
+    function StepInfo({ amount, onBack, onSubmit, active }) {
+      const [form, setForm] = useState({
+        firstName: 'Jason', lastName: 'Williams', email: 'jason@epcvip.com', age: '', state: '',
+      });
+      const [errors, setErrors] = useState({});
+      const tabIndex = active ? undefined : -1;
+
+      const set = (field, val) => {
+        setForm(f => ({ ...f, [field]: val }));
+        if (errors[field]) setErrors(e => ({ ...e, [field]: '' }));
+      };
+
+      const validate = () => {
+        const e = {};
+        if (!form.firstName.trim()) e.firstName = 'Required';
+        if (!form.lastName.trim()) e.lastName = 'Required';
+        if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Invalid email';
+        const age = parseInt(form.age, 10);
+        if (!form.age || isNaN(age) || age < 18 || age > 99) e.age = 'Must be 18–99';
+        if (!form.state) e.state = 'Required';
+        return e;
+      };
+
+      const handleSubmit = () => {
+        const e = validate();
+        if (Object.keys(e).length) { setErrors(e); return; }
+        onSubmit(form);
+      };
+
+      return (
+        <div>
+          <button className="back-link" onClick={onBack} tabIndex={tabIndex}>
+            <span className="material-icons-outlined" aria-hidden="true">arrow_back</span> Back
+          </button>
+          <LedgerProgress step={2} />
+          <div className="step-eyebrow">Your Details</div>
+          <div className="step-headline">Complete your entry</div>
+          <div className="step-sub">Requesting <strong>${amount.toLocaleString('en-US')}</strong> today.</div>
+
+          <div className="ledger-lines">
+            {LEDGER_FIELDS.map(f => (
+              <div key={f.key}>
+                <div className="ledger-line">
+                  <label className="ledger-line-label" htmlFor={`ledger-${f.key}`}>{f.label}</label>
+                  <span className="ledger-line-dots" aria-hidden="true" />
+                  {f.type === 'select' ? (
+                    <select
+                      id={`ledger-${f.key}`}
+                      tabIndex={tabIndex}
+                      className={`ledger-line-select${errors[f.key] ? ' has-error' : ''}`}
+                      value={form[f.key]}
+                      onChange={e => set(f.key, e.target.value)}
+                    >
+                      <option value="" disabled></option>
+                      {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  ) : (
+                    <input
+                      id={`ledger-${f.key}`}
+                      tabIndex={tabIndex}
+                      type={f.type}
+                      inputMode={f.inputMode}
+                      maxLength={f.maxLength}
+                      autoComplete={f.autoComplete}
+                      className={`ledger-line-input${errors[f.key] ? ' has-error' : ''}`}
+                      value={form[f.key]}
+                      onChange={e => set(f.key, e.target.value)}
+                    />
+                  )}
+                </div>
+                {errors[f.key] && <div className="ledger-line-error">{errors[f.key]}</div>}
+              </div>
+            ))}
+          </div>
+
+          <button className="btn-ledger" onClick={handleSubmit} tabIndex={tabIndex}>
+            Get My Funds <span className="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+          </button>
+
+          <div className="legal-text">
+            By continuing you agree to our Terms of Service and Privacy Policy. This is not a loan
+            application — no credit check will be performed.
+          </div>
+        </div>
+      );
+    }
+
+    // ─── FLIP CARD ──────────────────────────────────────────────────
+    function FlipCard({ digits, setDigits, flipped, onContinue, onBack, onSubmit }) {
+      const amount = digits === '' ? 0 : parseInt(digits, 10);
+      return (
+        <div className="flip-outer">
+          <div className={`flip-inner${flipped ? ' flipped' : ''}`}>
+            <div className="flip-face flip-face-front" aria-hidden={flipped}>
+              <StepAmount digits={digits} setDigits={setDigits} onContinue={onContinue} active={!flipped} />
+            </div>
+            <div className="flip-face flip-face-back" aria-hidden={!flipped}>
+              <StepInfo amount={amount} onBack={onBack} onSubmit={onSubmit} active={flipped} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── FULL-SCREEN PROCESSING ─────────────────────────────────────
+    function ProcessingScreen() {
+      const [msgIndex, setMsgIndex] = useState(0);
+      const [done, setDone] = useState(false);
+
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setMsgIndex(i => {
+            if (i >= PROCESSING_MESSAGES.length - 1) {
+              clearInterval(interval);
+              setTimeout(() => setDone(true), 600);
+              return i;
+            }
+            return i + 1;
+          });
+        }, 900);
+        return () => clearInterval(interval);
+      }, []);
+
+      return (
+        <div className="processing-screen">
+          {done ? (
+            <>
+              <div className="check-circle"><span className="material-icons-outlined" aria-hidden="true">check</span></div>
+              <div className="processing-done">You're approved.</div>
+              <div className="processing-done-sub">Redirecting to your offer…</div>
+            </>
+          ) : (
+            <>
+              <div className="spin-ring"></div>
+              <div className="processing-msg">{PROCESSING_MESSAGES[msgIndex]}</div>
+            </>
+          )}
+        </div>
+      );
+    }
+
+    // ─── APP ────────────────────────────────────────────────────────
+    function App() {
+      const [digits, setDigits] = useState(DEFAULT_DIGITS);
+      const [flipped, setFlipped] = useState(false);
+      const [processing, setProcessing] = useState(false);
+
+      if (processing) return <ProcessingScreen />;
+
+      return (
+        <div className="scene">
+          <div className="vignette" aria-hidden="true" />
+          <div className="bg-word" aria-hidden="true">PAYDAY</div>
+          <div className="bg-word second" aria-hidden="true">TODAY</div>
+
+          <TickerRail />
+
+          <div className="scene-inner">
+            <div className="top-bar">
+              <img className="brand-logo-img" src="../media/logo.svg" alt="Logo" />
+              <div className="kicker-pill">Early Wage Access</div>
+            </div>
+
+            <div className="layout">
+              <div className="headline-block">
+                <div className="headline-rule" />
+                <h1 className="headline">
+                  Stop waiting for payday. <em>Get paid today.</em>
+                </h1>
+                <p className="headline-sub">
+                  Access wages you've already earned — before your scheduled payday. No interest,
+                  no credit check, no waiting around.
+                </p>
+                <HeadlineBullets />
+                <EwaBlurb />
+              </div>
+
+              <div className="card-wrap">
+                <div className="entry-tag">ENTRY NO. 004821</div>
+                <FlipCard
+                  digits={digits}
+                  setDigits={setDigits}
+                  flipped={flipped}
+                  onContinue={() => setFlipped(true)}
+                  onBack={() => setFlipped(false)}
+                  onSubmit={() => setProcessing(true)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
