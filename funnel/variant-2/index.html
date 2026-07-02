@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loan Funnel — The Application Rail</title>
+  <meta name="description" content="Personal loan request funnel — a professional, roadmap-driven application flow." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* ══════════════════════════════════════════════════════════════
+       1. RESET & ROOT VARIABLES
+       2. LAYOUT / RAIL / MAIN
+       3. STEP SHELL (headline, helper, back link)
+       4. FIELD COMPONENTS (text / select / date)
+       5. RADIO ROWS (no circles, reserved checkmark slot)
+       6. COMBOBOX (debt / income picker)
+       7. HELPER TIP (collapsible)
+       8. CONFIRM MODAL
+       9. DISCLOSURE / LEGAL TEXT
+       10. BUTTON
+       11. LANDING PAGE (amount phase: header, hero, stats, features, how-it-works, faq, footer)
+       12. TERMINAL / PROCESSING / SUCCESS
+       13. RESPONSIVE / REDUCED MOTION
+       ══════════════════════════════════════════════════════════════ */
+
+    /* ── 1. RESET & ROOT VARIABLES ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #ffffff;
+      --panel:       #f7faf3;
+      --teal:        #87c242;
+      --teal-dk:     #65a240;
+      --teal-lt:     #7ebe42;
+      --teal-soft:   rgba(135,194,66,0.09);
+      --teal-border: rgba(135,194,66,0.3);
+      --ink:         #231f20;
+      --muted:       #64748b;
+      --border:      #e3e8db;
+      --danger:      #dc2626;
+      --font:        'Montserrat', sans-serif;
+    }
+
+    html, body { min-height: 100%; background: var(--bg); color: var(--ink); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+    #root { min-height: 100vh; }
+    button, input, select { font-family: var(--font); }
+
+    /* ── 2. LAYOUT / RAIL / MAIN ───────────────────────────────── */
+    .app-shell { display: flex; min-height: 100vh; }
+
+    .rail {
+      flex: 0 0 288px;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      padding: 32px 28px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-logo-img { display: block; height: 26px; width: auto; }
+    .rail-brand-wrap { margin-bottom: 28px; }
+
+    .rail-list { display: flex; flex-direction: column; gap: 4px; }
+    .rail-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 10px;
+      border-radius: 10px;
+      font-size: 13px; font-weight: 600; color: var(--muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .rail-item.current { color: var(--ink); background: #fff; box-shadow: 0 1px 4px rgba(35,31,32,0.08); }
+    .rail-item.done { color: var(--ink); }
+    .rail-dot {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--border); font-size: 10px; font-weight: 800; color: var(--muted);
+    }
+    .rail-item.current .rail-dot { border-color: var(--teal); color: var(--teal-dk); }
+    .rail-item.done .rail-dot { border-color: var(--teal); background: var(--teal); color: #fff; }
+    .rail-dot .material-icons-outlined { font-size: 13px !important; }
+    .rail-sub { font-size: 10.5px; font-weight: 700; color: var(--teal-dk); margin-left: auto; }
+
+    .rail-footer { margin-top: auto; padding-top: 20px; display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); font-weight: 600; }
+    .rail-footer .material-icons-outlined { font-size: 15px !important; color: var(--teal); }
+
+    .main { flex: 1; min-width: 0; display: flex; justify-content: center; }
+    .main-inner { width: 100%; max-width: 620px; padding: 56px 32px 60px; }
+
+    .mobile-progress { display: none; }
+
+    /* ── 3. STEP SHELL ────────────────────────────────────────────── */
+    @keyframes slideFwd  { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes slideBack { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
+    .step-pane { animation: slideFwd 0.32s cubic-bezier(0.16,1,0.3,1) both; }
+    .step-pane[data-dir="back"] { animation-name: slideBack; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: none; border: none; color: var(--muted);
+      font-weight: 700; font-size: 12.5px; cursor: pointer; padding: 0; margin-bottom: 18px;
+    }
+    .back-link:hover { color: var(--teal-dk); }
+    .back-link .material-icons-outlined { font-size: 16px !important; }
+
+    .step-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal-dk); margin-bottom: 10px; }
+    .step-title { font-size: 24px; font-weight: 800; line-height: 1.3; letter-spacing: -0.01em; margin-bottom: 20px; }
+    .step-subtitle { font-size: 16px; font-weight: 700; margin: 22px 0 12px; }
+
+    .step-helper {
+      display: flex; gap: 10px; align-items: flex-start;
+      background: var(--teal-soft); border-radius: 10px; padding: 13px 15px;
+      font-size: 13px; color: #2e4a1f; font-weight: 500; line-height: 1.5; margin-bottom: 20px;
+    }
+    .step-helper .material-icons-outlined { font-size: 17px !important; color: var(--teal-dk); flex-shrink: 0; margin-top: 1px; }
+
+    .field-group { margin-bottom: 16px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ── 4. FIELD COMPONENTS ──────────────────────────────────────── */
+    .field-wrap { position: relative; margin-bottom: 14px; }
+    .field-wrap input, .field-wrap select {
+      width: 100%; padding: 21px 14px 8px;
+      background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 14.5px; font-weight: 500; color: var(--ink); outline: none;
+      appearance: none; -webkit-appearance: none; transition: border-color 0.15s;
+    }
+    .field-wrap select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px;
+    }
+    .field-wrap input:focus, .field-wrap select:focus { border-color: var(--teal); }
+    .field-wrap input.has-error, .field-wrap select.has-error { border-color: var(--danger); }
+    .field-wrap label {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); pointer-events: none; font-size: 14px; font-weight: 500;
+      transition: top 0.15s, transform 0.15s, font-size 0.15s, color 0.15s, font-weight 0.15s;
+    }
+    .field-wrap input:not(:placeholder-shown) + label,
+    .field-wrap input:focus + label,
+    .field-wrap select.has-value + label {
+      top: 9px; transform: none; font-size: 9.5px; color: var(--teal-dk);
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .field-wrap input::placeholder { color: transparent; }
+    .field-helper-note { font-size: 12px; color: var(--muted); margin: -6px 0 14px 2px; line-height: 1.5; }
+    .field-error { font-size: 11.5px; color: var(--danger); font-weight: 600; margin: 4px 0 8px 2px; }
+    .field-wrap input.has-toggle { padding-right: 48px; }
+    .field-toggle-btn {
+      position: absolute; right: 2px; top: 50%; transform: translateY(-50%);
+      width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+      background: none; border: none; border-radius: 8px; color: var(--muted); cursor: pointer;
+    }
+    .field-toggle-btn:hover { color: var(--ink); }
+    .field-toggle-btn .material-icons-outlined { font-size: 19px !important; }
+
+    /* ── 5. RADIO ROWS (no circles, reserved checkmark slot) ────────── */
+    .radio-row-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 6px; }
+    .radio-row {
+      display: flex; align-items: center; gap: 14px;
+      border: 1.5px solid var(--border); border-radius: 10px; padding: 14px 16px;
+      background: #fff; cursor: pointer; text-align: left; width: 100%;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .radio-row:hover { border-color: var(--teal-border); }
+    .radio-row.selected { border-color: var(--teal); background: var(--teal-soft); }
+    .radio-row-icon { width: 32px; height: 32px; border-radius: 9px; background: var(--teal-soft); color: var(--teal-dk); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s, color 0.15s; }
+    .radio-row.selected .radio-row-icon { background: var(--teal); color: #fff; }
+    .radio-row-icon .material-icons-outlined { font-size: 17px !important; }
+    .radio-row-label { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.35; }
+    .radio-row-check { flex-shrink: 0; color: var(--teal); opacity: 0; transform: scale(0.5); transition: opacity 0.15s, transform 0.15s cubic-bezier(0.34,1.56,0.64,1); }
+    .radio-row.selected .radio-row-check { opacity: 1; transform: scale(1); }
+    .radio-row-check .material-icons-outlined { font-size: 19px !important; }
+
+    /* ── 6. COMBOBOX (debt / income picker) ───────────────────────── */
+    .combo-wrap { position: relative; margin-bottom: 16px; }
+    .combo-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 8px; }
+    .combo-input-wrap { position: relative; display: flex; align-items: center; }
+    .combo-search-icon { position: absolute; left: 14px; font-size: 18px !important; color: var(--muted); pointer-events: none; }
+    .combo-input-wrap input {
+      width: 100%; padding: 13px 14px 13px 42px;
+      background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 14.5px; font-weight: 600; color: var(--ink); outline: none;
+      transition: border-color 0.15s;
+    }
+    .combo-input-wrap input:focus { border-color: var(--teal); }
+    .combo-list {
+      position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 16px 40px -16px rgba(35,31,32,0.25);
+      max-height: 260px; overflow-y: auto; list-style: none; z-index: 10;
+      padding: 6px;
+    }
+    .combo-option {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--ink);
+    }
+    .combo-option.highlighted { background: var(--teal-soft); }
+    .combo-option.selected { color: var(--teal-dk); }
+    .combo-option .material-icons-outlined { font-size: 16px !important; color: var(--teal); }
+    .combo-empty { padding: 12px; font-size: 13px; color: var(--muted); text-align: center; }
+
+    /* ── 7. HELPER TIP (collapsible) ───────────────────────────────── */
+    .helper-tip { margin-bottom: 18px; }
+    .helper-tip-quote {
+      background: var(--teal-soft); border: 1px solid var(--teal-border); border-radius: 10px;
+      padding: 15px 17px; font-size: 13px; font-style: italic; color: #2e4a1f; line-height: 1.6; text-align: center;
+      margin-bottom: 10px;
+    }
+    .helper-tip-toggle {
+      display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
+      background: none; border: none; color: var(--teal-dk); font-size: 11px; font-weight: 800;
+      letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; padding: 6px;
+    }
+    .helper-tip-toggle .material-icons-outlined { font-size: 16px !important; }
+
+    /* ── 8. CONFIRM MODAL ─────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(35,31,32,0.5); display: flex; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px; animation: overlayIn 0.2s ease both;
+    }
+    @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-card {
+      background: #fff; border-radius: 16px; max-width: 400px; width: 100%; padding: 28px 26px; text-align: center;
+      box-shadow: 0 30px 80px -20px rgba(35,31,32,0.45); animation: modalIn 0.25s cubic-bezier(0.16,1,0.3,1) both; outline: none;
+    }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.94) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-icon {
+      width: 44px; height: 44px; border-radius: 10px; background: var(--teal-soft); color: var(--teal-dk);
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+    }
+    .modal-icon .material-icons-outlined { font-size: 22px !important; }
+    .modal-message { font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.5; margin-bottom: 22px; }
+    .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+    .modal-btn-primary {
+      width: 100%; padding: 13px; border: none; border-radius: 9px; font-weight: 700; font-size: 13.5px; color: #fff;
+      cursor: pointer; background: var(--teal);
+    }
+    .modal-btn-secondary {
+      width: 100%; padding: 13px; border: 1.5px solid var(--border); border-radius: 9px; font-weight: 700; font-size: 13.5px;
+      color: var(--ink); cursor: pointer; background: #fff;
+    }
+
+    /* ── 9. DISCLOSURE / LEGAL TEXT ───────────────────────────────── */
+    .disclosure { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--muted); line-height: 1.65; }
+    .disclosure.is-info { margin-top: 0; padding: 13px 15px; border-top: none; background: var(--panel); border-radius: 10px; font-size: 12.5px; color: #3a4a34; }
+
+    /* ── 10. BUTTON ───────────────────────────────────────────────── */
+    .btn-primary {
+      width: 100%; padding: 15px; background: var(--teal); color: #fff; border: none; border-radius: 11px;
+      font-size: 14.5px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.15s, transform 0.1s; margin-top: 6px;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--teal-dk); }
+    .btn-primary:active:not(:disabled) { transform: scale(0.99); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary .material-icons-outlined { font-size: 17px !important; }
+
+    /* ── 11. LANDING PAGE (amount phase) ─────────────────────────────── */
+    .landing-page { width: 100%; }
+
+    .landing-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 32px; border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      position: sticky; top: 0; z-index: 20;
+    }
+    .landing-header-trust { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--teal-dk); }
+    .landing-header-trust .material-icons-outlined { font-size: 16px !important; }
+
+    /* Decorative journey teaser — distinct from the wizard's real step counter */
+    .phase-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+    .phase-seg { height: 6px; border-radius: 100px; background: var(--border); flex: 1; max-width: 46px; transition: background 0.2s, max-width 0.2s; }
+    .phase-seg.active { background: var(--teal); flex: 2.4; max-width: 72px; }
+
+    @keyframes heroReveal { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes cardReveal { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+
+    .hero-section {
+      display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center;
+      max-width: 1140px; margin: 0 auto; padding: 72px 32px 64px;
+    }
+    .hero-copy { animation: heroReveal 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+    .amount-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal-dk); margin-bottom: 12px; }
+    .hero-headline { font-size: clamp(30px, 2.6vw + 20px, 48px); font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .hero-subline { font-size: 16px; color: var(--muted); font-weight: 500; line-height: 1.65; max-width: 460px; margin-bottom: 28px; }
+
+    .hero-image-wrap { border-radius: 20px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 30px 60px -30px rgba(35,31,32,0.28); }
+    .hero-image-wrap img { display: block; width: 100%; height: auto; }
+
+    .hero-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 36px;
+      box-shadow: 0 32px 70px -32px rgba(35,31,32,0.22);
+      animation: cardReveal 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    .amount-box-label { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .amount-display-box {
+      border: 2px solid var(--border); border-radius: 16px; padding: 22px 24px; margin-bottom: 22px;
+      background: var(--panel); transition: border-color 0.2s, background 0.2s;
+    }
+    .amount-display-box.has-amount { border-color: var(--teal); background: var(--teal-soft); }
+    .amount-readout {
+      font-size: 40px; font-weight: 900; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums;
+    }
+    .amount-readout span { color: var(--teal-dk); font-size: 26px; margin-right: 2px; }
+    .amount-readout-placeholder { font-size: 17px; font-weight: 600; color: var(--muted); }
+
+    .amount-select-label { font-size: 12.5px; font-weight: 700; color: var(--ink); margin-bottom: 12px; }
+    .amount-chip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 6px; }
+    .amount-chip {
+      border: 1.5px solid var(--border); border-radius: 12px; background: #fff; padding: 4px;
+      min-height: 52px; display: flex; align-items: center; justify-content: center;
+      font-size: 13.5px; font-weight: 700; color: var(--ink); cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.15s;
+    }
+    .amount-chip:hover { border-color: var(--teal-border); transform: translateY(-2px); }
+    .amount-chip.selected { border-color: var(--teal); background: var(--teal-soft); color: var(--teal-dk); }
+    .amount-chip.custom-chip { color: var(--teal-dk); }
+
+    .amount-custom-input-wrap { display: flex; align-items: center; gap: 4px; border: 1.5px solid var(--teal); border-radius: 12px; padding: 12px 14px; margin: 14px 0 18px; }
+    .amount-custom-input-wrap span { font-size: 15px; font-weight: 700; color: var(--teal-dk); }
+    .amount-custom-input-wrap input { border: none; outline: none; background: transparent; font-size: 15px; font-weight: 700; width: 100%; color: var(--ink); }
+
+    .amount-estimate {
+      display: flex; align-items: flex-start; gap: 12px; background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px; margin: 18px 0 4px;
+    }
+    .amount-estimate .material-icons-outlined { font-size: 20px !important; color: var(--teal-dk); flex-shrink: 0; margin-top: 1px; }
+    .amount-estimate-value { font-size: 14.5px; font-weight: 800; color: var(--ink); }
+    .amount-estimate-note { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .amount-reassurance { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--muted); margin-top: 16px; text-align: center; }
+    .amount-reassurance .material-icons-outlined { font-size: 16px !important; color: var(--teal-dk); }
+
+    .amount-info-divider { border-top: 1px solid var(--border); margin: 22px 0 18px; }
+    .amount-info-eyebrow { font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal-dk); margin-bottom: 8px; }
+    .amount-info-text { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+
+    .trust-stats-section { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--panel); padding: 56px 32px; }
+    .trust-stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 900px; margin: 0 auto; }
+    .trust-stat { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 28px 20px; text-align: center; box-shadow: 0 16px 40px -28px rgba(35,31,32,0.2); }
+    .trust-stat-value { font-size: 32px; font-weight: 900; color: var(--teal-dk); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+    .trust-stat-label { font-size: 12.5px; font-weight: 600; color: var(--muted); margin-top: 6px; }
+
+    .section-title { font-size: clamp(22px, 1.4vw + 16px, 30px); font-weight: 800; text-align: center; letter-spacing: -0.01em; margin-bottom: 40px; }
+
+    .process-section { max-width: 1040px; margin: 0 auto; padding: 72px 32px; }
+    .process-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    .process-list { display: flex; flex-direction: column; gap: 22px; }
+    .process-item { display: flex; gap: 18px; align-items: flex-start; background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 20px 22px; transition: transform 0.2s, box-shadow 0.2s; }
+    .process-item:hover { transform: translateY(-3px); box-shadow: 0 20px 40px -26px rgba(35,31,32,0.2); }
+    .process-num { flex-shrink: 0; font-size: 26px; font-weight: 800; color: var(--teal-dk); line-height: 1; }
+    .process-title { font-size: 15.5px; font-weight: 800; margin-bottom: 4px; }
+    .process-text { font-size: 13px; color: var(--muted); font-weight: 500; line-height: 1.55; }
+    .process-media { border-radius: 18px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 24px 48px -28px rgba(35,31,32,0.28); }
+    .process-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    @media (max-width: 900px) {
+      .process-grid { grid-template-columns: 1fr; gap: 28px; }
+      .process-media { order: -1; max-height: 280px; }
+    }
+
+    /* How It Works — mapped-route "waypoint" motif */
+    .how-section { background: var(--panel); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 72px 32px; }
+    .how-list { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; position: relative; }
+    .how-item { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 30px 22px 24px; text-align: center; position: relative; transition: transform 0.2s, box-shadow 0.2s; }
+    .how-item:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -26px rgba(35,31,32,0.2); }
+    .how-num {
+      width: 40px; height: 40px; border-radius: 50%; background: var(--teal); color: #fff; font-weight: 800; font-size: 16px;
+      display: flex; align-items: center; justify-content: center; margin: -52px auto 16px;
+      border: 4px solid var(--panel); box-shadow: 0 0 0 2px var(--teal); position: relative; z-index: 2;
+    }
+    .how-title { font-size: 15.5px; font-weight: 800; margin-bottom: 6px; }
+    .how-text { font-size: 13px; color: var(--muted); font-weight: 500; line-height: 1.55; }
+    @media (min-width: 900px) {
+      .how-list::before {
+        content: ''; position: absolute; top: -32px; left: 16.6667%; right: 16.6667%; height: 3px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, var(--teal-border), var(--teal), var(--teal-border));
+        z-index: 1;
+      }
+    }
+
+    .faq-section { max-width: 760px; margin: 0 auto; padding: 64px 32px 72px; }
+    .faq-list { display: flex; flex-direction: column; gap: 10px; }
+    .faq-item { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: box-shadow 0.2s; }
+    .faq-item:has(.faq-trigger[aria-expanded="true"]) { box-shadow: 0 14px 34px -22px rgba(35,31,32,0.2); }
+    .faq-item-heading { margin: 0; }
+    .faq-trigger {
+      width: 100%; min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 16px 18px; background: #fff; border: none; text-align: left; cursor: pointer;
+      font-size: 14.5px; font-weight: 700; color: var(--ink); transition: background 0.15s;
+    }
+    .faq-trigger:hover { background: var(--panel); }
+    .faq-chevron { font-size: 20px !important; color: var(--teal-dk); flex-shrink: 0; }
+    .faq-panel { padding: 0 18px 18px; font-size: 13.5px; color: var(--muted); line-height: 1.6; font-weight: 500; animation: faqOpen 0.2s ease both; }
+    @keyframes faqOpen { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .rate-table-section { max-width: 1040px; margin: 0 auto; padding: 64px 32px 8px; }
+    .rate-table-section .section-title { margin-bottom: 10px; }
+    .rate-table-subtitle { text-align: center; font-size: 14.5px; color: var(--muted); font-weight: 500; margin: 0 auto 32px; max-width: 560px; }
+    .rate-table-card { background: #fff; border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 20px 44px -30px rgba(35,31,32,0.22); overflow: hidden; }
+    .rate-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .rate-table { width: 100%; min-width: 640px; border-collapse: collapse; }
+    .rate-table thead th {
+      background: var(--teal-dk); color: #fff; font-size: 12px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.04em; padding: 16px 18px; text-align: center; white-space: nowrap;
+    }
+    .rate-table thead th:first-child { text-align: left; }
+    .rate-table tbody th {
+      color: #fff; font-weight: 700; font-size: 13.5px; padding: 14px 18px; text-align: left; white-space: nowrap;
+    }
+    .rate-table tbody tr:nth-child(odd) th { background: var(--teal-dk); }
+    .rate-table tbody tr:nth-child(even) th { background: var(--teal); }
+    .rate-table tbody td {
+      padding: 14px 18px; text-align: center; font-size: 13.5px; font-weight: 600; color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+    .rate-table tbody tr:nth-child(odd) td { background: #fff; }
+    .rate-table tbody tr:nth-child(even) td { background: var(--panel); }
+
+    .landing-footer { border-top: 1px solid var(--border); padding: 32px 32px 44px; text-align: center; }
+    .landing-footer-trust { display: flex; align-items: center; justify-content: center; gap: 22px; margin-bottom: 18px; flex-wrap: wrap; }
+    .landing-footer-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--muted); }
+    .landing-footer-badge .material-icons-outlined { font-size: 15px !important; color: var(--teal-dk); }
+    .landing-footer-legal { font-size: 11px; color: var(--muted); max-width: 640px; margin: 0 auto; line-height: 1.7; }
+    .landing-footer-legal a { color: var(--teal-dk); font-weight: 700; }
+
+    /* ── 12. TERMINAL / PROCESSING / SUCCESS ──────────────────────── */
+    .security-callouts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .security-callout { display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 600; color: #2e4a1f; background: var(--teal-soft); border-radius: 10px; padding: 12px 14px; }
+    .security-callout .material-icons-outlined { font-size: 18px !important; color: var(--teal-dk); }
+
+    .processing-screen { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; animation: slideFwd 0.3s ease both; }
+    .spin-ring { width: 72px; height: 72px; border-radius: 50%; border: 4px solid var(--border); border-top-color: var(--teal); animation: spin 0.85s linear infinite; margin-bottom: 26px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .processing-msg { font-size: 15px; font-weight: 700; color: var(--ink); text-align: center; }
+    .processing-sub { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+
+    .success-screen { display: flex; flex-direction: column; align-items: center; text-align: center; animation: successIn 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+    @keyframes successIn { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+    @keyframes checkPop { 0% { transform: scale(0.3); opacity: 0; } 70% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+    .success-check {
+      width: 84px; height: 84px; border-radius: 50%; background: var(--teal); color: #fff;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 24px;
+      animation: checkPop 0.5s 0.1s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .success-check .material-icons-outlined { font-size: 42px !important; }
+    .success-title { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
+    .success-sub { font-size: 14px; color: var(--muted); }
+
+    /* ── 13. RESPONSIVE / REDUCED MOTION ───────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .step-pane, .processing-screen, .success-screen, .success-check, .spin-ring, .modal-overlay, .modal-card, .faq-panel,
+      .hero-copy, .hero-card { animation: none !important; }
+      * { transition-duration: 0.01ms !important; }
+    }
+
+    @media (max-width: 900px) {
+      .rail { display: none; }
+      .mobile-progress {
+        display: flex; align-items: center; gap: 14px;
+        padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--panel);
+        position: sticky; top: 0; z-index: 5;
+      }
+      .mobile-logo { height: 18px; width: auto; flex-shrink: 0; }
+      .mobile-progress-track { flex: 1; height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; }
+      .mobile-progress-fill { height: 100%; background: var(--teal); border-radius: 3px; transition: width 0.4s ease; }
+      .mobile-progress-label { font-size: 11px; font-weight: 700; color: var(--teal-dk); white-space: nowrap; flex-shrink: 0; }
+      .app-shell { flex-direction: column; }
+      .main-inner { padding: 32px 20px 44px; }
+      .hero-section { grid-template-columns: 1fr; gap: 32px; padding: 40px 24px 44px; }
+      .hero-copy { display: flex; flex-direction: column; }
+      .hero-image-wrap { display: none; }
+      .hero-headline { font-size: 30px; }
+      .how-list { grid-template-columns: 1fr; }
+      .how-num { margin: 0 auto 16px; }
+      .landing-header { padding: 16px 20px; }
+      .trust-stats-row, .process-section, .how-section, .faq-section { padding-left: 24px; padding-right: 24px; }
+    }
+
+    @media (max-width: 560px) {
+      .field-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .step-title { font-size: 20px; }
+      .amount-readout { font-size: 32px; }
+      .hero-headline { font-size: 25px; }
+      .hero-card { padding: 22px; }
+      .trust-stats-row { padding: 0; gap: 12px; grid-template-columns: 1fr; }
+      .trust-stat-value { font-size: 24px; }
+      .trust-stat-label { font-size: 11px; }
+      .process-item { padding: 16px 18px; gap: 14px; }
+      .section-title { font-size: 21px; margin-bottom: 24px; }
+      .amount-chip-grid { gap: 8px; }
+      .amount-chip { font-size: 12.5px; min-height: 48px; }
+      .hero-card { padding: 24px; }
+      .rate-table-section { padding: 40px 16px 8px; }
+      .rate-table-subtitle { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // ══════════════════════════════════════════════════════════════
+    // 1. CONSTANTS
+    // ══════════════════════════════════════════════════════════════
+
+    // ═══════════════════════════════════════════════════════════════
+    // COMPLIANCE-LOCKED STEP CONFIG — IDENTICAL ACROSS ALL 3 VARIANTS
+    // Do not reword copy, reorder fields, or change field keys here
+    // without updating the other 2 variant files to match.
+    // Diff this block against variant-N/index.html to verify parity.
+    // ═══════════════════════════════════════════════════════════════
+
+    const US_STATES = [
+      'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA',
+      'HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
+      'MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
+      'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC',
+      'SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'
+    ];
+
+    const DURATION_OPTIONS = [
+      { value: '5plus', label: '5+ years' },
+      { value: '4', label: '4 years' },
+      { value: '3', label: '3 years' },
+      { value: '2', label: '2 years' },
+      { value: 'under1', label: 'Under 1 year' },
+    ];
+
+    const DEBT_OPTIONS = [
+      'None', '$1,000 - $4,999', '$5,000 - $9,999', '$10,000 - $14,999',
+      '$15,000 - $19,999', '$20,000 - $24,999', '$25,000 - $29,999',
+      '$30,000 - $34,999', '$35,000 - $39,999', '$40,000 - $44,999',
+      '$45,000 - $49,999', '$50,000+',
+    ];
+
+    const INCOME_OPTIONS = [
+      'Below $1500', '$1,500 - $2,000', '$2,000 - $2,500', '$2,500 - $3,000',
+      '$3,000 - $4,000', '$4,000 - $5,000', '$5,000 - $6,000', '$6,000 - $7,000',
+      '$7,000 - $8,000', '$8,000 - $9,000', '$9,000 - $10,000', '$10,000 or More',
+    ];
+
+    const STEP_CONFIG = [
+      {
+        id: 'name-dob', category: 'Personal information', title: 'What is your name?',
+        fields: [
+          { key: 'firstName', label: 'First Name', type: 'text', autoComplete: 'given-name', required: true },
+          { key: 'lastName', label: 'Last Name', type: 'text', autoComplete: 'family-name', required: true },
+          { key: 'dob', label: 'Date of Birth', type: 'date', required: true, sectionTitle: 'What is your date of birth?' },
+        ],
+        disclosure: null,
+      },
+      {
+        id: 'email-ssn', category: 'Personal information', title: 'What is your email address?',
+        fields: [
+          { key: 'email', label: 'Email Address', type: 'email', autoComplete: 'email', required: true,
+            helperNote: 'Provide the email address where you would like to receive your loan request confirmation.' },
+          { key: 'ssnLast4', label: 'Last 4 digits of SSN', type: 'ssn-last4', required: true,
+            helperNote: 'Providing your last 4 SSN digits can help us find you in our system and speed up the request process.' },
+        ],
+        disclosure: {
+          id: 'terms-consent',
+          text: 'By clicking Continue, you agree to our Terms & Conditions and Privacy Policy and to receive important notices and other communications electronically.',
+        },
+      },
+      {
+        id: 'phone', category: 'Personal information', title: 'What is your contact phone number?',
+        helperNote: 'Your loan request may need final confirmation by phone before funding.',
+        fields: [
+          { key: 'phone', label: 'Cell Phone Number', type: 'tel', autoComplete: 'tel', required: true },
+        ],
+        disclosure: {
+          id: 'tcpa-consent',
+          text: 'By providing your telephone number and clicking "Continue", you expressly consent to receive calls, texts/SMS and pre-recorded/artificial voice messages from americanemergencyfund.com, and up to five (5) of americanemergencyfund.com\'s Network Partners and authorized third parties calling on their behalf. Consent to such communication is not a requirement for purchase and std. msg/data rates apply. You understand that you are providing this consent to receive such telephone calls and SMS/text messages even if your telephone number is currently listed on any federal, state, or internal Do-Not-Call ("DNC") lists. If you do not wish to receive any remarketing messages or phone calls resulting from this submission, simply call 1-833-968-3768.',
+        },
+      },
+      {
+        id: 'address', category: 'Personal information', title: 'What is the full address of your current home or place of residence?',
+        fields: [
+          { key: 'address', label: 'Home Address', type: 'text', autoComplete: 'street-address', required: true },
+          { key: 'zip', label: 'ZIP Code', type: 'zip', autoComplete: 'postal-code', required: true },
+          { key: 'city', label: 'Home City', type: 'text', autoComplete: 'address-level2', required: true },
+          { key: 'state', label: 'Home State', type: 'state-select', required: true },
+        ],
+        disclosure: null,
+      },
+      {
+        id: 'debt', category: 'Debt information', title: 'How much credit card or personal debt do you currently have?',
+        fields: [ { key: 'debtAmount', label: 'Debt Amount', type: 'dropdown-select', required: true, options: DEBT_OPTIONS } ],
+        disclosure: null,
+      },
+      {
+        id: 'residence-duration', category: 'Residence information', title: 'How long have you been living at your current home or residence?',
+        fields: [ { key: 'residenceDuration', type: 'radio-card-grid', required: true, options: DURATION_OPTIONS } ],
+        disclosure: null,
+      },
+      {
+        id: 'home-ownership', category: 'Home ownership information', title: 'Are you a home owner?',
+        fields: [ { key: 'homeOwner', type: 'radio-card', required: true, options: [
+          { value: 'yes', label: 'Yes', icon: 'home' }, { value: 'no', label: 'No', icon: 'close' },
+        ] } ],
+        disclosure: null,
+      },
+      {
+        id: 'income-amount', category: 'Monthly income information', title: 'What is your gross monthly income?',
+        fields: [ { key: 'incomeAmount', label: 'Income Amount', type: 'dropdown-select', required: true, options: INCOME_OPTIONS } ],
+        disclosure: {
+          id: 'income-definition', variant: 'info',
+          text: 'List your total available income including wages, retirement, investments, and rental properties. You are not required to disclose income that is alimony, child support or separate maintenance unless you want to use that income to qualify for a loan. If applicable, include self-employment salary. For total compensation earning, provide an annual average. Increase non-taxable income/benefits by 25%.',
+        },
+      },
+      {
+        id: 'income-source', category: 'Income source information', title: 'What is your current income source?',
+        fields: [ { key: 'incomeSource', type: 'radio-card-grid', required: true, options: [
+          { value: 'employed', label: 'Employed' },
+          { value: 'benefits', label: 'Benefits' },
+          { value: 'self-employed', label: 'Self-Employed' },
+        ] } ],
+        disclosure: null,
+      },
+      {
+        id: 'payday-frequency', category: 'Payday frequency information', title: 'How often do you receive your paycheck or get paid by your employer?',
+        helperNote: 'If you are not currently employed, please let us know how often you receive any benefits or income. This helps us understand your financial situation better and provide tailored options for your needs.',
+        fields: [ { key: 'paydayFrequency', type: 'radio-grid-2x2', required: true, options: [
+          { value: 'weekly', label: 'Weekly' }, { value: 'biweekly', label: 'Bi-Weekly' },
+          { value: 'monthly', label: 'Monthly' }, { value: 'semimonthly', label: 'Semi-Monthly' },
+        ] } ],
+        disclosure: null,
+      },
+      {
+        id: 'military-status', category: 'Military status information', title: 'Are you currently serving as an active member of the military?',
+        fields: [ { key: 'militaryStatus', type: 'radio-card', required: true, options: [
+          { value: 'yes', label: 'Yes', icon: 'military_tech' }, { value: 'no', label: 'No', icon: 'person' },
+        ] } ],
+        disclosure: null,
+      },
+      {
+        id: 'employer', category: 'Employer information', title: "What is your employer's name?",
+        helperNote: 'We collect employment details to verify income and speed up loan approval. If you receive benefits, please provide the name of the organization or agency.',
+        fields: [ { key: 'employerName', label: 'Employer Name', type: 'text', required: true, placeholder: 'Enter your primary employer' } ],
+        disclosure: null,
+      },
+      {
+        id: 'employment-duration', category: 'Employment duration information', title: 'How long have you been employed?',
+        helperNote: "This helps us understand your financial situation and provide tailored options for your needs. If you're not currently employed, please let us know how long you were at your previous job.",
+        fields: [ { key: 'employmentDuration', type: 'radio-card-grid', required: true, options: DURATION_OPTIONS } ],
+        disclosure: null,
+      },
+      {
+        id: 'employer-phone', category: 'Employer phone information', title: 'What is your work phone number?',
+        helperTip: {
+          text: 'This number is mandatory for most lenders. Our lenders will NEVER contact your employer to disclose your loan inquiry. If on Benefits, enter your providers number.',
+        },
+        fields: [ { key: 'employerPhone', label: 'Work Phone Number', type: 'tel', required: true,
+          helperNote: "Enter your primary employer's phone number." } ],
+        disclosure: null,
+      },
+      {
+        id: 'license', category: 'Identity information', title: "What is your driver's license or state ID number?",
+        fields: [
+          { key: 'licenseNumber', label: 'License / State ID Number', type: 'text', required: true },
+          { key: 'licenseState', label: 'Issuing State', type: 'state-select', required: true },
+        ],
+        disclosure: null,
+      },
+      {
+        id: 'ssn-full', category: 'Social security information', title: 'What is your Social Security Number?',
+        fields: [ { key: 'ssnFull', label: 'Social Security Number', type: 'ssn-full', autoComplete: 'off', required: true,
+          helperNote: 'Your Social Security Number helps us verify your identity and match you with the right lenders.' } ],
+        disclosure: null,
+      },
+      {
+        id: 'bank-account-type', category: 'Bank account type information', title: 'What type of bank account do you have?',
+        fields: [ { key: 'bankAccountType', type: 'radio-card', required: true, options: [
+          { value: 'checking', label: 'Checking', icon: 'account_balance' },
+          { value: 'savings', label: 'Savings', icon: 'savings' },
+        ], confirmIf: {
+          value: 'savings', switchTo: 'checking',
+          message: 'Banks are significantly more likely to fund checking accounts than savings accounts. Would you like to change your answer to checking?',
+          confirmLabel: 'Yes, switch to Checking',
+          declineLabel: 'No, keep Savings',
+        } } ],
+        disclosure: null,
+      },
+      {
+        id: 'bank-duration', category: 'Bank account duration information', title: 'How long have you had this bank account for?',
+        fields: [ { key: 'bankDuration', type: 'radio-card-grid', required: true, options: DURATION_OPTIONS } ],
+        disclosure: null,
+      },
+      {
+        id: 'direct-deposit', category: 'Direct deposit information', title: 'Do you have direct deposit?',
+        fields: [ { key: 'directDeposit', type: 'radio-card', required: true, options: [
+          { value: 'yes', label: 'Yes', icon: 'check_circle' }, { value: 'no', label: 'No', icon: 'cancel' },
+        ] } ],
+        disclosure: null,
+      },
+      {
+        id: 'credit-score', category: 'Credit information', title: 'What is your credit score?',
+        fields: [ { key: 'creditScore', type: 'radio-card-grid', required: true, options: [
+          { value: '700plus', label: 'Great 700+' },
+          { value: '600-700', label: '600-700' },
+          { value: '500-600', label: '500-600' },
+          { value: 'below500', label: 'Below 500' },
+          { value: 'not-sure', label: 'Not Sure' },
+        ] } ],
+        disclosure: null,
+      },
+      {
+        id: 'loan-purpose', category: 'Loan purpose information', title: 'What are you seeking a loan for?',
+        fields: [ { key: 'loanPurpose', type: 'radio-card-grid', required: true, options: [
+          { value: 'credit-card-debt', label: 'Credit Card Debt' },
+          { value: 'debt-consolidation', label: 'Debt Consolidation' },
+          { value: 'other', label: 'Other Reason' },
+        ] } ],
+        disclosure: null,
+      },
+      {
+        id: 'bank-account', category: 'Bank account information', title: 'What bank account would you like your loan deposited to?',
+        isTerminal: true,
+        securityCallouts: [
+          { icon: 'lock', text: 'Your information is safe and secure with us.' },
+          { icon: 'shield', text: 'We use bank-level 256-bit SSL security.' },
+        ],
+        fields: [
+          { key: 'routingNumber', label: 'Bank Routing Number', type: 'text', inputMode: 'numeric', maxLength: 9, required: true },
+          { key: 'accountNumber', label: 'Bank Account Number', type: 'text', inputMode: 'numeric', required: true },
+        ],
+        disclosure: {
+          id: 'fcra-consent',
+          text: 'By submitting, you consent to the Terms & Conditions, Privacy Policy, Credit Authorization, E-Consent and you are providing written instructions under the Fair Credit Reporting Act authorizing us and our Network Partners or authorized third parties on their behalf with whom your request is shared to obtain your consumer credit report, and to contact you at the information on file to receive offers for financial products or services.',
+        },
+      },
+    ];
+    const TOTAL_STEPS = STEP_CONFIG.length;
+    // ═══════════════════════════════ END COMPLIANCE-LOCKED STEP CONFIG ═══════════════════════════════
+
+    const RAIL_GROUPS = (() => {
+      const groups = [];
+      STEP_CONFIG.forEach((step, i) => {
+        const last = groups[groups.length - 1];
+        if (last && last.category === step.category) last.stepIndices.push(i);
+        else groups.push({ category: step.category, stepIndices: [i] });
+      });
+      return groups;
+    })();
+
+    const AUTO_ADVANCE_TYPES = ['radio-card', 'radio-card-grid', 'radio-grid-2x2', 'dropdown-select'];
+    const AUTO_ADVANCE_DELAY = 420;
+    const AMOUNT_TIERS = [500, 1000, 2000, 3000, 5000, 7500, 10000];
+    const JOURNEY_PHASES = ['Amount', 'Your Info', 'Employment', 'Funding'];
+
+    const prefersReducedMotion = () =>
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+    // ══════════════════════════════════════════════════════════════
+    // 2. VALIDATION
+    // ══════════════════════════════════════════════════════════════
+    function validateField(field, value) {
+      const val = (value || '').toString().trim();
+      if (field.required && !val) return 'Required';
+      if (!val) return '';
+      if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return 'Enter a valid email address';
+      if (field.type === 'ssn-last4' && !/^\d{4}$/.test(val)) return 'Enter 4 digits';
+      if (field.type === 'ssn-full' && val.replace(/\D/g, '').length !== 9) return 'Enter all 9 digits';
+      if (field.type === 'tel' && val.replace(/\D/g, '').length !== 10) return 'Enter a valid 10-digit phone number';
+      if (field.type === 'zip' && !/^\d{5}$/.test(val)) return 'Enter a valid ZIP code';
+      if (field.type === 'date') {
+        const m = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (!m) return 'Use MM/DD/YYYY';
+        const dob = new Date(`${m[3]}-${m[1]}-${m[2]}`);
+        const age = (Date.now() - dob.getTime()) / (365.25 * 24 * 3600 * 1000);
+        if (isNaN(dob.getTime()) || age < 18) return 'Must be 18 or older';
+      }
+      if (field.key === 'routingNumber' && val.replace(/\D/g, '').length !== 9) return 'Must be 9 digits';
+      return '';
+    }
+    function validateStep(step, formState) {
+      const errors = {};
+      step.fields.forEach(f => { const err = validateField(f, formState[f.key]); if (err) errors[f.key] = err; });
+      return errors;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // 3. FIELD RENDERER
+    // ══════════════════════════════════════════════════════════════
+    function formatDate(raw) {
+      const digits = raw.replace(/\D/g, '').slice(0, 8);
+      let out = digits;
+      if (digits.length > 4) out = `${digits.slice(0,2)}/${digits.slice(2,4)}/${digits.slice(4)}`;
+      else if (digits.length > 2) out = `${digits.slice(0,2)}/${digits.slice(2)}`;
+      return out;
+    }
+
+    function formatSSN(raw) {
+      const digits = raw.replace(/\D/g, '').slice(0, 9);
+      let out = digits;
+      if (digits.length > 5) out = `${digits.slice(0,3)}-${digits.slice(3,5)}-${digits.slice(5)}`;
+      else if (digits.length > 3) out = `${digits.slice(0,3)}-${digits.slice(3)}`;
+      return out;
+    }
+
+    function formatPhone(raw) {
+      const digits = raw.replace(/\D/g, '').slice(0, 10);
+      let out = digits;
+      if (digits.length > 6) out = `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
+      else if (digits.length > 3) out = `${digits.slice(0,3)}-${digits.slice(3)}`;
+      return out;
+    }
+
+    function TextInput({ field, value, error, onChange, autoFocus }) {
+      const isDate = field.type === 'date';
+      const isSSNFull = field.type === 'ssn-full';
+      const [ssnVisible, setSsnVisible] = useState(false);
+      const handleChange = (e) => {
+        let v = e.target.value;
+        if (isDate) v = formatDate(v);
+        if (field.type === 'ssn-last4') v = v.replace(/\D/g, '').slice(0, 4);
+        if (field.type === 'ssn-full') v = formatSSN(v);
+        if (field.type === 'tel') v = formatPhone(v);
+        if (field.type === 'zip') v = v.replace(/\D/g, '').slice(0, 5);
+        if (field.key === 'routingNumber') v = v.replace(/\D/g, '').slice(0, 9);
+        onChange(v);
+      };
+      return (
+        <div>
+          <div className="field-wrap">
+            <input
+              id={field.key}
+              type={isSSNFull ? (ssnVisible ? 'text' : 'password') : isDate ? 'text' : field.type === 'ssn-last4' ? 'text' : field.type}
+              inputMode={isDate || field.type === 'ssn-last4' || field.type === 'ssn-full' || field.type === 'zip' ? 'numeric' : field.inputMode}
+              autoComplete={field.autoComplete}
+              placeholder={isDate ? 'MM/DD/YYYY' : field.type === 'ssn-full' ? 'XXX-XX-XXXX' : field.type === 'tel' ? 'XXX-XXX-XXXX' : (field.placeholder || ' ')}
+              value={value || ''}
+              onChange={handleChange}
+              className={`${error ? 'has-error' : ''}${isSSNFull ? ' has-toggle' : ''}`}
+              autoFocus={autoFocus}
+              maxLength={field.type === 'ssn-full' ? 11 : field.type === 'tel' ? 12 : field.maxLength}
+            />
+            <label htmlFor={field.key}>{field.label}</label>
+            {isSSNFull && (
+              <button
+                type="button" className="field-toggle-btn" onClick={() => setSsnVisible(v => !v)}
+                aria-label={ssnVisible ? 'Hide Social Security Number' : 'Show Social Security Number'}
+              >
+                <span className="material-icons-outlined" aria-hidden="true">{ssnVisible ? 'visibility_off' : 'visibility'}</span>
+              </button>
+            )}
+          </div>
+          {field.helperNote && <div className="field-helper-note">{field.helperNote}</div>}
+          {error && <div className="field-error">{error}</div>}
+        </div>
+      );
+    }
+
+    function SelectInput({ field, value, error, onChange, options, autoFocus }) {
+      const hasValue = value !== '' && value !== undefined;
+      return (
+        <div>
+          <div className="field-wrap">
+            <select id={field.key} value={value || ''} onChange={(e) => onChange(e.target.value)}
+              className={`${hasValue ? 'has-value' : ''} ${error ? 'has-error' : ''}`} autoFocus={autoFocus}>
+              <option value="" disabled></option>
+              {options.map(o => {
+                const val = typeof o === 'string' ? o : o.value;
+                const label = typeof o === 'string' ? o : o.label;
+                return <option key={val} value={val}>{label}</option>;
+              })}
+            </select>
+            <label htmlFor={field.key}>{field.label}</label>
+          </div>
+          {error && <div className="field-error">{error}</div>}
+        </div>
+      );
+    }
+
+    function RadioRowGroup({ field, value, onChange, autoFocus }) {
+      return (
+        <div className="radio-row-group" role="radiogroup" aria-label={field.label || 'Choose an option'}>
+          {field.options.map((opt, i) => (
+            <button
+              type="button" key={opt.value}
+              className={`radio-row${value === opt.value ? ' selected' : ''}`}
+              onClick={() => onChange(opt.value)}
+              role="radio" aria-checked={value === opt.value}
+              autoFocus={autoFocus && i === 0}
+            >
+              {opt.icon && (
+                <span className="radio-row-icon" aria-hidden="true"><span className="material-icons-outlined">{opt.icon}</span></span>
+              )}
+              <span className="radio-row-label">{opt.label}</span>
+              <span className="radio-row-check" aria-hidden="true"><span className="material-icons-outlined">check_circle</span></span>
+            </button>
+          ))}
+        </div>
+      );
+    }
+
+    function ComboSelect({ field, value, onChange, autoFocus }) {
+      const [query, setQuery] = useState(value || '');
+      const [open, setOpen] = useState(false);
+      const [highlight, setHighlight] = useState(0);
+      const options = field.options;
+      const filtered = query && query !== value
+        ? options.filter(o => o.toLowerCase().includes(query.toLowerCase()))
+        : options;
+
+      useEffect(() => { setQuery(value || ''); }, [value]);
+
+      const selectOption = (opt) => { onChange(opt); setQuery(opt); setOpen(false); };
+
+      const onKeyDown = (e) => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); setOpen(true); setHighlight(h => Math.min(h + 1, filtered.length - 1)); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); setHighlight(h => Math.max(h - 1, 0)); }
+        else if (e.key === 'Enter') { e.preventDefault(); if (open && filtered[highlight]) selectOption(filtered[highlight]); }
+        else if (e.key === 'Escape') { setOpen(false); }
+      };
+
+      return (
+        <div className="combo-wrap">
+          <label htmlFor={field.key} className="combo-label">{field.label}</label>
+          <div className="combo-input-wrap">
+            <span className="material-icons-outlined combo-search-icon" aria-hidden="true">search</span>
+            <input
+              id={field.key}
+              role="combobox" aria-expanded={open} aria-controls={`${field.key}-listbox`} aria-autocomplete="list"
+              autoComplete="off" value={query}
+              placeholder="Search or select…"
+              onFocus={() => setOpen(true)}
+              onChange={e => { setQuery(e.target.value); setOpen(true); setHighlight(0); }}
+              onKeyDown={onKeyDown}
+              onBlur={() => setTimeout(() => setOpen(false), 120)}
+              autoFocus={autoFocus}
+            />
+          </div>
+          {open && (
+            <ul className="combo-list" role="listbox" id={`${field.key}-listbox`}>
+              {filtered.length === 0 && <li className="combo-empty">No matches</li>}
+              {filtered.map((opt, i) => (
+                <li key={opt} role="option" aria-selected={value === opt}
+                  className={`combo-option${i === highlight ? ' highlighted' : ''}${value === opt ? ' selected' : ''}`}
+                  onMouseDown={() => selectOption(opt)} onMouseEnter={() => setHighlight(i)}>
+                  {opt}
+                  {value === opt && <span className="material-icons-outlined" aria-hidden="true">check</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+    }
+
+    function renderField(field, value, error, onChange, autoFocus) {
+      switch (field.type) {
+        case 'text': case 'email': case 'tel': case 'zip': case 'ssn-last4': case 'ssn-full': case 'date':
+          return <TextInput field={field} value={value} error={error} onChange={onChange} autoFocus={autoFocus} />;
+        case 'state-select':
+          return <SelectInput field={field} value={value} error={error} onChange={onChange} options={US_STATES} autoFocus={autoFocus} />;
+        case 'dropdown-select':
+          if (field.key === 'debtAmount' || field.key === 'incomeAmount') {
+            return <ComboSelect field={field} value={value} onChange={onChange} autoFocus={autoFocus} />;
+          }
+          return <SelectInput field={field} value={value} error={error} onChange={onChange} options={field.options} autoFocus={autoFocus} />;
+        case 'radio-card': case 'radio-card-grid': case 'radio-grid-2x2':
+          return <RadioRowGroup field={field} value={value} onChange={onChange} autoFocus={autoFocus} />;
+        default:
+          return null;
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // 4. STEP SHELL
+    // ══════════════════════════════════════════════════════════════
+    function Disclosure({ disclosure }) {
+      if (!disclosure) return null;
+      return <div className={`disclosure${disclosure.variant === 'info' ? ' is-info' : ''}`}>{disclosure.text}</div>;
+    }
+
+    function Rail({ stepIndex }) {
+      return (
+        <aside className="rail" aria-label="Application progress">
+          <div className="rail-brand-wrap"><img className="brand-logo-img" src="../media/logo.svg" alt="Logo" /></div>
+          <div className="rail-list">
+            {RAIL_GROUPS.map((group, gi) => {
+              const isCurrent = group.stepIndices.includes(stepIndex);
+              const isDone = group.stepIndices[group.stepIndices.length - 1] < stepIndex;
+              const subIndex = group.stepIndices.indexOf(stepIndex);
+              return (
+                <div key={gi} className={`rail-item${isCurrent ? ' current' : ''}${isDone ? ' done' : ''}`}
+                  aria-current={isCurrent ? 'step' : undefined}>
+                  <span className="rail-dot" aria-hidden="true">
+                    {isDone ? <span className="material-icons-outlined">check</span> : gi + 1}
+                  </span>
+                  {group.category}
+                  {isCurrent && group.stepIndices.length > 1 && (
+                    <span className="rail-sub">{subIndex + 1}/{group.stepIndices.length}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="rail-footer"><span className="material-icons-outlined" aria-hidden="true">lock</span>256-bit SSL encrypted</div>
+        </aside>
+      );
+    }
+
+    function MobileProgress({ stepIndex, total, category }) {
+      return (
+        <div className="mobile-progress">
+          <img className="mobile-logo" src="../media/logo.svg" alt="Logo" />
+          <div className="mobile-progress-track" role="progressbar" aria-valuenow={stepIndex + 1} aria-valuemin={1} aria-valuemax={total} aria-label={`Step ${stepIndex + 1} of ${total}: ${category}`}>
+            <div className="mobile-progress-fill" style={{ width: `${((stepIndex + 1) / total) * 100}%` }} />
+          </div>
+          <div className="mobile-progress-label">{stepIndex + 1}/{total}</div>
+        </div>
+      );
+    }
+
+    function HelperTip({ tip }) {
+      const [open, setOpen] = useState(true);
+      if (!tip) return null;
+      return (
+        <div className="helper-tip">
+          {open && <div className="helper-tip-quote">"{tip.text}"</div>}
+          <button type="button" className="helper-tip-toggle" onClick={() => setOpen(o => !o)}>
+            A Helpful Tip! <span className="material-icons-outlined" aria-hidden="true">{open ? 'expand_less' : 'expand_more'}</span>
+          </button>
+        </div>
+      );
+    }
+
+    function ConfirmModal({ confirmIf, onKeep, onSwitch }) {
+      const cardRef = useRef(null);
+      useEffect(() => {
+        const onKey = (e) => { if (e.key === 'Escape') onKeep(); };
+        window.addEventListener('keydown', onKey);
+        if (cardRef.current) cardRef.current.focus();
+        return () => window.removeEventListener('keydown', onKey);
+        // eslint-disable-next-line
+      }, []);
+      return (
+        <div className="modal-overlay" onMouseDown={onKeep}>
+          <div
+            className="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="confirm-modal-msg"
+            tabIndex={-1} ref={cardRef} onMouseDown={e => e.stopPropagation()}
+          >
+            <span className="modal-icon" aria-hidden="true"><span className="material-icons-outlined">info</span></span>
+            <p id="confirm-modal-msg" className="modal-message">{confirmIf.message}</p>
+            <div className="modal-actions">
+              <button type="button" className="modal-btn-primary" onClick={onSwitch}>{confirmIf.confirmLabel}</button>
+              <button type="button" className="modal-btn-secondary" onClick={onKeep}>{confirmIf.declineLabel}</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function StepScreen({ step, index, total, direction, formState, errors, onChange, onBack, onSubmit }) {
+      const headingRef = useRef(null);
+      const firstFieldType = step.fields[0].type;
+      const focusableFieldTypes = ['text', 'email', 'tel', 'zip', 'ssn-last4', 'ssn-full', 'date', 'state-select', 'dropdown-select'];
+      const shouldFocusField = focusableFieldTypes.includes(firstFieldType);
+      const isAutoAdvanceStep = step.fields.length === 1 && AUTO_ADVANCE_TYPES.includes(step.fields[0].type);
+      const [confirmState, setConfirmState] = useState(null);
+
+      useEffect(() => {
+        if (!shouldFocusField && headingRef.current) headingRef.current.focus();
+        if (!prefersReducedMotion()) window.scrollTo({ top: 0, behavior: 'smooth' }); else window.scrollTo(0, 0);
+        setConfirmState(null);
+        // eslint-disable-next-line
+      }, [step.id]);
+
+      const groups = [];
+      let current = { title: null, fields: [] };
+      step.fields.forEach(f => {
+        if (f.sectionTitle) { if (current.fields.length) groups.push(current); current = { title: f.sectionTitle, fields: [f] }; }
+        else current.fields.push(f);
+      });
+      if (current.fields.length) groups.push(current);
+
+      let focusAssigned = !shouldFocusField;
+
+      const makeOnChange = (f) => (val) => {
+        if (f.confirmIf && val === f.confirmIf.value) { setConfirmState({ field: f }); return; }
+        onChange(f.key, val, { autoAdvance: isAutoAdvanceStep });
+      };
+      const resolveKeep = () => {
+        const { field } = confirmState;
+        setConfirmState(null);
+        onChange(field.key, field.confirmIf.value, { autoAdvance: isAutoAdvanceStep });
+      };
+      const resolveSwitch = () => {
+        const { field } = confirmState;
+        setConfirmState(null);
+        onChange(field.key, field.confirmIf.switchTo, { autoAdvance: isAutoAdvanceStep });
+      };
+
+      return (
+        <div className="step-pane" data-dir={direction} key={step.id}>
+          {index > 0 && (
+            <button className="back-link" onClick={onBack}><span className="material-icons-outlined" aria-hidden="true">arrow_back</span> Back</button>
+          )}
+          <div className="step-eyebrow">{step.category}</div>
+          <h1 className="step-title" tabIndex={-1} ref={headingRef}>{step.title}</h1>
+          {step.helperNote && <div className="step-helper"><span className="material-icons-outlined" aria-hidden="true">info</span>{step.helperNote}</div>}
+          <HelperTip tip={step.helperTip} />
+
+          {step.securityCallouts && (
+            <div className="security-callouts">
+              {step.securityCallouts.map((c, i) => (
+                <div className="security-callout" key={i}><span className="material-icons-outlined" aria-hidden="true">{c.icon}</span>{c.text}</div>
+              ))}
+            </div>
+          )}
+
+          {groups.map((group, gi) => (
+            <div className="field-group" key={gi}>
+              {group.title && <div className="step-subtitle">{group.title}</div>}
+              {group.fields.length > 1 && group.fields.every(f => ['text','email','tel','zip'].includes(f.type)) ? (
+                <div className="field-row">
+                  {group.fields.map(f => {
+                    const doFocus = !focusAssigned; if (doFocus) focusAssigned = true;
+                    return <div key={f.key}>{renderField(f, formState[f.key], errors[f.key], makeOnChange(f), doFocus)}</div>;
+                  })}
+                </div>
+              ) : (
+                group.fields.map(f => {
+                  const doFocus = !focusAssigned && focusableFieldTypes.includes(f.type); if (doFocus) focusAssigned = true;
+                  return <div key={f.key}>{renderField(f, formState[f.key], errors[f.key], makeOnChange(f), doFocus)}</div>;
+                })
+              )}
+            </div>
+          ))}
+
+          <button className="btn-primary" onClick={onSubmit}>
+            {step.isTerminal ? 'Request Loan' : 'Continue'}
+            <span className="material-icons-outlined" aria-hidden="true">{step.isTerminal ? 'lock_open' : 'arrow_forward'}</span>
+          </button>
+
+          <Disclosure disclosure={step.disclosure} />
+
+          {confirmState && (
+            <ConfirmModal confirmIf={confirmState.field.confirmIf} onKeep={resolveKeep} onSwitch={resolveSwitch} />
+          )}
+        </div>
+      );
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // 5. LANDING PAGE (amount phase)
+    // ══════════════════════════════════════════════════════════════
+    const TRUST_STATS = [
+      { value: 2, suffix: 'M+', label: 'Loan requests submitted' },
+      { value: 60, suffix: ' sec', label: 'Average time to apply' },
+      { value: 500, suffix: '+', label: 'Lenders in our network' },
+    ];
+
+    const PROCESS_STEPS = [
+      { title: 'Submit your request', text: 'Our fast, and secure online form can be completed in just 2 minutes.' },
+      { title: 'Review top lender offers', text: 'Our lenders consider all credit score ratings, from no rating to excellent!' },
+      { title: 'Receive your funds', text: 'Select your lender and receive your funds as soon as the same day.' },
+    ];
+
+    const HOW_STEPS = [
+      { title: 'Tell us how much you need', text: 'Pick your amount and answer a few quick questions.' },
+      { title: 'Get matched with lenders', text: 'We connect your request with lenders in our network.' },
+      { title: 'Review your offer & get funded', text: 'Accept the terms that work for you and get your funds.' },
+    ];
+
+    const FAQS = [
+      { q: 'What is a personal loan?', a: 'A personal loan is a way for an individual to receive up to $35,000 in funding. It is a loan that can be used for home enhancements, luxury item purchases, vehicle repairs or large purchases. The length of the loan is called the term and can range all the way up to 180 days, depending on the lender. Our simple online form does not contain any long questions. Instead, it asks for your basic information and a location for where you would like the loan to be sent to. It is that easy!' },
+      { q: 'What are the basic loan requirements?', a: 'Must be at least 18 years old. Must be a U.S. citizen or permanent resident. Currently employed or receive steady income. Have a bank account to receive the funds ideally with direct deposit.' },
+      { q: 'Are there any fees?', a: 'Fast Loan Advance services will always be provided free of charge, but that is not to say that the lender will give you a loan for free. Your lender will charge you fees and/or interest and must provide you with full disclosure of their loan terms upon approval. It is then your responsibility to read through the terms before signing your loan agreement.' },
+      { q: 'What are the repayment terms and the APR?', a: 'Annual Percentage Rate (APR) is a measure of the cost of credit, expressed as a nominal yearly rate. It relates to the amount and timing of value received by the consumer to the amount and timing of payments made. Fast Loan Advance cannot guarantee any APR since we are not a lender ourselves. Annual Percentage Rates (APR) start from 5.99% up to a maximum of 35.99%. Personal loans have a 91-day minimum repayment period and a 72-month maximum repayment period. Before accepting a loan from a lender within our network, please read the loan agreement carefully as the APR and repayment terms may differ from what is listed on this site.' },
+      { q: 'How/when do I repay the loan?', a: 'Please check the loan agreement from your lender for specifics on this, as each loan may vary.' },
+      { q: 'How do you protect my privacy and personal information?', a: 'We take privacy seriously, so we use industry-standard encryption on our website so that third parties cannot intercept your data. You can also look at our privacy policy for more details on this.' },
+    ];
+
+    const RATE_TABLE_COLUMNS = ['$1,000', '$2,000', '$5,000', '$10,000'];
+    const RATE_TABLE_ROWS = [
+      { label: 'Interest Rate (APR)', values: ['24%', '19%', '13%', '8%'] },
+      { label: 'Loan Term', values: ['12 Months', '24 Months', '48 Months', '60 Months'] },
+      { label: 'Other Fees/Costs (%)', values: ['5%', '5%', '5%', '5%'] },
+      { label: 'Other Fees/Costs ($)', values: ['$50', '$100', '$250', '$500'] },
+      { label: 'Monthly Payments', values: ['$99.29', '$105.86', '$140.84', '$212.90'] },
+      { label: 'Number of Payments', values: ['12', '24', '48', '60'] },
+      { label: 'Total Payments', values: ['$1,191.48', '$2,540.64', '$6,760.32', '$12,774.00'] },
+    ];
+
+    function PhaseIndicator({ current }) {
+      return (
+        <div className="phase-indicator" aria-hidden="true">
+          {JOURNEY_PHASES.map((_, i) => (
+            <div key={i} className={`phase-seg${i === current ? ' active' : ''}`} />
+          ))}
+        </div>
+      );
+    }
+
+    function LandingHeader() {
+      return (
+        <header className="landing-header">
+          <img className="brand-logo-img" src="../media/logo.svg" alt="Logo" />
+          <div className="landing-header-trust">
+            <span className="material-icons-outlined" aria-hidden="true">verified_user</span>
+            Secure &amp; Confidential Application
+          </div>
+        </header>
+      );
+    }
+
+    function CountUpStat({ value, suffix, label }) {
+      const nodeRef = useRef(null);
+      const [count, setCount] = useState(0);
+      useEffect(() => {
+        const node = nodeRef.current;
+        if (!node) return;
+        if (prefersReducedMotion()) { setCount(value); return; }
+        let animated = false;
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting && !animated) {
+              animated = true;
+              const duration = 900;
+              const start = performance.now();
+              const step = (now) => {
+                const progress = Math.min((now - start) / duration, 1);
+                setCount(Math.round(progress * value));
+                if (progress < 1) requestAnimationFrame(step);
+              };
+              requestAnimationFrame(step);
+              observer.disconnect();
+            }
+          });
+        }, { threshold: 0.4 });
+        observer.observe(node);
+        return () => observer.disconnect();
+        // eslint-disable-next-line
+      }, [value]);
+      return (
+        <div className="trust-stat" ref={nodeRef}>
+          <div className="trust-stat-value">{count.toLocaleString('en-US')}{suffix}</div>
+          <div className="trust-stat-label">{label}</div>
+        </div>
+      );
+    }
+
+    function TrustStats() {
+      return (
+        <section className="trust-stats-section" aria-label="Trust statistics">
+          <div className="trust-stats-row">
+            {TRUST_STATS.map((s, i) => <CountUpStat key={i} value={s.value} suffix={s.suffix} label={s.label} />)}
+          </div>
+        </section>
+      );
+    }
+
+    function ProcessSection() {
+      return (
+        <section className="process-section" aria-labelledby="process-heading">
+          <h2 id="process-heading" className="section-title">Getting a loan is easier than you think</h2>
+          <div className="process-grid">
+            <div className="process-list">
+              {PROCESS_STEPS.map((s, i) => (
+                <div className="process-item" key={i}>
+                  <div className="process-num" aria-hidden="true">{i + 1}.</div>
+                  <div>
+                    <div className="process-title">{s.title}</div>
+                    <div className="process-text">{s.text}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="process-media">
+              <img src="../media/couple-girl01.jpg" alt="A couple reviewing their loan options together" />
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    function HowItWorks() {
+      return (
+        <section className="how-section" aria-labelledby="how-heading">
+          <h2 id="how-heading" className="section-title">How It Works</h2>
+          <div className="how-list">
+            {HOW_STEPS.map((s, i) => (
+              <div className="how-item" key={i}>
+                <div className="how-num" aria-hidden="true">{i + 1}</div>
+                <div className="how-title">{s.title}</div>
+                <div className="how-text">{s.text}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    function FaqAccordion() {
+      const [openIndex, setOpenIndex] = useState(null);
+      return (
+        <section className="faq-section" aria-labelledby="faq-heading">
+          <h2 id="faq-heading" className="section-title">Frequently Asked Questions</h2>
+          <div className="faq-list">
+            {FAQS.map((item, i) => {
+              const open = openIndex === i;
+              const panelId = `faq-panel-${i}`;
+              const btnId = `faq-btn-${i}`;
+              return (
+                <div className="faq-item" key={i}>
+                  <h3 className="faq-item-heading">
+                    <button
+                      type="button" id={btnId} className="faq-trigger"
+                      aria-expanded={open} aria-controls={panelId}
+                      onClick={() => setOpenIndex(open ? null : i)}
+                    >
+                      <span>{item.q}</span>
+                      <span className="material-icons-outlined faq-chevron" aria-hidden="true">{open ? 'remove' : 'add'}</span>
+                    </button>
+                  </h3>
+                  {open && (
+                    <div id={panelId} role="region" aria-labelledby={btnId} className="faq-panel">
+                      {item.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      );
+    }
+
+    function RateComparisonTable() {
+      return (
+        <section className="rate-table-section" aria-labelledby="rate-table-heading">
+          <h2 id="rate-table-heading" className="section-title">Smart borrowing starts with the right comparison</h2>
+          <p className="rate-table-subtitle">Here's a representative example of interest rates, terms, fees, and total repayment costs</p>
+          <div className="rate-table-card">
+            <div className="rate-table-scroll">
+              <table className="rate-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Loan Amount</th>
+                    {RATE_TABLE_COLUMNS.map(c => <th scope="col" key={c}>{c}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {RATE_TABLE_ROWS.map((row) => (
+                    <tr key={row.label}>
+                      <th scope="row">{row.label}</th>
+                      {row.values.map((v, vi) => <td key={vi}>{v}</td>)}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    function LandingFooter() {
+      return (
+        <footer className="landing-footer">
+          <div className="landing-footer-trust">
+            <span className="landing-footer-badge"><span className="material-icons-outlined" aria-hidden="true">lock</span>256-bit SSL Encrypted</span>
+            <span className="landing-footer-badge"><span className="material-icons-outlined" aria-hidden="true">verified_user</span>Secure Application</span>
+          </div>
+          <div className="landing-footer-legal">
+            APR Ranges From 5.99% up to 35.99% For Qualified Customers 91 Day Minimum up to 72 Month Maximum Repayment Period
+            <br /><a href="#">Disclosure</a>
+          </div>
+        </footer>
+      );
+    }
+
+    function AmountHero({ amount, setAmount, onContinue }) {
+      const [customOpen, setCustomOpen] = useState(false);
+      const [customVal, setCustomVal] = useState('');
+      const hasAmount = amount !== null;
+      const isCustomAmount = hasAmount && !AMOUNT_TIERS.includes(amount);
+      const biweeklyEstimate = hasAmount ? Math.max(25, Math.round(amount / 12)) : null;
+      const customInputRef = useRef(null);
+
+      const applyCustom = () => {
+        const n = parseInt(customVal.replace(/\D/g, ''), 10);
+        if (!isNaN(n) && n > 0) setAmount(clamp(n, 100, 15000));
+        setCustomOpen(false);
+        setCustomVal('');
+      };
+
+      useEffect(() => {
+        if (customOpen && customInputRef.current) customInputRef.current.focus();
+      }, [customOpen]);
+
+      return (
+        <section className="hero-section" aria-labelledby="hero-heading">
+          <div className="hero-copy">
+            <div className="amount-eyebrow">Personal Loan Marketplace</div>
+            <h1 id="hero-heading" className="hero-headline">Get the cash you need — fast, simple, secure.</h1>
+            <p className="hero-subline">Answer a few quick questions and see what lenders in our network can offer — with no impact to your credit score.</p>
+            <div className="hero-image-wrap">
+              <img src="../media/happy-guy01.jpg" alt="Smiling man relaxing outdoors" />
+            </div>
+          </div>
+          <div className="hero-card">
+            <PhaseIndicator current={0} />
+            <div className="amount-box-label">Amount Requested</div>
+            <div className={`amount-display-box${hasAmount ? ' has-amount' : ''}`}>
+              <div className="amount-readout">
+                {hasAmount ? <><span>$</span>{amount.toLocaleString('en-US')}</> : <span className="amount-readout-placeholder">Select an amount</span>}
+              </div>
+            </div>
+
+            <div className="amount-select-label">Select an amount</div>
+            <div className="amount-chip-grid" role="group" aria-label="Choose a loan amount">
+              {AMOUNT_TIERS.map(v => (
+                <button
+                  type="button" key={v}
+                  className={`amount-chip${amount === v ? ' selected' : ''}`}
+                  onClick={() => { setAmount(v); setCustomOpen(false); }}
+                >
+                  ${v.toLocaleString('en-US')}
+                </button>
+              ))}
+              <button
+                type="button" className={`amount-chip custom-chip${customOpen || isCustomAmount ? ' selected' : ''}`}
+                onClick={() => setCustomOpen(true)}
+              >
+                Custom
+              </button>
+            </div>
+
+            {customOpen && (
+              <div className="amount-custom-input-wrap">
+                <span>$</span>
+                <input
+                  ref={customInputRef}
+                  type="text" inputMode="numeric" placeholder="e.g. 1,750"
+                  value={customVal}
+                  onChange={e => setCustomVal(e.target.value.replace(/\D/g, ''))}
+                  onKeyDown={e => e.key === 'Enter' && applyCustom()}
+                  onBlur={applyCustom}
+                />
+              </div>
+            )}
+
+            {hasAmount && (
+              <div className="amount-estimate">
+                <span className="material-icons-outlined" aria-hidden="true">calculate</span>
+                <div>
+                  <div className="amount-estimate-value">~${biweeklyEstimate.toLocaleString('en-US')} / bi-weekly</div>
+                  <div className="amount-estimate-note">Estimate only. Actual terms are determined by your lender.</div>
+                </div>
+              </div>
+            )}
+
+            <button className="btn-primary" onClick={onContinue} disabled={!hasAmount} style={{ marginTop: '18px' }}>
+              Continue <span className="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+            </button>
+
+            <div className="amount-reassurance">
+              <span className="material-icons-outlined" aria-hidden="true">verified_user</span>
+              No obligation. Multiple lenders, one simple application.
+            </div>
+
+            <div className="amount-info-divider" />
+            <div className="amount-info-eyebrow">How Loan Matching Works</div>
+            <p className="amount-info-text">Submitting your request is free and won't affect your credit score. We match you with vetted lenders in our network, and you're never obligated to accept an offer.</p>
+          </div>
+        </section>
+      );
+    }
+
+    function LandingPage({ amount, setAmount, onContinue }) {
+      return (
+        <div className="landing-page">
+          <LandingHeader />
+          <AmountHero amount={amount} setAmount={setAmount} onContinue={onContinue} />
+          <TrustStats />
+          <ProcessSection />
+          <HowItWorks />
+          <FaqAccordion />
+          <RateComparisonTable />
+          <LandingFooter />
+        </div>
+      );
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // 6. TERMINAL / PROCESSING / SUCCESS
+    // ══════════════════════════════════════════════════════════════
+    const PROCESSING_MESSAGES = ['Verifying your information…', 'Matching you with lenders…', 'Finalizing your request…'];
+
+    function ProcessingScreen({ onDone }) {
+      const [msgIdx, setMsgIdx] = useState(0);
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setMsgIdx(i => { if (i >= PROCESSING_MESSAGES.length - 1) { clearInterval(interval); setTimeout(onDone, 500); return i; } return i + 1; });
+        }, 900);
+        return () => clearInterval(interval);
+      }, [onDone]);
+      return (
+        <div className="processing-screen">
+          <div className="spin-ring" />
+          <div className="processing-msg">{PROCESSING_MESSAGES[msgIdx]}</div>
+          <div className="processing-sub">This only takes a moment</div>
+        </div>
+      );
+    }
+
+    function SuccessScreen() {
+      return (
+        <div className="success-screen" role="status">
+          <div className="success-check" aria-hidden="true"><span className="material-icons-outlined">check</span></div>
+          <div className="success-title">You're approved.</div>
+          <div className="success-sub">Redirecting to your offer…</div>
+        </div>
+      );
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // 7. APP
+    // ══════════════════════════════════════════════════════════════
+    function App() {
+      const [phase, setPhase] = useState('amount');
+      const [amount, setAmount] = useState(null);
+      const [stepIndex, setStepIndex] = useState(0);
+      const [direction, setDirection] = useState('fwd');
+      const [formState, setFormState] = useState({});
+      const [errors, setErrors] = useState({});
+      const advancingRef = useRef(false);
+
+      const step = STEP_CONFIG[stepIndex];
+
+      const setField = (key, val, opts) => {
+        setFormState(f => {
+          const next = { ...f, [key]: val };
+          if (opts && opts.autoAdvance && !advancingRef.current) {
+            const stepErrs = validateStep(step, next);
+            if (!Object.keys(stepErrs).length) {
+              advancingRef.current = true;
+              setTimeout(() => {
+                advancingRef.current = false;
+                if (step.isTerminal) setPhase('processing');
+                else { setDirection('fwd'); setStepIndex(i => i + 1); }
+              }, AUTO_ADVANCE_DELAY);
+            }
+          }
+          return next;
+        });
+        if (errors[key]) setErrors(e => ({ ...e, [key]: '' }));
+      };
+
+      const handleContinue = () => {
+        const stepErrors = validateStep(step, formState);
+        if (Object.keys(stepErrors).length) { setErrors(stepErrors); return; }
+        setErrors({});
+        if (step.isTerminal) { setPhase('processing'); return; }
+        setDirection('fwd');
+        setStepIndex(i => i + 1);
+      };
+
+      const handleBack = () => {
+        setDirection('back');
+        if (stepIndex === 0) { setPhase('amount'); return; }
+        setStepIndex(i => i - 1);
+      };
+
+      if (phase === 'amount') return <LandingPage amount={amount} setAmount={setAmount} onContinue={() => setPhase('wizard')} />;
+      if (phase === 'processing') return <ProcessingScreen onDone={() => setPhase('done')} />;
+      if (phase === 'done') return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <SuccessScreen />
+        </div>
+      );
+
+      return (
+        <div className="app-shell">
+          <Rail stepIndex={stepIndex} />
+          <div className="main">
+            <div style={{ width: '100%' }}>
+              <MobileProgress stepIndex={stepIndex} total={TOTAL_STEPS} category={step.category} />
+              <div className="main-inner">
+                <StepScreen
+                  step={step} index={stepIndex} total={TOTAL_STEPS} direction={direction}
+                  formState={formState} errors={errors} onChange={setField} onBack={handleBack} onSubmit={handleContinue}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
